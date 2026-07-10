@@ -111,13 +111,14 @@ REVOKE UNMASK ON dbo.EmployeeData FROM [TestRole];
 
 A column is masked with `email()`. A user with the Contributor workspace role queries the table. What do they see?
 
-A. The masked value, `aXXX@XXXX.com`
-B. The real, unmasked email address — Contributor has implicit CONTROL
-C. An access-denied error, since Contributor lacks explicit UNMASK
-D. NULL, because Contributor's queries bypass the column entirely
+A. The masked value, `aXXX@XXXX.com`  
+B. The real, unmasked email address — Contributor has implicit CONTROL  
+C. An access-denied error, since Contributor lacks explicit UNMASK  
+D. NULL, because Contributor's queries bypass the column entirely  
 
 > [!success]- Answer
-> **B. The real, unmasked email address — Contributor has implicit CONTROL**  
+> **B. The real, unmasked email address — Contributor has implicit CONTROL**
+>
 > Admin, Member, and Contributor workspace roles automatically carry `CONTROL` permission on the Warehouse database, which includes `UNMASK`. They see real values without any explicit `GRANT UNMASK` — DDM only masks data for users **without** those elevated roles/permissions.
 
 ---
@@ -150,16 +151,15 @@ The `Salary` column still shows `0`, but the `WHERE` clause narrowed the result 
 
 A security team wants to fully prevent analysts from ever determining a specific employee's exact salary, even through repeated targeted queries. Is applying DDM's `default()` mask on the `Salary` column sufficient on its own?
 
-A. Yes — `default()` fully hides all numeric values with no inference risk
-B. No — DDM only obscures displayed values; a range-based WHERE clause can still narrow down the real value through repeated queries
-C. Yes, but only if combined with the `random()` function instead of `default()`
-D. No — DDM doesn't apply to numeric columns at all
+A. Yes — `default()` fully hides all numeric values with no inference risk  
+B. No — DDM only obscures displayed values; a range-based WHERE clause can still narrow down the real value through repeated queries  
+C. Yes, but only if combined with the `random()` function instead of `default()`  
+D. No — DDM doesn't apply to numeric columns at all  
 
 > [!success]- Answer
-> **B. No — DDM only obscures displayed values; a range-based WHERE clause can still narrow down the real value through repeated queries**  
+> **B. No — DDM only obscures displayed values; a range-based WHERE clause can still narrow down the real value through repeated queries**
+>
 > DDM never restricts *which rows* satisfy a `WHERE` predicate — it only changes what's displayed in the result set. An analyst with ongoing `SELECT` access can iteratively narrow a range filter to infer the real salary regardless of which mask function is applied. Actual prevention requires blocking access to the column/row via CLS, RLS, or OLS — DDM is not a substitute.
-
----
 
 ---
 
@@ -177,13 +177,14 @@ D. No — DDM doesn't apply to numeric columns at all
 
 A Warehouse table has `SSN` masked with `partial(0,"XXX-XX-",4)`. A support analyst without `UNMASK` runs `SELECT SSN FROM Customers WHERE SSN = '123-45-6789'`. What does the query return?
 
-A. An error, because the WHERE clause can't reference a masked column
-B. `NULL` for every matching row
-C. The masked value `XXX-XX-6789` for any row where the underlying SSN actually equals `'123-45-6789'` — confirming that exact SSN exists in the table
-D. The full unmasked SSN, since equality predicates bypass masking
+A. An error, because the WHERE clause can't reference a masked column  
+B. `NULL` for every matching row  
+C. The masked value `XXX-XX-6789` for any row where the underlying SSN actually equals `'123-45-6789'` — confirming that exact SSN exists in the table  
+D. The full unmasked SSN, since equality predicates bypass masking  
 
 > [!success]- Answer
-> **C. The masked value `XXX-XX-6789` for any row where the underlying SSN actually equals `'123-45-6789'` — confirming that exact SSN exists in the table**  
+> **C. The masked value `XXX-XX-6789` for any row where the underlying SSN actually equals `'123-45-6789'` — confirming that exact SSN exists in the table**
+>
 > The `WHERE` clause evaluates against the real, unmasked stored value — masking only changes what's *displayed* in the result set. A match confirms the guessed SSN is correct even though the displayed value is still masked; this is the exact inference mechanism the "Exam Trap" section above describes, just with an equality predicate instead of a range. Options A and D describe protections DDM doesn't actually provide, and B is simply incorrect — a matching row is still returned, just with a masked (not null) value.
 
 ## Managing and Cleaning Up Masks

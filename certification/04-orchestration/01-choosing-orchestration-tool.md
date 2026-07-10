@@ -73,13 +73,14 @@ Fabric's Data Factory experience frames the choice as **ETL vs. ELT**: Dataflow 
 
 A citizen developer wants to combine three connector-supported sources with only built-in visual transformations, with no downstream coordination required. Which tool minimizes both authoring effort and unnecessary orchestration overhead?
 
-A. A notebook using PySpark DataFrame joins
-B. A pipeline with three Copy activities feeding a Stored Procedure activity
-C. Dataflow Gen2, scheduled directly
-D. A pipeline invoking a Dataflow Gen2 activity
+A. A notebook using PySpark DataFrame joins  
+B. A pipeline with three Copy activities feeding a Stored Procedure activity  
+C. Dataflow Gen2, scheduled directly  
+D. A pipeline invoking a Dataflow Gen2 activity  
 
 > [!success]- Answer
 > **C. Dataflow Gen2, scheduled directly**
+>
 > The scenario has no need for pipeline-level control flow or coordination with other items — adding a pipeline (option D) only makes sense once there's something else to orchestrate around the dataflow. A notebook (A) requires code the analyst doesn't have, and Copy + Stored Procedure (B) can't reproduce a dozen Power Query cleansing/join steps without significant custom SQL.
 
 ---
@@ -96,13 +97,14 @@ D. A pipeline invoking a Dataflow Gen2 activity
 
 A pipeline needs to run a custom multi-pass matching algorithm that can't be expressed in Power Query's transform library, then notify a Teams channel only if that step fails. Which combination correctly assigns responsibility to each tool?
 
-A. Dataflow Gen2 for the matching algorithm; Dataflow Gen2's own failure setting for the Teams notification
-B. A Notebook activity for the matching algorithm; a Teams activity connected to the notebook activity's failure path
-C. A Notebook activity for the matching algorithm; the notebook's own `try/except` block sends the Teams message directly via REST
-D. A Copy activity with a complex column mapping expression for the matching algorithm; a Web activity for the Teams notification
+A. Dataflow Gen2 for the matching algorithm; Dataflow Gen2's own failure setting for the Teams notification  
+B. A Notebook activity for the matching algorithm; a Teams activity connected to the notebook activity's failure path  
+C. A Notebook activity for the matching algorithm; the notebook's own `try/except` block sends the Teams message directly via REST  
+D. A Copy activity with a complex column mapping expression for the matching algorithm; a Web activity for the Teams notification  
 
 > [!success]- Answer
 > **B. A Notebook activity for the matching algorithm; a Teams activity connected to the notebook activity's failure path**
+>
 > Custom, code-level logic like multi-pass fuzzy matching is exactly what a notebook is for — Dataflow Gen2's transform catalog and a Copy activity's column mappings both cap out well short of this. Conditional Teams notification on failure is a pipeline-level concern (the `UponFailure` path wired to a Teams activity), not something the notebook itself should own — keeping notification logic in the pipeline keeps it visible, reusable, and independent of the notebook's own code.
 
 ---
@@ -133,13 +135,14 @@ D. A Copy activity with a complex column mapping expression for the matching alg
 
 A requirements document states: "The dataflow must expose a required `region` parameter that callers set at run time, and must also run automatically every morning at 6 AM with no external trigger." What's the issue with implementing this directly as a scheduled Dataflow Gen2 with a required public parameter?
 
-A. There's no issue — Dataflow Gen2 supports both simultaneously today
-B. Public parameters is Preview, and a dataflow with a required public parameter can't be scheduled or manually triggered — the two requirements conflict as described
-C. Dataflow Gen2 doesn't support parameters at all
-D. The parameter must be optional, but optional parameters can't be passed from a pipeline
+A. There's no issue — Dataflow Gen2 supports both simultaneously today  
+B. Public parameters is Preview, and a dataflow with a required public parameter can't be scheduled or manually triggered — the two requirements conflict as described  
+C. Dataflow Gen2 doesn't support parameters at all  
+D. The parameter must be optional, but optional parameters can't be passed from a pipeline  
 
 > [!success]- Answer
 > **B. Public parameters is Preview, and a dataflow with a required public parameter can't be scheduled or manually triggered — the two requirements conflict as described**
+>
 > Per Microsoft's documented limitation, dataflows using public parameter mode "can't be scheduled or manually triggered via Fabric, unless no required parameters are set." A design needing both a required runtime parameter *and* an unattended daily schedule needs a workaround — for example, a pipeline that supplies the parameter value via a Dataflow activity on its own schedule, rather than scheduling the dataflow directly.
 
 ---

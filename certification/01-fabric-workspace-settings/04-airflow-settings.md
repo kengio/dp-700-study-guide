@@ -11,12 +11,12 @@ tags:
 
 # Apache Airflow Job Workspace Settings
 
-> [!info]
-> This topic is the July 21, 2026 blueprint's one change to Domain 1: **"Configure Dataflows Gen2 workspace settings"** was replaced by **"Configure Apache Airflow workspace settings."** Dataflows Gen2 itself hasn't been removed from Fabric — only the workspace-settings skill bullet changed, swapping which item's workspace configuration is tested. Every other Domain 1 bullet is unchanged from the April 20, 2026 blueprint.
-
 ## Overview
 
 **Apache Airflow job** is Fabric's managed, hosted Apache Airflow environment — the next generation of Azure Data Factory's Workflow Orchestration Manager. This topic covers the workspace-level settings that control its runtime: starter vs. custom pools, environment/requirements configuration, and where DAG files live.
+
+> [!info]
+> This topic is the July 21, 2026 blueprint's one change to Domain 1: **"Configure Dataflows Gen2 workspace settings"** was replaced by **"Configure Apache Airflow workspace settings."** Dataflows Gen2 itself hasn't been removed from Fabric — only the workspace-settings skill bullet changed, swapping which item's workspace configuration is tested. Every other Domain 1 bullet is unchanged from the April 20, 2026 blueprint.
 
 > [!abstract]
 >
@@ -96,10 +96,10 @@ If the capacity-level setting for customizing compute configurations is disabled
 
 A team runs simple, low-complexity DAGs during active development, then promotes finished DAGs to a production Airflow job with strict uptime expectations. Which pool strategy fits best?
 
-A. Use the starter pool for both development and production
-B. Use a custom pool with Small node size for development, and a separate custom pool with Large node size and autoscale for production
-C. Use the starter pool for production because it has no startup latency
-D. Development and production must always share the same pool
+A. Use the starter pool for both development and production  
+B. Use a custom pool with Small node size for development, and a separate custom pool with Large node size and autoscale for production  
+C. Use the starter pool for production because it has no startup latency  
+D. Development and production must always share the same pool  
 
 > [!success]- Answer
 > **B. Use a custom pool with Small node size for development, and a separate custom pool with Large node size and autoscale for production**
@@ -150,10 +150,10 @@ Two supported paths, depending on whether the job is Git-connected:
 
 A team has no Git repository connected to their Apache Airflow job but needs to install a private wheel package their data engineers built in-house. What's the correct approach?
 
-A. Add the package path as `/opt/airflow/git/<repoName>/plugins/<file>.whl`
-B. Upload the `.whl` file to the `dags` folder and reference it directly by filename
-C. Upload the `.whl` file to `plugins/libs`, reference it as `plugins/libs/<file>.whl` in requirements, then restart the job
-D. Private packages require a Git repository — there is no alternative
+A. Add the package path as `/opt/airflow/git/<repoName>/plugins/<file>.whl`  
+B. Upload the `.whl` file to the `dags` folder and reference it directly by filename  
+C. Upload the `.whl` file to `plugins/libs`, reference it as `plugins/libs/<file>.whl` in requirements, then restart the job  
+D. Private packages require a Git repository — there is no alternative  
 
 > [!success]- Answer
 > **C. Upload the `.whl` file to `plugins/libs`, reference it as `plugins/libs/<file>.whl` in requirements, then restart the job**
@@ -172,10 +172,10 @@ Once saved, DAG files load into the Apache Airflow UI — reachable from the job
 
 Where do Apache Airflow job DAG files live in Fabric-managed storage?
 
-A. The `plugins` folder
-B. The `dags` folder
-C. The workspace's default Lakehouse `Files` folder
-D. `plugins/libs`
+A. The `plugins` folder  
+B. The `dags` folder  
+C. The workspace's default Lakehouse `Files` folder  
+D. `plugins/libs`  
 
 > [!success]- Answer
 > **B. The `dags` folder**

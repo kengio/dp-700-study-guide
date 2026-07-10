@@ -97,10 +97,10 @@ Uncommitted workspace changes can be reverted to the last-synced state via **Und
 
 A developer wants to push their workspace changes to the connected Git branch, but the Commit button is greyed out. What's the most likely cause?
 
-A. They lack a GitHub personal access token
-B. There are pending updates from the Git branch that haven't been applied to the workspace yet
-C. The workspace has more than 1,000 items
-D. Commit is only available to workspace Viewers
+A. They lack a GitHub personal access token  
+B. There are pending updates from the Git branch that haven't been applied to the workspace yet  
+C. The workspace has more than 1,000 items  
+D. Commit is only available to workspace Viewers  
 
 > [!success]- Answer
 > **B. There are pending updates from the Git branch that haven't been applied to the workspace yet**
@@ -148,10 +148,10 @@ Git integration supports a growing, versioned list of item types, spanning Data 
 
 A workspace contains a Lakehouse, a Warehouse, and a Power BI Dashboard. After connecting the workspace to Git, the team notices the Dashboard doesn't appear to sync via commit or update, though it's visible in the source control panel. What's the correct explanation?
 
-A. The workspace exceeded the 1,000-item limit
-B. Power BI Dashboard isn't a Git integration supported item, so it's tracked but ignored for commit/update
-C. Dashboards require a separate Azure DevOps project
-D. The Git connection is broken and must be reconnected
+A. The workspace exceeded the 1,000-item limit  
+B. Power BI Dashboard isn't a Git integration supported item, so it's tracked but ignored for commit/update  
+C. Dashboards require a separate Azure DevOps project  
+D. The Git connection is broken and must be reconnected  
 
 > [!success]- Answer
 > **B. Power BI Dashboard isn't a Git integration supported item, so it's tracked but ignored for commit/update**
@@ -193,10 +193,10 @@ A **conflict** occurs when the *same item* changes in both the workspace and the
 
 A semantic model was modified in both the connected Git branch (by a teammate's commit) and the workspace (by a local edit) since the last sync. The team wants a proper code review of the merge before it lands in the workspace, rather than simply picking one version. What's the correct approach?
 
-A. Select "Accept incoming changes" in the UI conflict resolution dialog
-B. Select "Keep current content" in the UI conflict resolution dialog
-C. Checkout a new branch from the last synced state, commit the workspace changes there, resolve the conflict via a pull request in Git, then switch the workspace back to the original branch
-D. Disconnect and reconnect the workspace, choosing to update from Git
+A. Select "Accept incoming changes" in the UI conflict resolution dialog  
+B. Select "Keep current content" in the UI conflict resolution dialog  
+C. Checkout a new branch from the last synced state, commit the workspace changes there, resolve the conflict via a pull request in Git, then switch the workspace back to the original branch  
+D. Disconnect and reconnect the workspace, choosing to update from Git  
 
 > [!success]- Answer
 > **C. Checkout a new branch from the last synced state, commit the workspace changes there, resolve the conflict via a pull request in Git, then switch the workspace back to the original branch**

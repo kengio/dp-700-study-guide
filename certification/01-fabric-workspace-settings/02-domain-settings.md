@@ -61,10 +61,10 @@ Only a **Fabric admin** can create a new domain in the first place (Admin portal
 
 A business analyst who is a workspace Admin for "Sales Reporting" has been designated a domain contributor for the "Sales" domain. What can they do?
 
-A. Create new subdomains under "Sales"
-B. Assign the "Sales Reporting" workspace to the "Sales" domain, since they admin that workspace
-C. Change who the domain admins of "Sales" are
-D. Override tenant-level certification settings for the "Sales" domain
+A. Create new subdomains under "Sales"  
+B. Assign the "Sales Reporting" workspace to the "Sales" domain, since they admin that workspace  
+C. Change who the domain admins of "Sales" are  
+D. Override tenant-level certification settings for the "Sales" domain  
 
 > [!success]- Answer
 > **B. Assign the "Sales Reporting" workspace to the "Sales" domain, since they admin that workspace**
@@ -118,10 +118,10 @@ Other tabs on the **Domain settings** pane cover general settings (name/descript
 
 A domain admin wants Finance-domain items to automatically get a specific sensitivity label without changing the tenant-wide default. Where do they configure this?
 
-A. Workspace settings → OneLake
-B. Domain settings → Delegated Settings → Domain-level default sensitivity label
-C. Admin portal → Information Protection (tenant level only)
-D. Item-level frontmatter on each note
+A. Workspace settings → OneLake  
+B. Domain settings → Delegated Settings → Domain-level default sensitivity label  
+C. Admin portal → Information Protection (tenant level only)  
+D. Item-level frontmatter on each note  
 
 > [!success]- Answer
 > **B. Domain settings → Delegated Settings → Domain-level default sensitivity label**
@@ -132,10 +132,10 @@ D. Item-level frontmatter on each note
 
 A new employee is added to a security group that is set as the default domain for "Marketing." They immediately create a brand-new workspace. What happens to that workspace?
 
-A. Nothing — default domain only affects pre-existing workspaces
-B. It's automatically assigned to the "Marketing" domain
-C. It requires a Fabric admin to manually assign it
-D. It's assigned to "Marketing" only if the employee is also a domain contributor beforehand
+A. Nothing — default domain only affects pre-existing workspaces  
+B. It's automatically assigned to the "Marketing" domain  
+C. It requires a Fabric admin to manually assign it  
+D. It's assigned to "Marketing" only if the employee is also a domain contributor beforehand  
 
 > [!success]- Answer
 > **B. It's automatically assigned to the "Marketing" domain**

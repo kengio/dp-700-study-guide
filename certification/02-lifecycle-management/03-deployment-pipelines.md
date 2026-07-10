@@ -78,10 +78,10 @@ Adding a *new* item directly into an already-assigned stage's workspace does **n
 
 A workspace is assigned to the Test stage of a pipeline. The Dev stage has a report named "Sales Report" in `Folder A`; Test has a report with the same name and type in `Folder B`. What happens when the workspace is assigned?
 
-A. The items pair automatically because name and type match
-B. The items don't pair because the folder locations differ — deployment can still succeed but the items are treated as unrelated
-C. Assignment fails outright because of the folder mismatch
-D. Fabric automatically moves the Test report into Folder A to force a match
+A. The items pair automatically because name and type match  
+B. The items don't pair because the folder locations differ — deployment can still succeed but the items are treated as unrelated  
+C. Assignment fails outright because of the folder mismatch  
+D. Fabric automatically moves the Test report into Folder A to force a match  
 
 > [!success]- Answer
 > **B. The items don't pair because the folder locations differ — deployment can still succeed but the items are treated as unrelated**
@@ -123,10 +123,10 @@ Every deployment (any method) shows a confirmation listing the items about to mo
 
 A team has a fully populated Production stage and wants to pull last quarter's approved content back into a freshly reset Test stage, deploying only the three reports that changed — leaving everything else in Test untouched. Is this possible as described?
 
-A. Yes — select the three reports and use backward deployment
-B. No — backward deployment requires the target stage to be empty and only supports deploying all items, not a selective subset
-C. Yes, but only if deployment rules are configured first
-D. No — backward deployment doesn't exist in Fabric deployment pipelines
+A. Yes — select the three reports and use backward deployment  
+B. No — backward deployment requires the target stage to be empty and only supports deploying all items, not a selective subset  
+C. Yes, but only if deployment rules are configured first  
+D. No — backward deployment doesn't exist in Fabric deployment pipelines  
 
 > [!success]- Answer
 > **B. No — backward deployment requires the target stage to be empty and only supports deploying all items, not a selective subset**
@@ -165,10 +165,10 @@ Additional constraints:
 
 A team wants the Production stage of a semantic model to always point at the production SQL database, regardless of what the Test stage's semantic model points to. Where should this be configured?
 
-A. A parameter in the pipeline's global settings
-B. A data source rule, defined on the semantic model in the Production stage
-C. A data source rule, defined on the semantic model in the Development stage
-D. This isn't achievable with deployment pipelines
+A. A parameter in the pipeline's global settings  
+B. A data source rule, defined on the semantic model in the Production stage  
+C. A data source rule, defined on the semantic model in the Development stage  
+D. This isn't achievable with deployment pipelines  
 
 > [!success]- Answer
 > **B. A data source rule, defined on the semantic model in the Production stage**

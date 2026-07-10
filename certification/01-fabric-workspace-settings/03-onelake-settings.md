@@ -89,10 +89,10 @@ Beyond external access, the **OneLake** tab in workspace settings exposes:
 
 A workspace has shortcuts to an Amazon S3 bucket, an Azure Data Lake Storage Gen2 account, and a Google Cloud Storage bucket. The team enables shortcut caching with a 14-day retention period. Which shortcuts benefit?
 
-A. All three shortcuts
-B. Only the S3 and GCS shortcuts
-C. Only the ADLS Gen2 shortcut
-D. None — caching requires an on-premises data gateway
+A. All three shortcuts  
+B. Only the S3 and GCS shortcuts  
+C. Only the ADLS Gen2 shortcut  
+D. None — caching requires an on-premises data gateway  
 
 > [!success]- Answer
 > **B. Only the S3 and GCS shortcuts**
@@ -103,10 +103,10 @@ D. None — caching requires an on-premises data gateway
 
 A cached file in a shortcut hasn't been accessed in 20 days, and the retention period is set to 14 days. What happens to it?
 
-A. It stays cached indefinitely since it was accessed at least once
-B. It's purged from the cache since it wasn't accessed within the 14-day retention window
-C. It's automatically re-downloaded every 14 days regardless of access
-D. It's moved to Cold access tier
+A. It stays cached indefinitely since it was accessed at least once  
+B. It's purged from the cache since it wasn't accessed within the 14-day retention window  
+C. It's automatically re-downloaded every 14 days regardless of access  
+D. It's moved to Cold access tier  
 
 > [!success]- Answer
 > **B. It's purged from the cache since it wasn't accessed within the 14-day retention window**
@@ -134,10 +134,10 @@ Key behavioral points that matter for workspace configuration:
 
 A user opens a lakehouse folder in OneLake file explorer and sees several files with a blue cloud icon. A colleague, working directly in the Fabric portal, updates one of those files. What does the first user need to do to see the update in File Explorer?
 
-A. Nothing — updates always sync automatically regardless of source
-B. Right-click the file or folder and select OneLake → Sync from OneLake
-C. Reinstall the OneLake file explorer application
-D. Double-click the file — this both downloads and refreshes it
+A. Nothing — updates always sync automatically regardless of source  
+B. Right-click the file or folder and select OneLake → Sync from OneLake  
+C. Reinstall the OneLake file explorer application  
+D. Double-click the file — this both downloads and refreshes it  
 
 > [!success]- Answer
 > **B. Right-click the file or folder and select OneLake → Sync from OneLake**

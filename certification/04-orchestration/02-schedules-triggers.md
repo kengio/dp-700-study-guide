@@ -61,13 +61,14 @@ Configure **email notifications** under a schedule's **Failure notifications** s
 
 A team wants a pipeline to run indefinitely on a daily schedule starting next Monday, with no planned end date. How should they configure the fixed schedule?
 
-A. Leave the end date field blank to signal "no end"
-B. Set the end date to a date far in the future (e.g., 01/01/2099)
-C. Use an interval-based schedule instead, since only it supports open-ended runs
-D. Fixed schedules can't run indefinitely; a pipeline must be manually re-triggered each day
+A. Leave the end date field blank to signal "no end"  
+B. Set the end date to a date far in the future (e.g., 01/01/2099)  
+C. Use an interval-based schedule instead, since only it supports open-ended runs  
+D. Fixed schedules can't run indefinitely; a pipeline must be manually re-triggered each day  
 
 > [!success]- Answer
 > **B. Set the end date to a date far in the future (e.g., 01/01/2099)**
+>
 > Fabric's fixed schedule configuration always requires both a start and an end date/time — there's no blank-for-open-ended option (A) and interval-based schedules don't change this requirement (C). The documented workaround for an effectively indefinite schedule is to pick a far-future end date and update or stop the schedule later if needed.
 
 ---
@@ -113,13 +114,14 @@ The trigger itself is a **Reflex** object, visible in the workspace item list by
 
 A pipeline uses `@pipeline().TriggerEvent.FileName` (without the `?` operator) in an expression, and the pipeline author runs a **manual test** from the canvas to validate logic before enabling the trigger. What happens?
 
-A. The expression evaluates to an empty string with no error
-B. The expression throws an error, because `TriggerEvent` is NULL during a manual run and the expression doesn't null-safely handle that
-C. Fabric automatically substitutes a placeholder file name for testing
-D. Manual test runs are blocked entirely for event-triggered pipelines
+A. The expression evaluates to an empty string with no error  
+B. The expression throws an error, because `TriggerEvent` is NULL during a manual run and the expression doesn't null-safely handle that  
+C. Fabric automatically substitutes a placeholder file name for testing  
+D. Manual test runs are blocked entirely for event-triggered pipelines  
 
 > [!success]- Answer
 > **B. The expression throws an error, because `TriggerEvent` is NULL during a manual run and the expression doesn't null-safely handle that**
+>
 > `TriggerEvent` and its nested fields are only populated when the pipeline is actually invoked by a matching storage event. During manual testing there's no event, so the field is `NULL` — accessing `.FileName` on a null object without the `?` null-safe operator (`@pipeline()?.TriggerEvent?.FileName`) throws an expression evaluation error rather than silently returning empty.
 
 ---
@@ -175,13 +177,14 @@ Conditional retries (the Preview **Retry conditions** feature specifically) are 
 
 An activity is configured with **Enable retries** on, **Retry** set to 3, a **Retry interval** of 3600 seconds, and a retry condition matching only `Error code Contains 429`. The activity fails with a 500 (server error), which doesn't match the condition. How long before the pipeline moves past this activity's failure handling?
 
-A. Immediately — the condition doesn't match, so no retry or wait occurs
-B. The pipeline waits the full 3600-second interval once, then proceeds without retrying, since the interval runs before the condition is checked
-C. The pipeline retries 3 times regardless of the condition, ignoring it entirely
-D. The activity fails instantly and the retry interval is skipped for non-matching errors
+A. Immediately — the condition doesn't match, so no retry or wait occurs  
+B. The pipeline waits the full 3600-second interval once, then proceeds without retrying, since the interval runs before the condition is checked  
+C. The pipeline retries 3 times regardless of the condition, ignoring it entirely  
+D. The activity fails instantly and the retry interval is skipped for non-matching errors  
 
 > [!success]- Answer
 > **B. The pipeline waits the full 3600-second interval once, then proceeds without retrying, since the interval runs before the condition is checked**
+>
 > Per documented behavior, the retry interval elapses *before* the retry condition is evaluated. So even though the 500 error doesn't match the `429`-only condition, the pipeline still waits the configured 3600 seconds before recognizing that no retry should occur and proceeding to the activity's failure path.
 
 ## Use Cases

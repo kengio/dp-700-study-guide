@@ -85,13 +85,14 @@ Maximum permissions per role:                 500
 
 A Lakehouse admin creates a new OneLake security role, `FinanceReader`, scoped to only the `Finance/` folder, and adds `alice@contoso.com` as a member. Alice still sees data outside `Finance/` when browsing the Lakehouse. What is the most likely cause?
 
-A. The role definition hasn't propagated yet (wait 5 minutes)
-B. Alice is also a member of the `DefaultReader` role via her ReadAll permission
-C. OneLake security roles can't scope to a single folder
-D. Alice needs the ReadWrite permission, not Read, to see folder-scoped data
+A. The role definition hasn't propagated yet (wait 5 minutes)  
+B. Alice is also a member of the `DefaultReader` role via her ReadAll permission  
+C. OneLake security roles can't scope to a single folder  
+D. Alice needs the ReadWrite permission, not Read, to see folder-scoped data  
 
 > [!success]- Answer
-> **B. Alice is also a member of the `DefaultReader` role via her ReadAll permission**  
+> **B. Alice is also a member of the `DefaultReader` role via her ReadAll permission**
+>
 > Because OneLake security roles are additive (UNION), and `DefaultReader` grants Read across all folders under `Tables/` and `Files/` to anyone with ReadAll, Alice keeps that broader access even after being added to a narrower custom role. To actually restrict her, `DefaultReader` needs to be deleted or its underlying ReadAll access removed for her.
 
 ---
@@ -213,13 +214,14 @@ Listing a directory always shows internal shortcuts regardless of the user's acc
 
 A Power BI report uses Direct Lake over SQL against a Warehouse whose data includes a shortcut into a separately-secured Lakehouse. OneLake security on that Lakehouse restricts most users to a subset of rows. Report viewers report seeing rows they shouldn't have access to. What's the most likely cause?
 
-A. OneLake security roles don't support row-level security through shortcuts
-B. Direct Lake over SQL delegates to the item owner's identity rather than passing through each viewer's identity
-C. The Lakehouse's DefaultReader role was never deleted
-D. Shortcuts always bypass OneLake security by design
+A. OneLake security roles don't support row-level security through shortcuts  
+B. Direct Lake over SQL delegates to the item owner's identity rather than passing through each viewer's identity  
+C. The Lakehouse's DefaultReader role was never deleted  
+D. Shortcuts always bypass OneLake security by design  
 
 > [!success]- Answer
-> **B. Direct Lake over SQL delegates to the item owner's identity rather than passing through each viewer's identity**  
+> **B. Direct Lake over SQL delegates to the item owner's identity rather than passing through each viewer's identity**
+>
 > Direct Lake over SQL and T-SQL Delegated identity mode both evaluate shortcut access using the calling *item's owner* identity, not the individual report viewer's identity — so every viewer effectively inherits the owner's (likely broader) access. Switching the semantic model to Direct Lake over OneLake mode restores per-viewer identity pass-through and correct enforcement.
 
 ---

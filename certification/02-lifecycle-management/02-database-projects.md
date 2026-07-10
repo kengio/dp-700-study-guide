@@ -82,10 +82,10 @@ For Fabric development this matters most when:
 
 A developer built a SQL database project locally and wants to preview exactly which `ALTER`/`CREATE`/`DROP` statements will run against a Fabric SQL database *before* committing the change, so a reviewer can approve the diff. Which tool accomplishes this?
 
-A. Deployment pipelines' compare-stages view
-B. Schema Compare in the SQL Database Projects extension for VS Code
-C. The Fabric query editor's Object Explorer
-D. Git's `diff` command against the `.sqlproj` file
+A. Deployment pipelines' compare-stages view  
+B. Schema Compare in the SQL Database Projects extension for VS Code  
+C. The Fabric query editor's Object Explorer  
+D. Git's `diff` command against the `.sqlproj` file  
 
 > [!success]- Answer
 > **B. Schema Compare in the SQL Database Projects extension for VS Code**
@@ -136,10 +136,10 @@ The same **branch out to a new workspace** mechanic used for other Fabric items 
 
 A developer merges a pull request containing a new stored procedure into the primary branch connected to a production SQL database's workspace. What additional step is required before the procedure exists in the live database?
 
-A. Nothing — merging the PR automatically updates the live database
-B. Rebuild the `.dacpac` locally and run SqlPackage manually
-C. Select Update (Update All) in the primary workspace's Source control panel
-D. Branch out to a new workspace and switch back
+A. Nothing — merging the PR automatically updates the live database  
+B. Rebuild the `.dacpac` locally and run SqlPackage manually  
+C. Select Update (Update All) in the primary workspace's Source control panel  
+D. Branch out to a new workspace and switch back  
 
 > [!success]- Answer
 > **C. Select Update (Update All) in the primary workspace's Source control panel**
@@ -169,10 +169,10 @@ All three lifecycle tools can move a Fabric SQL database or Warehouse's schema f
 
 A team's Fabric SQL database is Git-connected. A developer wants to (1) review every incremental schema change with a code reviewer via pull request before it reaches the shared Dev database, and separately (2) promote the fully-tested Dev schema to a Test workspace and then to Production on a release cadence. Which combination of tools fits both needs?
 
-A. Use only deployment pipelines for both needs
-B. Use Git integration + database projects (with PR review) for (1), and deployment pipelines for (2)
-C. Use only Git integration for both — deployment pipelines can't handle SQL database items
-D. Use deployment rules for (1) and Schema Compare for (2)
+A. Use only deployment pipelines for both needs  
+B. Use Git integration + database projects (with PR review) for (1), and deployment pipelines for (2)  
+C. Use only Git integration for both — deployment pipelines can't handle SQL database items  
+D. Use deployment rules for (1) and Schema Compare for (2)  
 
 > [!success]- Answer
 > **B. Use Git integration + database projects (with PR review) for (1), and deployment pipelines for (2)**

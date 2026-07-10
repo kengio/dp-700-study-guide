@@ -36,7 +36,7 @@ mindmap
       1-28 day retention, 1GB file cap
       File explorer - placeholder sync
     Airflow
-      Replaced Dataflows Gen2 bullet (Jul 2026)
+      "Replaced Dataflows Gen2 bullet (Jul 2026)"
       Starter vs custom pool
       dags folder vs plugins folder
       No Free/PPU workspace support

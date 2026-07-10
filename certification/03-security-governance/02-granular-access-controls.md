@@ -114,13 +114,14 @@ Key behavior:
 
 A predicate function used by an RLS filter policy needs to be modified to add a new exemption for an auditor role. What is the correct sequence of steps?
 
-A. Run `ALTER FUNCTION` directly — the security policy updates automatically
-B. Drop the security policy, alter the function, then recreate the security policy
-C. Disable the policy with `STATE = OFF`, alter the function, then re-enable it
-D. Create a brand-new function and a brand-new policy, leaving the old ones in place
+A. Run `ALTER FUNCTION` directly — the security policy updates automatically  
+B. Drop the security policy, alter the function, then recreate the security policy  
+C. Disable the policy with `STATE = OFF`, alter the function, then re-enable it  
+D. Create a brand-new function and a brand-new policy, leaving the old ones in place  
 
 > [!success]- Answer
-> **B. Drop the security policy, alter the function, then recreate the security policy**  
+> **B. Drop the security policy, alter the function, then recreate the security policy**
+>
 > A schema-bound security policy blocks `ALTER FUNCTION` on its predicate function while the policy exists — Fabric enforces this to prevent silently changing the security logic underneath an active policy. The policy must be dropped first, then the function altered, then the policy recreated to reapply protection.
 
 ---
@@ -230,13 +231,14 @@ Everything above applies to the **Warehouse and SQL analytics endpoint** specifi
 
 A data platform team needs the same row-level restriction to apply consistently whether a user queries a Lakehouse table via a Spark notebook, the SQL analytics endpoint, or a Direct Lake semantic model. Where should the restriction be defined?
 
-A. RLS in the SQL analytics endpoint only — it automatically propagates to Spark and Direct Lake
-B. A OneLake data access role with row-level security defined on the table
-C. Separate RLS definitions in the SQL endpoint, a Spark-side filter, and a semantic model DAX role
-D. DDM on the relevant columns, since masking works identically across all engines
+A. RLS in the SQL analytics endpoint only — it automatically propagates to Spark and Direct Lake  
+B. A OneLake data access role with row-level security defined on the table  
+C. Separate RLS definitions in the SQL endpoint, a Spark-side filter, and a semantic model DAX role  
+D. DDM on the relevant columns, since masking works identically across all engines  
 
 > [!success]- Answer
-> **B. A OneLake data access role with row-level security defined on the table**  
+> **B. A OneLake data access role with row-level security defined on the table**
+>
 > SQL-endpoint RLS only applies when querying through the SQL analytics endpoint — it doesn't reach Spark notebooks or OneLake API callers. A OneLake security role's RLS is enforced by every Fabric engine that supports OneLake security filtering (Lakehouse, Spark, SQL analytics endpoint in user's identity mode, and Direct Lake on OneLake mode), making it the single definition point for cross-engine consistency. Option C works but duplicates logic across three places — exactly what B avoids.
 
 ## Use Cases

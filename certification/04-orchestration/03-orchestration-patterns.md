@@ -54,13 +54,14 @@ The `Set Variable` activity can also set a **pipeline return value** — one or 
 
 A pipeline needs a value that's fixed for the entire run (the target environment name, supplied by whoever triggers it) and a separate value that accumulates a running row count as a `ForEach` loop processes batches. Which construct fits each need?
 
-A. Both should be pipeline parameters
-B. Both should be pipeline variables
-C. Environment name = parameter (set once, read-only); running row count = variable (mutated via Set/Append Variable each loop iteration)
-D. Environment name = variable; running row count = parameter
+A. Both should be pipeline parameters  
+B. Both should be pipeline variables  
+C. Environment name = parameter (set once, read-only); running row count = variable (mutated via Set/Append Variable each loop iteration)  
+D. Environment name = variable; running row count = parameter  
 
 > [!success]- Answer
 > **C. Environment name = parameter (set once, read-only); running row count = variable (mutated via Set/Append Variable each loop iteration)**
+>
 > Parameters are fixed for the life of a run and are the correct fit for a caller-supplied, unchanging configuration value. A value that needs to change *during* the run — like an accumulating count inside a loop — requires a variable, updated with `Set Variable` or `Append Variable` on each iteration.
 
 ---
@@ -122,13 +123,14 @@ Use bracket `[]` syntax (not dot `.`) when a subfield reference itself needs to 
 
 A Copy activity needs its output file named with today's date in `yyyy-MM-dd` format, prefixed with `"orders_"`. Which expression correctly produces `orders_2026-07-10.csv`?
 
-A. `concat('orders_', utcNow(), '.csv')`
-B. `@concat('orders_', formatDateTime(utcNow(), 'yyyy-MM-dd'), '.csv')`
-C. `formatDateTime('orders_', 'yyyy-MM-dd', '.csv')`
-D. `@{orders_}formatDateTime(utcNow(),'yyyy-MM-dd').csv`
+A. `concat('orders_', utcNow(), '.csv')`  
+B. `@concat('orders_', formatDateTime(utcNow(), 'yyyy-MM-dd'), '.csv')`  
+C. `formatDateTime('orders_', 'yyyy-MM-dd', '.csv')`  
+D. `@{orders_}formatDateTime(utcNow(),'yyyy-MM-dd').csv`  
 
 > [!success]- Answer
 > **B. `@concat('orders_', formatDateTime(utcNow(), 'yyyy-MM-dd'), '.csv')`**
+>
 > The expression must start with `@` to be evaluated at all (ruling out A, which is a literal string). `formatDateTime` needs a timestamp and a format string as separate arguments — `utcNow()` supplies the timestamp, `'yyyy-MM-dd'` the format — and `concat` stitches the literal prefix, formatted date, and extension together. C reverses the arguments; D isn't valid expression syntax.
 
 ---
@@ -262,13 +264,14 @@ Both reference another notebook's code, but they solve different problems:
 
 A data engineering team wants to build a shared library of Python helper functions used identically across a dozen notebooks, edited in one place, with changes reflected everywhere without copying code. Separately, they also need to run four independent ingestion notebooks in parallel every night, three of which must finish before a fourth aggregation notebook starts. Which two mechanisms fit these two needs?
 
-A. `notebookutils.notebook.runMultiple` for both needs
-B. `%run` for the shared helper library; `notebookutils.notebook.runMultiple` with a `dependencies` DAG for the nightly ingestion
-C. `%run` for both needs
-D. `notebookutils.notebook.run` for the shared helper library; `%run` for the nightly ingestion
+A. `notebookutils.notebook.runMultiple` for both needs  
+B. `%run` for the shared helper library; `notebookutils.notebook.runMultiple` with a `dependencies` DAG for the nightly ingestion  
+C. `%run` for both needs  
+D. `notebookutils.notebook.run` for the shared helper library; `%run` for the nightly ingestion  
 
 > [!success]- Answer
 > **B. `%run` for the shared helper library; `notebookutils.notebook.runMultiple` with a `dependencies` DAG for the nightly ingestion**
+>
 > `%run` inlines a referenced notebook's variables and functions into the caller's namespace — exactly what a shared-helper-module pattern needs. The nightly ingestion scenario needs isolated parallel execution with a dependency ordering (three notebooks before a fourth), which is precisely what `runMultiple`'s `dependencies` field in the DAG configuration provides — `%run` has no parallelism or dependency concept at all.
 
 ---
@@ -320,19 +323,6 @@ Both post/send from the **Upon Failure** path of the activities they're monitori
 
 > [!warning] Common Mistake
 > Both Teams and Outlook activities are documented as **inactive under CI/CD deployment** until a new user-authentication connection is created in the target workspace — a scenario where a failure-notification pipeline "worked in Dev but silently stopped notifying after deployment to Prod via CI/CD" is this exact, documented gotcha, not a bug in the pipeline logic itself. Also note the Outlook activity **doesn't support Workspace Identity or Service Principal** authentication — a fully unattended service-principal-driven CI/CD pipeline can't use it as-is.
-
-**Practice Question 4** *(Medium)*
-
-A pipeline has two Copy activities (`CopySales`, `CopyInventory`) both feeding into a single Teams activity connected via **Upon Failure** from each. `CopySales` fails; `CopyInventory` succeeds. Does the Teams activity fire?
-
-A. Yes — at least one upstream activity failed
-B. No — all activities connected on the same outcome path must satisfy that condition; only one of two failed
-C. Yes, but only if `CopyInventory` also fails within 30 seconds
-D. The Teams activity always fires regardless of upstream status
-
-> [!success]- Answer
-> **B. No — all activities connected on the same outcome path must satisfy that condition; only one of two failed**
-> When multiple upstream activities connect to a downstream activity on the same path type (here, Upon Failure), *all* of them must meet that condition for the downstream activity to run. Since `CopyInventory` succeeded, the "all failed" condition isn't met, so the Teams notification doesn't fire — a design trap if the intent was "notify if *either* fails," which instead requires two separate Upon Failure connectors (one per Copy activity) both pointing at the Teams activity, or a Teams activity per source.
 
 ---
 

@@ -67,13 +67,14 @@ Workspace roles are assigned to individuals, security groups, Microsoft 365 grou
 
 A user has the Viewer role in a workspace. They open a Lakehouse's SQL analytics endpoint and run a `SELECT` query via a T-SQL client. What happens?
 
-A. The query fails — Viewers can't connect to the SQL analytics endpoint
-B. The query succeeds — Viewer includes ReadData (TDS/T-SQL) access by default
-C. The query succeeds only if the Viewer also has the Contributor role in another workspace
-D. The query fails because Viewers only have ReadAll, not ReadData
+A. The query fails — Viewers can't connect to the SQL analytics endpoint  
+B. The query succeeds — Viewer includes ReadData (TDS/T-SQL) access by default  
+C. The query succeeds only if the Viewer also has the Contributor role in another workspace  
+D. The query fails because Viewers only have ReadAll, not ReadData  
 
 > [!success]- Answer
-> **B. The query succeeds — Viewer includes ReadData (TDS/T-SQL) access by default**  
+> **B. The query succeeds — Viewer includes ReadData (TDS/T-SQL) access by default**
+>
 > All four workspace roles, including Viewer, can connect to the SQL analytics endpoint and read data through the TDS endpoint (ReadData). What Viewer lacks by default is **ReadAll** — read access via OneLake APIs and Spark, and Lakehouse explorer browsing. This ReadData/ReadAll split is one of the most exam-relevant facts in this topic.
 
 ---
@@ -136,13 +137,14 @@ Sharing an item with a user grants **Read** by default; the sharer chooses wheth
 
 Veronica owns a report and shares it directly with Marta, who has no role in the containing workspace. Later, Veronica removes Marta's item-level sharing on the report. What happens to Marta's access?
 
-A. Marta immediately loses all access to the report
-B. Marta retains access because she has a workspace role
-C. Marta loses access, because without a workspace role, item permission was her only path in
-D. Marta's access converts automatically to Viewer workspace role
+A. Marta immediately loses all access to the report  
+B. Marta retains access because she has a workspace role  
+C. Marta loses access, because without a workspace role, item permission was her only path in  
+D. Marta's access converts automatically to Viewer workspace role  
 
 > [!success]- Answer
-> **C. Marta loses access, because without a workspace role, item permission was her only path in**  
+> **C. Marta loses access, because without a workspace role, item permission was her only path in**
+>
 > Since Marta never had a workspace role, item-level sharing was the only mechanism granting her access. Removing it cuts off access entirely — this is the mirror case of the Common Mistake above: item-only access truly is revocable by removing the item permission, unlike workspace-role-backed access.
 
 ---
@@ -210,13 +212,14 @@ A **Power BI app** packages one or more reports/dashboards from a workspace into
 
 A workspace has a semantic model with row-level security (RLS) roles defined in DAX. The business wants report consumers to see only their own region's data via RLS, but data engineers need to see everything while building pipelines. How should roles be assigned?
 
-A. Assign everyone Contributor, and rely on RLS to filter what each person sees
-B. Assign report consumers Viewer (so RLS applies) and data engineers Contributor or higher (so RLS doesn't restrict their pipeline work)
-C. Assign everyone Viewer, and use item-level sharing to grant engineers extra access
-D. RLS can't coexist with workspace roles — engineers and consumers must be in separate workspaces
+A. Assign everyone Contributor, and rely on RLS to filter what each person sees  
+B. Assign report consumers Viewer (so RLS applies) and data engineers Contributor or higher (so RLS doesn't restrict their pipeline work)  
+C. Assign everyone Viewer, and use item-level sharing to grant engineers extra access  
+D. RLS can't coexist with workspace roles — engineers and consumers must be in separate workspaces  
 
 > [!success]- Answer
-> **B. Assign report consumers Viewer (so RLS applies) and data engineers Contributor or higher (so RLS doesn't restrict their pipeline work)**  
+> **B. Assign report consumers Viewer (so RLS applies) and data engineers Contributor or higher (so RLS doesn't restrict their pipeline work)**
+>
 > RLS on Power BI items is only enforced for users at the **Viewer** role — any higher role already has blanket view/modify access to all workspace content, which supersedes DAX-level row filtering. Splitting the audience by role (Viewer for consumers who need filtering, Contributor+ for builders who need full visibility) is the standard, supported pattern — no separate workspace is required, and D overstates the limitation.
 
 ## Use Cases

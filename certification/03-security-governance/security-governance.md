@@ -26,7 +26,7 @@ mindmap
       Apps distribute to audiences, not workspace access
     Granular Access Controls
       RLS - CREATE SECURITY POLICY + predicate TVF
-      CLS - GRANT SELECT ON table(cols)
+      "CLS - GRANT SELECT ON table(cols)"
       OLS - standard GRANT/REVOKE/DENY, DENY always wins
       SQL-endpoint-only, not Spark/OneLake
     OneLake Security

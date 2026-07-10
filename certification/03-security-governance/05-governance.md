@@ -106,26 +106,28 @@ A tenant-wide default label policy can be **delegated to the domain level** if t
 
 A Lakehouse has no sensitivity label applied. A Power BI report is built from that Lakehouse's SQL analytics endpoint and manually labeled "Highly Confidential." Does the Lakehouse automatically inherit that label?
 
-A. Yes — labels always sync bidirectionally between Fabric and Power BI items
-B. No — downstream inheritance flows Fabric → Power BI, never the reverse
-C. Yes, but only if the Lakehouse has default labeling enabled
-D. No — inheritance only works for semantic models, never Lakehouses
+A. Yes — labels always sync bidirectionally between Fabric and Power BI items  
+B. No — downstream inheritance flows Fabric → Power BI, never the reverse  
+C. Yes, but only if the Lakehouse has default labeling enabled  
+D. No — inheritance only works for semantic models, never Lakehouses  
 
 > [!success]- Answer
-> **B. No — downstream inheritance flows Fabric → Power BI, never the reverse**  
+> **B. No — downstream inheritance flows Fabric → Power BI, never the reverse**
+>
 > Fabric documentation explicitly lists "Power BI item to Fabric item" as **not supported** for downstream inheritance. A label applied to the Power BI report has no effect on the upstream Lakehouse; if the Lakehouse needs a label, it must be applied there directly (manually, by default policy, or inherited from further upstream within Fabric).
 
 **Practice Question 2** *(Medium)*
 
 An organization migrated from legacy Azure Information Protection (AIP) labels years ago but never completed the move to the Microsoft Purview Information Protection unified labeling platform. What's the effect on using those labels in Fabric?
 
-A. No effect — Fabric supports both AIP and Purview unified labels interchangeably
-B. AIP labels must first be migrated to the Purview unified labeling platform before they can be used in Fabric
-C. Fabric automatically converts AIP labels the first time they're applied to an item
-D. AIP labels work in Power BI Desktop but not in the Fabric portal
+A. No effect — Fabric supports both AIP and Purview unified labels interchangeably  
+B. AIP labels must first be migrated to the Purview unified labeling platform before they can be used in Fabric  
+C. Fabric automatically converts AIP labels the first time they're applied to an item  
+D. AIP labels work in Power BI Desktop but not in the Fabric portal  
 
 > [!success]- Answer
-> **B. AIP labels must first be migrated to the Purview unified labeling platform before they can be used in Fabric**  
+> **B. AIP labels must first be migrated to the Purview unified labeling platform before they can be used in Fabric**
+>
 > Fabric's information protection capabilities depend on Microsoft Purview Information Protection specifically. Organizations still on legacy Azure Information Protection labels must complete the migration to unified labeling before those labels are usable for classification and protection inside Fabric and Power BI — there's no interchangeable dual-support or automatic just-in-time conversion.
 
 ---
@@ -151,13 +153,14 @@ If an item owner wants Certified or Master data status but isn't an authorized r
 
 A data engineer with write permission on a Lakehouse wants to mark it as **Certified**. They are not on the Fabric admin's list of authorized certifiers. What happens when they try?
 
-A. The Certified option applies successfully since they have write permission
-B. The Certified option is greyed out — they must request certification through their org's process
-C. The item is automatically promoted instead
-D. The Fabric admin is notified and auto-approves after 24 hours
+A. The Certified option applies successfully since they have write permission  
+B. The Certified option is greyed out — they must request certification through their org's process  
+C. The item is automatically promoted instead  
+D. The Fabric admin is notified and auto-approves after 24 hours  
 
 > [!success]- Answer
-> **B. The Certified option is greyed out — they must request certification through their org's process**  
+> **B. The Certified option is greyed out — they must request certification through their org's process**
+>
 > Write permission alone is necessary but not sufficient for Certified (or Master data) status — the user must also be on the Fabric admin's authorized-reviewers list. Without that authorization, the UI greys out the option and directs them to a request workflow the admin has configured.
 
 ---

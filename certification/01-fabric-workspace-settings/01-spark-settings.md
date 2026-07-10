@@ -153,10 +153,10 @@ Each workload gets its own REPL core inside the shared session, isolating local 
 
 A data engineering team runs five scheduled Spark job definitions every night on a tight SLA. Session start time has been inconsistent — sometimes seconds, sometimes several minutes — because the workspace relies on starter pools. Which change gives the most predictable startup time?
 
-A. Increase the starter pool's autoscale maximum nodes
-B. Switch to a custom pool configured as a custom live pool with a Full-mode environment
-C. Enable dynamic executor allocation on the starter pool
-D. Enable high concurrency mode for the pipeline
+A. Increase the starter pool's autoscale maximum nodes  
+B. Switch to a custom pool configured as a custom live pool with a Full-mode environment  
+C. Enable dynamic executor allocation on the starter pool  
+D. Enable high concurrency mode for the pipeline  
 
 > [!success]- Answer
 > **B. Switch to a custom pool configured as a custom live pool with a Full-mode environment**
@@ -202,10 +202,10 @@ You can confirm whether an operation ran natively by checking the Spark UI / Spa
 
 A notebook enables the native execution engine at the environment level. One cell runs a query with `spark.sql.ansi.enabled` set to true against a Delta table. What happens?
 
-A. The job fails immediately with an unsupported-configuration error
-B. The entire query silently falls back to the standard JVM Spark engine
-C. Only the ANSI-specific expressions fall back; the rest runs natively
-D. The native execution engine ignores the ANSI setting and runs anyway
+A. The job fails immediately with an unsupported-configuration error  
+B. The entire query silently falls back to the standard JVM Spark engine  
+C. Only the ANSI-specific expressions fall back; the rest runs natively  
+D. The native execution engine ignores the ANSI setting and runs anyway  
 
 > [!success]- Answer
 > **B. The entire query silently falls back to the standard JVM Spark engine**
@@ -228,10 +228,10 @@ D. The native execution engine ignores the ANSI setting and runs anyway
 
 A workspace member with the Contributor role tries to create a custom Spark pool but doesn't see the option. What's the most likely cause?
 
-A. Custom pools require the workspace Admin role, and possibly a capacity-level setting the capacity admin hasn't enabled
-B. Custom pools can only be created by Fabric tenant admins
-C. The workspace has reached its maximum of one Spark pool
-D. Custom pools require a Premium Per User license
+A. Custom pools require the workspace Admin role, and possibly a capacity-level setting the capacity admin hasn't enabled  
+B. Custom pools can only be created by Fabric tenant admins  
+C. The workspace has reached its maximum of one Spark pool  
+D. Custom pools require a Premium Per User license  
 
 > [!success]- Answer
 > **A. Custom pools require the workspace Admin role, and possibly a capacity-level setting the capacity admin hasn't enabled**
