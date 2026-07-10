@@ -1,0 +1,23 @@
+# Obsidian
+.obsidian/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+
+# Python virtual environments
+.venv/
+
+# lychee link-checker cache
+.lycheecache
+
+# Transient release-notes artifact (used as gh release --notes-file source)
+RELEASE_NOTES.md
+
+# DP-800 reference clone (used for porting infrastructure/format, not part of this guide)
+.reference/
