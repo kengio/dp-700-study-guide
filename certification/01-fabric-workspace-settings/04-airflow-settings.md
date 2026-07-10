@@ -34,6 +34,17 @@ tags:
 
 ---
 
+## Legacy: Dataflows Gen2 Workspace Settings (pre-July 21, 2026)
+
+Before this refresh, the equivalent Domain 1 workspace-settings bullet was **"Configure Dataflows Gen2 workspace settings."** That item covered workspace-level staging and compute behavior for Dataflow Gen2 — specifically the internal staging Lakehouse/Warehouse (`DataflowsStagingLakehouse` / `DataflowsStagingWarehouse`) that Dataflow Gen2's compute engine creates automatically per workspace, plus the staging-related options controlling whether a dataflow's transformations route through that Fabric-managed compute layer before landing in a destination.
+
+> [!tip]
+> **Not tested from July 21, 2026** — if your exam date is on or after July 21, 2026, you can skip this section; it was replaced by the Apache Airflow workspace settings covered in the rest of this file. If your exam date is **before** July 21, 2026, this older skill may still be in scope for you.
+
+Dataflow Gen2 itself hasn't been removed from Fabric, and its staging/compute behavior remains documented for readers who still need it — see [Dataflow Gen2 data destinations and managed settings](https://learn.microsoft.com/en-us/fabric/data-factory/dataflow-gen2-data-destinations-and-managed-settings#using-staging-before-loading-to-a-destination).
+
+---
+
 ## What Apache Airflow Job Is
 
 Apache Airflow job is part of Fabric's Data Factory experience. It lets you author Python-based **Directed Acyclic Graphs (DAGs)** — Apache Airflow's native orchestration format — and run them at scale without managing the underlying Airflow infrastructure yourself. It's aimed at teams who already know Airflow or prefer code-first orchestration; teams that want a no-code experience should reach for **pipelines** instead (see [04-Orchestration](../04-orchestration/orchestration.md) for the choose-between-tools decision matrix).
