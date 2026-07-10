@@ -184,9 +184,11 @@ Same reasoning as the anki deck system planned for `certification/resources/anki
 
 This means *correcting an answer* or *adding a new question* is a one-file edit to the relevant `.md` file. Then re-run `build.py` and commit the regenerated JSON.
 
-## Why is JSON committed and not built in CI?
+## Does CI build the JSON, and why is it also committed?
 
-It's a static site — GitHub Pages serves `practice/data/*.json` directly. If the JSON weren't committed, GitHub Pages would have no way to produce it (we'd need a CI step + commit-back, which is overkill for a static app). The build is cheap (sub-second) and idempotent, so committing the output keeps the workflow simple.
+Yes — `.github/workflows/deploy-practice.yml` runs `python3 practice/build.py` on every deploy, so the live GitHub Pages site always reflects the latest committed markdown even if an author forgot to re-run `build.py` locally before pushing. CI does **not** commit that regenerated output back to git; it only feeds the freshly built `practice/data/*.json` into the Pages artifact for that deploy.
+
+The JSON is still committed to the repo separately so that local development and PR review can see the current data without running the build, and so the source-of-truth markdown and its generated output travel together in the same diff. The build is cheap (sub-second) and idempotent, so keeping both in sync is low-cost.
 
 The CI markdownlint + lychee checks ensure the source markdown stays well-formed; correctness of `build.py` itself is verified by running `python3 practice/build.py --check` before opening a PR.
 
