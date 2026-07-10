@@ -23,9 +23,29 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  guard:
+    name: Check practice/build.py exists
+    # remove in Task 12 once practice/build.py exists
+    # hashFiles() only works in step context (it needs the checkout to have
+    # run), so job-level `if:` conditions can't call it directly — this job
+    # runs the check once and exposes the result as an output for the other
+    # jobs to gate on via `needs`.
+    runs-on: ubuntu-latest
+    outputs:
+      build_script_exists: ${{ steps.check.outputs.exists }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for practice/build.py
+        id: check
+        run: echo "exists=$([ -f practice/build.py ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
   build:
     name: Build Pages artifact (practice/)
+    needs: guard
     runs-on: ubuntu-latest
+    # remove in Task 12 once practice/build.py exists
+    if: needs.guard.outputs.build_script_exists == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -51,8 +71,10 @@ jobs:
 
   deploy:
     name: Deploy to GitHub Pages
-    needs: build
+    needs: [guard, build]
     runs-on: ubuntu-latest
+    # remove in Task 12 once practice/build.py exists
+    if: needs.guard.outputs.build_script_exists == 'true'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
