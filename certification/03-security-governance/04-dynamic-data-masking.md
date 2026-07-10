@@ -288,7 +288,7 @@ Fabric's DDM builds on the same T-SQL feature as on-premises SQL Server, but a f
 
 ## Related Topics
 
-- [02-Granular Access Controls](./02-granular-access-controls.md)
+- [02-Granular Access Controls](./02-granular-access-controls.md) — see the [Role × Security Mechanism bypass matrix](./02-granular-access-controls.md#who-bypasses-what-role--security-mechanism) for how DDM's implicit-`CONTROL` bypass compares against T-SQL RLS, OneLake security, and DAX RLS
 - [05-Governance](./05-governance.md)
 
 ## Official Documentation

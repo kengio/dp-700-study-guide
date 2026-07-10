@@ -85,6 +85,7 @@ flowchart TD
 
 - **Two independent access layers** — workspace role and item permission — both gate access; removing one doesn't remove access still held via the other
 - **Granular SQL controls (RLS/CLS/OLS)** apply only within the Warehouse/SQL analytics endpoint; **OneLake data access roles** are the equivalent for Spark/OneLake API access, and are the only way to get one restriction enforced consistently across engines
+- **Bypass logic differs by mechanism, not just by role** — see the [Role × Security Mechanism bypass matrix](./02-granular-access-controls.md#who-bypasses-what-role--security-mechanism) in 02-Granular Access Controls: T-SQL RLS ignores workspace role entirely, DDM and OneLake security are bypassed by Contributor+'s implicit `CONTROL`/**Write**, and DAX RLS only binds at Viewer
 - **DDM masks values, not access** — it's complementary to RLS/CLS/OLS, and Fabric workspace Admin/Member/Contributor bypass it by default via implicit `CONTROL`
 - **Sensitivity label inheritance is directional**: Fabric → Fabric and Fabric → Power BI both work; Power BI → Fabric does not
 - **Endorsement is tiered by authorization**: Promoted needs only write permission; Certified and Master data both require tenant-admin-designated reviewer status

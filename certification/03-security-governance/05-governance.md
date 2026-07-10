@@ -274,6 +274,7 @@ An authorized reviewer should treat certification/master-data designation as a g
 
 - [01-Workspace & Item Access](./01-workspace-item-access.md)
 - [04-Dynamic Data Masking](./04-dynamic-data-masking.md)
+- [02-Domain Settings](../01-fabric-workspace-settings/02-domain-settings.md) — delegated domain roles and how a domain-level default sensitivity label is set
 
 ## Official Documentation
 

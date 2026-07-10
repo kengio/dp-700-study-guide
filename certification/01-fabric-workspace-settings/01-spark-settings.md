@@ -39,7 +39,7 @@ Fabric Spark compute comes in two flavors. **Starter pools** are Microsoft-manag
 | :--- | :--- | :--- |
 | Who configures it | Nobody — Microsoft-managed by default | Workspace **Admin**; capacity admin must also enable ==Customized workspace pools== for the capacity |
 | Node size | Medium only (8 vCore / 64 GB) | Small through XX-Large (Small–XX-Large; X-Large/XX-Large require a non-trial SKU) |
-| Startup latency | 5–10s typical, **best-effort** (prewarmed capacity isn't guaranteed) | ~3 minutes on-demand, or ~5s if configured as a [custom live pool](https://learn.microsoft.com/en-us/fabric/data-engineering/custom-live-pools-overview) with a Full-mode environment |
+| Startup latency | 5–10s typical, **best-effort** (prewarmed capacity isn't guaranteed) | ~3 minutes on-demand, or ~5s if configured as a [custom live pool](https://learn.microsoft.com/en-us/fabric/data-engineering/custom-live-pools-overview) *(keeps dedicated clusters warm on a schedule)* with a Full-mode environment |
 | Autoscale / dynamic allocation | Sliders only, both on by default | Full control: min/max nodes, min/max executors |
 | Networking | **Not supported** with Tenant Private Links or Managed VNets — falls back to on-demand (2–5 min) | Supported |
 | Autopause | 20 minutes of Spark pool inactivity | 2 minutes of inactivity (default), or always-on as a custom live pool |

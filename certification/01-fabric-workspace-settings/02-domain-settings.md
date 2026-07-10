@@ -286,6 +286,7 @@ Nothing stops a workspace from *wanting* to belong to two domains — but Fabric
 - [01-Spark Settings](./01-spark-settings.md)
 - [03-OneLake Settings](./03-onelake-settings.md)
 - [04-Airflow Settings](./04-airflow-settings.md)
+- [05-Governance](../03-security-governance/05-governance.md) — domain-level default sensitivity labels (delegated setting) vs. the tenant-wide default
 
 ## Official Documentation
 

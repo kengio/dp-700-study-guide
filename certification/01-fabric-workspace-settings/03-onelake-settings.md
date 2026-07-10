@@ -60,8 +60,8 @@ Beyond external access, the **OneLake** tab in workspace settings exposes:
 
 **OneLake diagnostics**, when enabled, captures user actions from the Fabric UI, programmatic API/analytics-engine access, and cross-workspace access through shortcuts — all streamed as logs into a lakehouse you designate. This is distinct from caching: diagnostics is about **auditability**, caching is about **performance and egress cost**.
 
-> [!note]
-> Workspace OneLake settings are also readable programmatically via the [OneLake Settings REST API](https://learn.microsoft.com/en-us/rest/api/fabric/core/onelake-settings/get-settings) (requires an admin workspace role), which additionally surfaces **lifecycle management** fields — a default access tier (`Hot` / `Cool` / `Cold`) and whether an active lifecycle policy exists for the workspace. The exact in-portal control surface for lifecycle tiers isn't documented at time of writing; treat the REST API as the source of truth if a question focuses on it.
+> [!note] Low exam yield — REST-API-only surface
+> Workspace OneLake settings are also readable via the [OneLake Settings REST API](https://learn.microsoft.com/en-us/rest/api/fabric/core/onelake-settings/get-settings) (admin workspace role required: `GET /v1/workspaces/{workspaceId}/onelake/settings`), which additionally surfaces **lifecycle management** fields — a default access tier (`Hot`/`Cool`/`Cold`, mirroring Azure Blob Storage's tiering — Cool/Cold trade lower storage cost for higher transaction cost and a minimum storage duration) and whether an active lifecycle policy exists — plus diagnostic-log immutability policy details (protected scope, minimum retention days). None of this appears in the in-portal settings UI at time of writing; it's not a frequently tested surface, so skim only.
 
 ---
 
@@ -163,23 +163,6 @@ These protections aren't configured from the workspace OneLake settings tab — 
 ## OneLake Catalog and Governance Context
 
 The **OneLake catalog** is the discovery surface where the workspace-level settings in this file become visible to end users: a workspace with external access enabled, shortcut caching configured, and diagnostics turned on still surfaces its items through the same catalog used for domain-based filtering (see [02-Domain Settings](./02-domain-settings.md)). Data owners can review sensitivity-label coverage, endorsements, and data location directly from the catalog — but the underlying access control always resolves through **OneLake security roles** and workspace/item permissions, not catalog visibility. Deep OneLake security role configuration (folder/table/row/column-level permissions) is covered separately in [03-OneLake Security](../03-security-governance/03-onelake-security.md).
-
-## OneLake Settings REST API Fields Reference
-
-Calling `GET /v1/workspaces/{workspaceId}/onelake/settings` (admin workspace role required) returns the same settings surfaced in the portal, structured as:
-
-| Field | Type | Meaning |
-| :--- | :--- | :--- |
-| `diagnostics.status` | `Enabled` \| `Disabled` | Whether OneLake diagnostics (access-event logging) is on for the workspace |
-| `diagnostics.destination` | Lakehouse reference | Which lakehouse receives the diagnostic log stream, when enabled |
-| `lifecycle.defaultTier` | `Hot` \| `Cool` \| `Cold` | Default access tier applied to files without an explicitly set tier |
-| `lifecycle.policy` | `Active` \| `Inactive` | Whether at least one lifecycle rule is currently configured for the workspace |
-| `immutabilityPolicies[].scope` | `DiagnosticLogs` | What the immutability policy protects |
-| `immutabilityPolicies[].retentionDays` | integer | Minimum retention enforced by the immutability policy |
-
-The three access tiers trade storage cost against transaction cost: **Hot** has the highest storage cost but lowest transaction cost; **Cool** and **Cold** progressively lower storage cost but raise transaction cost and impose minimum storage durations (30 days for Cool, 60 days for Cold). This mirrors Azure Blob Storage's tiering model, applied at the OneLake workspace level.
-
----
 
 ## How External Shortcuts Use Cloud Connections
 

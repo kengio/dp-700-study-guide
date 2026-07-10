@@ -135,6 +135,125 @@ D. `@{orders_}formatDateTime(utcNow(),'yyyy-MM-dd').csv`
 
 ---
 
+## Control-Flow Activities
+
+Beyond parameters, variables, and expressions, five activities on the pipeline canvas provide the actual looping, branching, and metadata-probing logic that expressions alone can't: **ForEach**, **Until**, **Switch**, **Lookup**, and **Get Metadata**. These are the building blocks of the metadata-driven pipeline pattern — discover *what* to process at runtime, then loop over it.
+
+### ForEach
+
+`ForEach` iterates over a JSON array bound to its **Items** property, running one or more child activities once per item. The array most commonly comes from a `Lookup` activity's output:
+
+```text
+Items: @activity('Lookup_TableList').output.value
+```
+
+Inside the loop, `@item()` refers to the current element being processed, and `@item().<field>` accesses one of its properties when each element is an object rather than a scalar.
+
+| Property | Description | Values |
+| :--- | :--- | :--- |
+| `isSequential` | Whether items process one at a time or concurrently | `true` (default: `false`) |
+| `batchCount` | Upper concurrency limit when `isSequential = false` — an actual ceiling on parallelism, not a guarantee that every run hits it | Integer, default **20**, maximum **50** |
+| `items` | The array to iterate over | Expression returning a JSON array |
+
+> [!warning] Common Mistake
+> `ForEach` can't be nested directly inside another `ForEach` (or an `Until`), and a single `ForEach` tops out at **100,000 items** regardless of `batchCount`. A scenario needing nested iteration needs the outer `ForEach` to call a **child pipeline** via `Invoke Pipeline`, with the inner loop living in that child — the same two-level pattern used to work around the nesting restriction and the item ceiling together.
+
+### Until
+
+`Until` is a do-while loop: it repeats its child activities until an **expression** evaluates to `true`, checking the condition *after* each iteration rather than before. An inner activity failing doesn't stop the loop on its own — only the exit expression or the optional **timeout** ends it.
+
+```text
+Expression: @equals(variables('RetryCount'), 3)
+Timeout: 0.12:00:00   // 12 hours, in dd.hh:mm:ss format
+```
+
+A `Set Variable` activity inside the loop body is what actually moves the exit condition toward `true` — an `Until` with no variable mutation inside it never terminates on its own and depends entirely on the timeout.
+
+### Switch
+
+`Switch` evaluates one expression once, then runs the child activities in whichever **case** matches the result — the low-code equivalent of a `switch`/`case` statement. An unmatched result falls through to the **Default** case (which can be left empty to mean "do nothing").
+
+```text
+Expression: @pipeline().parameters.region
+Cases: "EU" → Load_EU_Activities | "US" → Load_US_Activities | Default → Fail activity ("Unrecognized region")
+```
+
+`Switch` is the natural fit whenever a `ForEach`-driven scenario needs *different* handling per item rather than the same activity run once per item — pair the two by putting a `Switch` inside a `ForEach`'s child activities, keyed on `@item().sourceType` or similar.
+
+### Lookup and Get Metadata: Feeding the Loop
+
+`Lookup` and `Get Metadata` don't move or transform data — they **read** it, producing output that downstream control-flow activities consume.
+
+| Activity | Returns | Key setting |
+| :--- | :--- | :--- |
+| `Lookup` | The result of a query, stored procedure, or file read — a single row/value or an array of rows | **First row only** toggles the output shape: on → a single object at `.output.firstRow`; off (default) → an array at `.output.value`, consumed directly by `ForEach`'s **Items** |
+| `Get Metadata` | Requested metadata fields about a file, folder, or table — e.g., `itemName`, `itemType`, `columnCount`, `structure`, `size`, `exists`, `lastModified` | The specific fields to retrieve are chosen explicitly in the activity's settings, not returned in bulk |
+
+> [!note]
+> `Lookup` caps out at **5,000 rows** (a larger result set is silently truncated to the first 5,000) and **4 MB** of output — exceeding the size cap fails the activity outright rather than truncating. The longest a `Lookup` activity can run before timing out is **24 hours**. A query or stored procedure used in a `Lookup` must return exactly one result set, or the activity fails.
+
+### Worked Example: Metadata-Driven Copy Pattern
+
+The canonical metadata-driven pipeline: a `Lookup` activity reads a control table listing which source tables to copy, then a `ForEach` fans out a parameterized `Copy` activity once per table — adding a new table to the control table extends the pipeline without touching its activities.
+
+```json
+{
+  "name": "MetadataDriven_CopyAllTables",
+  "properties": {
+    "activities": [
+      {
+        "name": "Lookup_TableList",
+        "type": "Lookup",
+        "typeProperties": {
+          "source": { "type": "LakehouseTableSource" },
+          "table": "control.TablesToCopy",
+          "firstRowOnly": false
+        }
+      },
+      {
+        "name": "ForEach_Table",
+        "type": "ForEach",
+        "dependsOn": [
+          { "activity": "Lookup_TableList", "dependencyConditions": ["Succeeded"] }
+        ],
+        "typeProperties": {
+          "isSequential": false,
+          "batchCount": 10,
+          "items": {
+            "value": "@activity('Lookup_TableList').output.value",
+            "type": "Expression"
+          },
+          "activities": [
+            {
+              "name": "Copy_Table",
+              "type": "Copy",
+              "typeProperties": {
+                "source": {
+                  "type": "LakehouseTableSource",
+                  "tableName": "@item().SourceTableName"
+                },
+                "sink": {
+                  "type": "LakehouseTableSink",
+                  "tableName": "@item().SinkTableName"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+Swapping the `Copy` activity for a `Notebook` activity turns the same pattern into a metadata-driven Spark run — each iteration passes `@item()`'s fields as **Base parameters**, so one notebook handles every table without hardcoding a table name:
+
+```text
+Notebook activity Base parameters:
+  source_table = @item().SourceTableName
+  sink_table   = @item().SinkTableName
+```
+
 ## Invoke Pipeline Activity: Parent-Child Parameter Passing
 
 The **Invoke Pipeline activity** runs another pipeline from within a parent pipeline — the standard way to build modular, reusable pipeline patterns. Fabric has two versions:

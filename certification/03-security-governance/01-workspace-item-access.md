@@ -272,7 +272,7 @@ D. RLS can't coexist with workspace roles — engineers and consumers must be in
 
 ## Related Topics
 
-- [02-Granular Access Controls](./02-granular-access-controls.md)
+- [02-Granular Access Controls](./02-granular-access-controls.md) — see the [Role × Security Mechanism bypass matrix](./02-granular-access-controls.md#who-bypasses-what-role--security-mechanism) for how each workspace role interacts with RLS, DDM, and OneLake security
 - [03-OneLake Security](./03-onelake-security.md)
 
 ## Official Documentation

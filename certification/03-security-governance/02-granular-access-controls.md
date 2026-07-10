@@ -27,16 +27,49 @@ Beyond workspace roles and item permissions, the Fabric **Warehouse and SQL anal
 
 > [!tip] What the Exam Tests
 >
-> - Exact `CREATE SECURITY POLICY` / predicate function syntax for RLS, including `WITH SCHEMABINDING` and filter vs. block behavior
+> - Exact `CREATE SECURITY POLICY` / predicate function syntax for RLS, including `WITH SCHEMABINDING`, and that Fabric Warehouse RLS supports FILTER predicates only (no BLOCK predicate support)
 > - `GRANT SELECT ON table(columns)` syntax for CLS, and that it's Microsoft Entra-only authentication
 > - Standard `GRANT`/`REVOKE`/`DENY` T-SQL for OLS, and that `DENY` overrides any `GRANT` including inherited role grants
 > - Choosing the right control layer for a given scenario — SQL endpoint (RLS/CLS/OLS) vs. OneLake security vs. semantic model RLS
+> - Which workspace roles **bypass** each granular control mechanism — the bypass logic differs by mechanism and is a frequent scenario trap
+
+---
+
+## Who Bypasses What: Role × Security Mechanism
+
+Every granular control layer in Fabric has its own, independent answer to "which workspace roles see everything regardless of the rule?" Getting this table wrong is one of the most common sources of missed scenario questions in this topic — a mechanism that blocks *everyone* (T-SQL RLS) sits right next to one that a workspace Contributor bypasses by default (DDM).
+
+| Mechanism | Viewer | Contributor | Member | Admin | Why |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| Semantic model DAX RLS | ==filtered== | sees all | sees all | sees all | DAX RLS enforcement binds only at the **Viewer** role — Contributor+ already has blanket view/modify access to all workspace content, which supersedes row filtering |
+| Warehouse T-SQL RLS | ==filtered== | ==filtered== | ==filtered== | ==filtered== | `CREATE SECURITY POLICY` filter predicates apply to **every** querying principal, including `dbo` and `db_owner` members — no workspace role is exempted |
+| Warehouse DDM | ==masked== | sees all | sees all | sees all | Contributor/Member/Admin carry implicit `CONTROL` on the Warehouse database, which bundles `UNMASK`; only Viewer lacks it unless explicitly granted `UNMASK` |
+| OneLake security data access roles | ==filtered== | sees all | sees all | sees all | Admin/Member/Contributor's implicit workspace **Write** permission overrides the OneLake security role's read restriction; Viewer has no such override |
+
+> [!note] Mental model — bypass logic
+> Two different bypass rules are at work here, and mixing them up is the trap. **SQL-layer RLS ignores `CONTROL` entirely** — it's a query-execution-time filter that doesn't care what permission level issued the query, so it catches even `db_owner`. **DDM and OneLake security both honor the workspace role's implicit permissions** (`CONTROL` for DDM, **Write** for OneLake security) — Contributor+ sails through both. **DAX RLS only binds at Viewer** — it's a reporting-layer control that a higher workspace role simply outranks. Three different bypass mechanisms, three different answers — never assume one control's bypass rule applies to another.
+
+**Practice Question 1** *(Hard)*
+
+A Warehouse table has a T-SQL RLS filter predicate (`CREATE SECURITY POLICY`) restricting rows to each salesperson's own region, and the `Commission` column is masked with DDM's `default()` function. A user with the workspace **Contributor** role, and no explicit `UNMASK` grant, queries the table. What does the Contributor see?
+
+A. Every row, with `Commission` unmasked — Contributor bypasses both RLS and DDM  
+B. Only their own region's rows, with `Commission` unmasked — RLS still filters, but implicit `CONTROL` bypasses DDM  
+C. Every row, with `Commission` masked — Contributor bypasses RLS but not DDM  
+D. Only their own region's rows, with `Commission` masked — Contributor bypasses neither control  
+
+> [!success]- Answer
+> **B. Only their own region's rows, with `Commission` unmasked — RLS still filters, but implicit `CONTROL` bypasses DDM**
+>
+> These two mechanisms have opposite bypass behavior. T-SQL RLS filter predicates apply to every querying principal with no workspace-role exemption, so the Contributor still only sees their own region's rows. DDM, however, is bypassed by the implicit `CONTROL` permission that Admin/Member/Contributor all carry on the Warehouse database — so `Commission` displays unmasked even without an explicit `GRANT UNMASK`. The two controls are evaluated independently; one being bypassed says nothing about the other.
 
 ---
 
 ## Row-Level Security (RLS)
 
 RLS in Fabric Warehouse and SQL analytics endpoint uses the same `CREATE SECURITY POLICY` mechanism as SQL Server: a **filter predicate**, defined as a schema-bound inline table-valued function, silently filters rows from `SELECT`, `UPDATE`, and `DELETE`. RLS applies to queries on the Warehouse or SQL analytics endpoint — Power BI queries against a warehouse in Direct Lake mode automatically fall back to DirectQuery mode to respect it.
+
+==Fabric Warehouse RLS supports FILTER predicates only== — there's no BLOCK predicate type as in on-premises Azure SQL/SQL Server. A scenario option describing a "block predicate" for Fabric Warehouse RLS is describing a SQL Server/Azure SQL-only feature and is a reliable distractor to eliminate.
 
 ```sql
 -- 1. Create a schema and sample table
@@ -110,7 +143,7 @@ Key behavior:
 > [!warning] Common Mistake
 > RLS is **not immune to side-channel inference**. A carefully crafted query like `SELECT 1/(SaleAmount-1000) FROM sales.Orders` can leak whether a filtered-out row exists via a divide-by-zero error, even though the row itself is never returned. Treat RLS as row *visibility* control, not airtight confidentiality — pair it with monitoring for unusual query patterns on sensitive tables.
 
-**Practice Question 1** *(Medium)*
+**Practice Question 2** *(Medium)*
 
 A predicate function used by an RLS filter policy needs to be modified to add a new exemption for an auditor role. What is the correct sequence of steps?
 
@@ -227,7 +260,7 @@ Everything above applies to the **Warehouse and SQL analytics endpoint** specifi
 > [!note] Mental model — Layers of a house, not competing locks
 > Picture the data platform as a house with several independently locked doors: the **SQL endpoint's** RLS/CLS/OLS lock the dining room's chairs (rows) and place settings (columns); **OneLake security** locks the pantry (raw files) regardless of which door you use to reach it; the **semantic model's** RLS locks what a specific guest sees once seated at the table, no matter what's in the pantry. None of these locks substitutes for another — a determined visitor blocked at one door might still reach the same data through an unlocked one.
 
-**Practice Question 2** *(Hard)*
+**Practice Question 3** *(Hard)*
 
 A data platform team needs the same row-level restriction to apply consistently whether a user queries a Lakehouse table via a Spark notebook, the SQL analytics endpoint, or a Direct Lake semantic model. Where should the restriction be defined?
 
