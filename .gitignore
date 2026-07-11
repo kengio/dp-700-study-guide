@@ -1,5 +1,8 @@
-# Obsidian
-.obsidian/
+# Obsidian — ignore everything except the shared editor config (README/OBSIDIAN-SETUP.md
+# promise pre-tuned line numbers, tab width, and inline-title settings out of the box);
+# workspace.json / workspace-mobile.json / plugin caches stay ignored (per-user, not shared)
+.obsidian/*
+!.obsidian/app.json
 
 # OS files
 .DS_Store
