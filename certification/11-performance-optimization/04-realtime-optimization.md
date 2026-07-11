@@ -83,14 +83,14 @@ Both mechanisms require the source to be a **native table** — this constraint 
 An Eventhouse table receives 50,000 events per minute. A dashboard repeatedly queries a rolling 5-minute deduplicated count against this table, and the query is currently re-running a full `arg_max` deduplication over raw data on every refresh. What change reduces both query latency and overall compute cost?
 
 A. Switch ingestion from queued to streaming to reduce data volume  
-B. Replace the per-query `arg_max` deduplication with a materialized view that maintains the deduplicated aggregate continuously in the background, so dashboard queries read the pre-aggregated result instead of re-computing it  
-C. Add an update policy that runs the `arg_max` deduplication once per ingested batch  
+B. Add an update policy that runs the `arg_max` deduplication once per ingested batch  
+C. Replace the per-query `arg_max` deduplication with a materialized view  
 D. Shorten the caching policy to reduce the volume of hot data being scanned  
 
 > [!success]- Answer
-> **B. Replace the per-query arg_max deduplication with a materialized view that maintains the deduplicated aggregate continuously in the background, so dashboard queries read the pre-aggregated result instead of re-computing it**
+> **C. Replace the per-query arg_max deduplication with a materialized view**
 >
-> A materialized view is exactly the mechanism designed for this pattern: high-read, repeated-aggregation workloads where paying the aggregation cost once in the background (continuously, incrementally) beats every dashboard refresh re-scanning and re-deduplicating raw data. Switching ingestion mode (A) doesn't reduce query-time deduplication cost. An update policy (C) runs per-ingested-batch, not as a maintained rolling aggregate a dashboard can read directly — it doesn't solve repeated re-aggregation at query time the way a materialized view does. Shortening caching policy (D) would make the query's raw-data scan cost *worse*, not better, since data would fall out of hot cache sooner.
+> A materialized view is exactly the mechanism designed for this pattern: high-read, repeated-aggregation workloads where paying the aggregation cost once in the background (continuously, incrementally) beats every dashboard refresh re-scanning and re-deduplicating raw data — the view maintains the deduplicated aggregate continuously, so dashboard queries read the pre-aggregated result instead of re-computing it. Switching ingestion mode (A) doesn't reduce query-time deduplication cost. An update policy (B) runs per-ingested-batch, not as a maintained rolling aggregate a dashboard can read directly — it doesn't solve repeated re-aggregation at query time the way a materialized view does. Shortening caching policy (D) would make the query's raw-data scan cost *worse*, not better, since data would fall out of hot cache sooner.
 
 ## Partitioning Policy
 
@@ -123,7 +123,7 @@ Events
 
 ## OneLake Availability: Performance Cost Recap
 
-Full mechanics live in [08-Streaming Data: KQL Real-Time — OneLake Availability](../08-streaming-data/04-kql-realtime.md#onelake-availability-of-eventhouse-data). The performance-relevant summary: enabling OneLake availability doesn't slow down ingestion into the Eventhouse itself — the adaptive batching mechanism that delays the OneLake Delta copy (up to 3 hours by default, configurable down to a 5-minute floor via `TargetLatencyInMinutes`) runs asynchronously specifically to avoid producing many small, inefficient Parquet files in OneLake. The performance tradeoff is entirely on the *consumption* side: a shorter `TargetLatencyInMinutes` gets fresher data into OneLake sooner, at the cost of smaller, less-optimal Parquet files for anything reading that OneLake copy (Spark, SQL endpoint, Direct Lake) — directly echoing the small-file tradeoffs covered in [01-Lakehouse Optimization](01-lakehouse-optimization.md).
+Full mechanics live in [08-Streaming Data: KQL Real-Time — OneLake Availability](../08-streaming-data/04-kql-realtime.md#onelake-availability-of-eventhouse-data). The performance-relevant summary: enabling OneLake availability doesn't slow down ingestion into the Eventhouse itself — the adaptive batching mechanism that delays the OneLake Delta copy (up to 3 hours by default, configurable down to a 5-minute floor via `TargetLatencyInMinutes`) runs asynchronously specifically to avoid producing many small, inefficient Parquet files in OneLake. The performance tradeoff is entirely on the *consumption* side: a shorter `TargetLatencyInMinutes` gets fresher data into OneLake sooner, at the cost of smaller, less-optimal Parquet files for anything reading that OneLake copy (Spark, SQL endpoint, Direct Lake) — directly echoing the small-file tradeoffs covered in [01-Lakehouse Optimization](./01-lakehouse-optimization.md).
 
 ## Query Acceleration for Shortcuts: Recap
 
@@ -147,21 +147,21 @@ For the Eventstream Processor specifically, CU consumption correlates with three
 ## Processor Operator Efficiency and Destination Batching
 
 - **Processor operator efficiency**: every added transform operator (filters, aggregations, enrichments) in an Eventstream's processing pipeline increases CU consumption on top of the base throughput-driven rate. Keeping the operator graph as simple as the use case allows, and aligning input partition count to actual throughput needs, keeps CU cost proportional to genuine processing work rather than pipeline complexity.
-- **Destination batching**: Eventstream destinations (Eventhouse, Lakehouse, Warehouse, etc.) batch incoming events before committing them, for the same reason Delta's optimize write batches records before writing Parquet files — fewer, larger writes at the destination instead of many small ones. This is conceptually the same small-write-avoidance pattern covered for Delta tables in [01-Lakehouse Optimization](01-lakehouse-optimization.md#the-small-file-problem), applied at the streaming-destination layer instead of the Spark-write layer.
+- **Destination batching**: Eventstream destinations (Eventhouse, Lakehouse, Warehouse, etc.) batch incoming events before committing them, for the same reason Delta's optimize write batches records before writing Parquet files — fewer, larger writes at the destination instead of many small ones. This is conceptually the same small-write-avoidance pattern covered for Delta tables in [01-Lakehouse Optimization](./01-lakehouse-optimization.md#the-small-file-problem), applied at the streaming-destination layer instead of the Spark-write layer.
 
 **Practice Question 2** *(Easy)*
 
 An Eventstream ingests from an Azure Event Hubs source configured with 2 partitions. Despite setting the Eventstream's event throughput level to High, ingestion throughput doesn't improve. What's the most likely explanation?
 
-A. The Eventhouse destination's caching policy is too short  
-B. With fewer than 4 source partitions, Event Hubs throughput is bottlenecked by partition count regardless of the selected throughput level — the Event Hub needs more partitions  
+A. Event Hubs throughput is bottlenecked by source partition count below 4  
+B. The Eventhouse destination's caching policy is too short  
 C. Materialized views are consuming all available CU  
 D. The Eventstream needs to switch from streaming to queued ingestion  
 
 > [!success]- Answer
-> **B. With fewer than 4 source partitions, Event Hubs throughput is bottlenecked by partition count regardless of the selected throughput level — the Event Hub needs more partitions**
+> **A. Event Hubs throughput is bottlenecked by source partition count below 4**
 >
-> This is documented, specific behavior: when an Azure Event Hubs source has fewer than 4 partitions, that partition count — not the Eventstream's throughput level setting — is the limiting factor. Caching policy (A) affects Eventhouse query speed, not Eventstream ingestion throughput. Materialized views (C) and streaming-vs-queued ingestion mode (D) are unrelated to Event Hubs source-side partition bottlenecks.
+> This is documented, specific behavior: when an Azure Event Hubs source has fewer than 4 partitions, that partition count — not the Eventstream's throughput level setting — is the limiting factor; the fix is adding more partitions to the Event Hub itself. Caching policy (B) affects Eventhouse query speed, not Eventstream ingestion throughput. Materialized views (C) and streaming-vs-queued ingestion mode (D) are unrelated to Event Hubs source-side partition bottlenecks.
 
 ## Decision Guidance: Symptom → Lever
 
@@ -180,14 +180,14 @@ D. The Eventstream needs to switch from streaming to queued ingestion
 A KQL database's caching policy is set to 30 days and its retention policy is set to 3,650 days (the default). A query filtering for data from 6 months ago returns results, but noticeably slower than an equivalent query against the last week's data. What explains this?
 
 A. The retention policy has purged the 6-month-old data, so the query is scanning empty extents  
-B. The 6-month-old data has aged out of the 30-day hot cache into cold storage; it's still within the 3,650-day retention window so it's queryable, just slower to access than cached data  
+B. Materialized views need to be enabled on the table  
 C. The query needs a `ZORDER BY` clause to speed up  
-D. Materialized views need to be enabled on the table  
+D. The 6-month-old data aged out of the 30-day hot cache into cold storage  
 
 > [!success]- Answer
-> **B. The 6-month-old data has aged out of the 30-day hot cache into cold storage; it's still within the 3,650-day retention window so it's queryable, just slower to access than cached data**
+> **D. The 6-month-old data aged out of the 30-day hot cache into cold storage**
 >
-> This is exactly the caching-vs-retention distinction: a 30-day caching policy only keeps the most recent 30 days on fast local SSD, while the 3,650-day retention policy means data far older than that is still queryable — from cold storage, which is slower. If retention had purged the data (A), the query would return no rows at all rather than slower ones. `ZORDER BY` (C) is a Delta Lake/Spark concept, not a KQL/Eventhouse one. Materialized views (D) address repeated-aggregation cost, not raw cold-storage read latency.
+> This is exactly the caching-vs-retention distinction: a 30-day caching policy only keeps the most recent 30 days on fast local SSD, while the 3,650-day retention policy means data far older than that — still within that window, so still queryable — comes from cold storage instead, which is slower. If retention had purged the data (A), the query would return no rows at all rather than slower ones. Materialized views (B) address repeated-aggregation cost, not raw cold-storage read latency. `ZORDER BY` (C) is a Delta Lake/Spark concept, not a KQL/Eventhouse one.
 
 ## Use Cases
 
@@ -231,13 +231,13 @@ D. Materialized views need to be enabled on the table
 - The streaming-vs-queued and materialized-view-vs-update-policy decisions are both throughput/cost tradeoffs, not correctness questions — either choice works, but one costs more at a given scale
 - Eventstream throughput is gated by source partition count as much as by the throughput-level setting, especially for low-partition-count Event Hubs sources
 - KQL time-filter pushdown is the single highest-leverage, zero-configuration query optimization available
-- OneLake availability's batching delay and Eventhouse partitioning policy both echo the same core pattern seen in [01-Lakehouse Optimization](01-lakehouse-optimization.md): batching writes trades freshness for file/extent health
+- OneLake availability's batching delay and Eventhouse partitioning policy both echo the same core pattern seen in [01-Lakehouse Optimization](./01-lakehouse-optimization.md): batching writes trades freshness for file/extent health
 
 ## Related Topics
 
 - [08-Streaming Data: KQL Real-Time](../08-streaming-data/04-kql-realtime.md)
 - [08-Streaming Data: Eventstreams](../08-streaming-data/02-eventstreams.md)
-- [01-Lakehouse Optimization](01-lakehouse-optimization.md)
+- [01-Lakehouse Optimization](./01-lakehouse-optimization.md)
 - [10-Error Resolution: Realtime Errors](../10-error-resolution/03-realtime-errors.md)
 
 ## Official Documentation
@@ -251,4 +251,4 @@ D. Materialized views need to be enabled on the table
 
 ---
 
-**[← Previous](03-spark-optimization.md) | [↑ Back to Section](./performance-optimization.md) | [Next →](05-pipeline-query-optimization.md)**
+**[← Previous](./03-spark-optimization.md) | [↑ Back to Section](./performance-optimization.md) | [Next →](./05-pipeline-query-optimization.md)**

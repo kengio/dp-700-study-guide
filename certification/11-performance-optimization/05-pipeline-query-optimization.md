@@ -23,7 +23,7 @@ This closing topic covers two related but distinct performance surfaces: tuning 
 > - Copy activity performance is governed by **Data Integration Units (DIUs)** (4–256, default Auto) and **degree of copy parallelism** — both auto-tuned by the service unless explicitly overridden
 > - **Staging** is required for certain sinks (notably Fabric Warehouse) and separately useful for compressing data before a slow network hop
 > - `ForEach` activities default to sequential execution; batching and set-based operations beat per-row activity patterns at any meaningful scale
-> - Direct Lake's **guardrails** (file count, table size) tie query performance directly back to the file-size health covered in [01-Lakehouse Optimization](01-lakehouse-optimization.md) — a poorly maintained table can force a slower fallback mode or block queries entirely
+> - Direct Lake's **guardrails** (file count, table size) tie query performance directly back to the file-size health covered in [01-Lakehouse Optimization](./01-lakehouse-optimization.md) — a poorly maintained table can force a slower fallback mode or block queries entirely
 > - Dataflow Gen2's query folding — covered as an *error* symptom in [10-Error Resolution](../10-error-resolution/01-pipeline-dataflow-errors.md) — is really a performance topic: losing it doesn't fail the refresh, it just makes it much slower
 
 > [!tip] What the Exam Tests
@@ -71,7 +71,7 @@ Choosing binary copy when no transformation is genuinely needed avoids paying pa
 `ForEach` activities execute **sequentially by default**. Setting `isSequential = false` enables parallel execution, controlled by `batchCount` (up to a documented maximum of concurrent iterations) — but the deeper performance question is usually whether a `ForEach`-wrapped per-row activity pattern should exist at all.
 
 > [!warning] Common Mistake
-> Wrapping a Copy or Web activity inside a `ForEach` to process data one row (or one file, one API call) at a time, when a single set-based operation could do the same work. A `ForEach` over 100,000 rows — even with `batchCount` parallelism tuned up — pays per-iteration activity overhead 100,000 times. The scalable fix is almost always to push the logic into a single set-based Copy activity, a notebook processing the full dataset in one pass, or a Warehouse CTAS/`INSERT ... SELECT` (see [02-Warehouse Optimization](02-warehouse-optimization.md#data-clustering-distribution-and-load-patterns)) — the same anti-pattern the Warehouse topic covers as row-by-row `INSERT`.
+> Wrapping a Copy or Web activity inside a `ForEach` to process data one row (or one file, one API call) at a time, when a single set-based operation could do the same work. A `ForEach` over 100,000 rows — even with `batchCount` parallelism tuned up — pays per-iteration activity overhead 100,000 times. The scalable fix is almost always to push the logic into a single set-based Copy activity, a notebook processing the full dataset in one pass, or a Warehouse CTAS/`INSERT ... SELECT` (see [02-Warehouse Optimization](./02-warehouse-optimization.md#data-clustering-distribution-and-load-patterns)) — the same anti-pattern the Warehouse topic covers as row-by-row `INSERT`.
 
 Increasing `batchCount` parallelism helps when a `ForEach` is genuinely the right tool (iterating over a small, bounded list of distinct sub-tasks — different file paths, different API endpoints) but doesn't fix the underlying scalability problem when the real issue is a per-row pattern applied to row-scale data.
 
@@ -80,14 +80,14 @@ Increasing `batchCount` parallelism helps when a `ForEach` is genuinely the righ
 A pipeline uses a `ForEach` activity to loop over 50,000 individual customer records, calling a Web activity once per record to post each one to an external API, then a Copy activity to load each response into a Lakehouse table one file at a time. The pipeline takes hours to run and the team wants to tune `batchCount` to speed it up. What's the more effective fix?
 
 A. Increase `batchCount` and set `isSequential = false` to parallelize the existing per-row loop  
-B. Recognize this as a per-row activity anti-pattern at row-scale data volume; batch records into a smaller number of set-based API calls (or a Spark/notebook step for bulk processing) and load results with a single Copy activity instead of one per record  
+B. Recognize this as a per-row anti-pattern; batch into set-based calls  
 C. Increase the Copy activity's DIUs to speed up each individual per-record load  
 D. Add staging to the Copy activity  
 
 > [!success]- Answer
-> **B. Recognize this as a per-row activity anti-pattern at row-scale data volume; batch records into a smaller number of set-based API calls (or a Spark/notebook step for bulk processing) and load results with a single Copy activity instead of one per record**
+> **B. Recognize this as a per-row anti-pattern; batch into set-based calls**
 >
-> At 50,000 iterations, even a fully parallelized `ForEach` (A) still pays substantial per-iteration overhead — tuning `batchCount` improves this pattern only marginally. DIUs (C) and staging (D) tune a single Copy activity's throughput, not the fundamental problem of invoking 50,000 separate activity executions. The scalable fix restructures the pipeline around set-based operations instead of a per-row loop.
+> At row-scale data volume (50,000 records), the real fix is batching records into a smaller number of set-based API calls (or a Spark/notebook step for bulk processing) and loading results with a single Copy activity instead of one per record. Even a fully parallelized `ForEach` (A) still pays substantial per-iteration overhead — tuning `batchCount` improves this pattern only marginally. DIUs (C) and staging (D) tune a single Copy activity's throughput, not the fundamental problem of invoking 50,000 separate activity executions. The scalable fix restructures the pipeline around set-based operations instead of a per-row loop.
 
 ## Direct Lake vs. Import vs. DirectQuery: Performance Traps
 
@@ -111,25 +111,25 @@ What happens when a guardrail is exceeded depends on which Direct Lake variant i
 > [!note] Mental model — Direct Lake guardrails as a credit limit
 > Think of a Direct Lake table's guardrail limits (file count, table size) as a **credit limit**. Under the limit, you get Import-mode speed without an Import-mode refresh. Cross it, and the consequence depends on which card you're holding: Direct Lake on OneLake **freezes the account** (refresh fails, nothing queryable until you pay down the balance — i.e., run `OPTIMIZE`/`VACUUM`); Direct Lake on SQL **downgrades your rate** (falls back to DirectQuery — still usable, just slower and more expensive per query).
 
-This is exactly why [01-Lakehouse Optimization](01-lakehouse-optimization.md) matters beyond raw Spark/SQL query speed: a table accumulating small files from skipped `OPTIMIZE` runs can push past the Parquet-file-count guardrail and force a Direct Lake table into fallback or failure — a semantic-model performance problem whose root cause and fix live entirely in lakehouse table maintenance.
+This is exactly why [01-Lakehouse Optimization](./01-lakehouse-optimization.md) matters beyond raw Spark/SQL query speed: a table accumulating small files from skipped `OPTIMIZE` runs can push past the Parquet-file-count guardrail and force a Direct Lake table into fallback or failure — a semantic-model performance problem whose root cause and fix live entirely in lakehouse table maintenance.
 
 **Practice Question 2** *(Hard)*
 
 A Direct Lake on OneLake semantic model, previously performing well, suddenly fails to refresh with an error referencing exceeded storage guardrails. Power BI reports say the underlying lakehouse table hasn't been formally resized, but it has been receiving frequent small streaming writes for weeks with no scheduled maintenance. What's the most likely fix?
 
 A. Switch the semantic model from Direct Lake on OneLake to Direct Lake on SQL to enable DirectQuery fallback  
-B. Run `OPTIMIZE` (and `VACUUM` as appropriate) on the lakehouse table to compact accumulated small files back within the Parquet file-count guardrail, then retry the refresh  
-C. Increase the Fabric capacity SKU to raise the guardrail limits  
+B. Increase the Fabric capacity SKU to raise the guardrail limits  
+C. Run `OPTIMIZE` (and `VACUUM` as appropriate) to compact accumulated small files  
 D. Enable V-Order on the table to reduce file count  
 
 > [!success]- Answer
-> **B. Run OPTIMIZE (and VACUUM as appropriate) on the lakehouse table to compact accumulated small files back within the Parquet file-count guardrail, then retry the refresh**
+> **C. Run OPTIMIZE (and VACUUM as appropriate) to compact accumulated small files**
 >
-> Weeks of frequent small streaming writes with no maintenance is a textbook small-file accumulation scenario — the Parquet file-count guardrail is most directly addressed by compaction (`OPTIMIZE`), not by switching Direct Lake variants (A, which changes fallback *behavior* but doesn't fix the underlying file-count problem and requires a model rebuild) or scaling capacity (C, which doesn't change per-table guardrail limits, which are about table health, not overall capacity size). V-Order (D) changes file *encoding*, not file *count* — it doesn't reduce how many Parquet files exist.
+> Weeks of frequent small streaming writes with no maintenance is a textbook small-file accumulation scenario — the Parquet file-count guardrail is most directly addressed by compaction (`OPTIMIZE`), bringing the table back within the guardrail so the refresh can be retried. This isn't solved by switching Direct Lake variants (A, which changes fallback *behavior* but doesn't fix the underlying file-count problem and requires a model rebuild) or scaling capacity (B, which doesn't change per-table guardrail limits, which are about table health, not overall capacity size). V-Order (D) changes file *encoding*, not file *count* — it doesn't reduce how many Parquet files exist.
 
 ## SQL Endpoint Query Tuning: Recap
 
-The SQL analytics endpoint shares its statistics engine, in-memory/disk caching, result-set caching, and `queryinsights` diagnostic views with Fabric Warehouse — see [02-Warehouse Optimization](02-warehouse-optimization.md) for the full mechanics. The one addition worth noting here: because the SQL endpoint sits directly on top of the same Delta tables Direct Lake and Spark read, file-size health (covered in [01-Lakehouse Optimization](01-lakehouse-optimization.md)) affects SQL endpoint query speed too — a table with a well-maintained file layout benefits every consuming engine simultaneously, not just Spark.
+The SQL analytics endpoint shares its statistics engine, in-memory/disk caching, result-set caching, and `queryinsights` diagnostic views with Fabric Warehouse — see [02-Warehouse Optimization](./02-warehouse-optimization.md) for the full mechanics. The one addition worth noting here: because the SQL endpoint sits directly on top of the same Delta tables Direct Lake and Spark read, file-size health (covered in [01-Lakehouse Optimization](./01-lakehouse-optimization.md)) affects SQL endpoint query speed too — a table with a well-maintained file layout benefits every consuming engine simultaneously, not just Spark.
 
 ## Dataflow Gen2 Query Folding: Performance Framing
 
@@ -175,14 +175,14 @@ This table summarizes the performance-relevant angle of engine selection — see
 A Copy activity moves data from an on-premises SQL Server to a Fabric Warehouse over a constrained network link. The pipeline owner wants to reduce transfer time without changing the source or sink. Which setting is most directly aimed at this specific bottleneck?
 
 A. Increase the degree of copy parallelism only  
-B. Enable staged copy with compression, so data is compressed before crossing the constrained network link to the staging store  
+B. Increase DIUs to the maximum of 256  
 C. Switch the copy to binary mode  
-D. Increase DIUs to the maximum of 256  
+D. Enable staged copy with compression before the network hop  
 
 > [!success]- Answer
-> **B. Enable staged copy with compression, so data is compressed before crossing the constrained network link to the staging store**
+> **D. Enable staged copy with compression before the network hop**
 >
-> Staging to Fabric Warehouse is already required for many source types, and staged copy's compression option specifically targets a slow/constrained network hop — compressing data before it crosses the bottleneck link reduces transfer time in a way parallelism or DIU increases (A, D) don't address, since those tune compute, not the network link itself. Binary mode (C) skips parsing overhead but doesn't compress data for a constrained link, and a SQL Server source with typed columns moving into a Warehouse sink typically isn't a pure binary-copy scenario in the first place.
+> Staging to Fabric Warehouse is already required for many source types, and staged copy's compression option specifically targets a slow/constrained network hop — compressing data before it crosses the bottleneck link to the staging store reduces transfer time in a way parallelism or DIU increases (A, B) don't address, since those tune compute, not the network link itself. Binary mode (C) skips parsing overhead but doesn't compress data for a constrained link, and a SQL Server source with typed columns moving into a Warehouse sink typically isn't a pure binary-copy scenario in the first place.
 
 ## Use Cases
 
@@ -232,8 +232,8 @@ D. Increase DIUs to the maximum of 256
 
 ## Related Topics
 
-- [01-Lakehouse Optimization](01-lakehouse-optimization.md)
-- [02-Warehouse Optimization](02-warehouse-optimization.md)
+- [01-Lakehouse Optimization](./01-lakehouse-optimization.md)
+- [02-Warehouse Optimization](./02-warehouse-optimization.md)
 - [07-Batch Transformation: Choosing a Transform Tool](../07-batch-transformation/01-choosing-transform-tool.md)
 - [08-Streaming Data: Choosing a Streaming Engine](../08-streaming-data/01-choosing-streaming-engine.md)
 - [10-Error Resolution: Pipeline and Dataflow Errors](../10-error-resolution/01-pipeline-dataflow-errors.md)
@@ -249,4 +249,4 @@ D. Increase DIUs to the maximum of 256
 
 ---
 
-**[← Previous](04-realtime-optimization.md) | [↑ Back to Section](./performance-optimization.md) | [Next →](../resources/cheat-sheets/cheat-sheets.md)**
+**[← Previous](./04-realtime-optimization.md) | [↑ Back to Section](./performance-optimization.md) | [Next →](../resources/cheat-sheets/cheat-sheets.md)**

@@ -115,42 +115,42 @@ For **workspace-wide** failure alerting (many pipelines, one rule) rather than p
 A team wants to be notified in Teams the moment any of their 40 pipelines in a workspace fails, without configuring 40 separate alert rules and without needing to touch each pipeline individually as new ones get added. What approach fits best?
 
 A. Create a Job events alert on each of the 40 pipelines individually, targeting the same Activator item  
-B. Enable workspace monitoring, then create one Activator rule on a KQL queryset querying the monitoring Eventhouse's ItemJobEventLogs table for recent failures  
-C. Install the Capacity Metrics app and configure a capacity-wide failure alert  
+B. Install the Capacity Metrics app and configure a capacity-wide failure alert  
+C. Enable workspace monitoring and create a single Activator rule on a KQL queryset  
 D. Create a single Power BI report visual showing pipeline status and set an alert on it  
 
 > [!success]- Answer
-> **B. Enable workspace monitoring, then create one Activator rule on a KQL queryset querying the monitoring Eventhouse's ItemJobEventLogs table for recent failures**
+> **C. Enable workspace monitoring and create a single Activator rule on a KQL queryset**
 >
-> This is the workspace-wide alerting pattern — one rule against the centralized monitoring log covers every pipeline in the workspace, including ones added later, without per-pipeline setup. Option A technically works but doesn't scale and requires touching every new pipeline. The Capacity Metrics app doesn't support alerts at all (C). A Power BI visual alert (D) is possible in principle but is a much heavier, indirect path compared to querying the log directly.
+> This is the workspace-wide alerting pattern — one KQL queryset rule, querying the monitoring Eventhouse's `ItemJobEventLogs` table for recent failures, covers every pipeline in the workspace, including ones added later, without per-pipeline setup. Option A technically works but doesn't scale and requires touching every new pipeline. The Capacity Metrics app doesn't support alerts at all (B). A Power BI visual alert (D) is possible in principle but is a much heavier, indirect path compared to querying the log directly.
 
 **Practice Question 2** *(Easy)*
 
 A cold-chain logistics team wants an alert only when a package's average temperature over a 3-hour window exceeds 8°C — not an alert on every single temperature reading, even ones briefly over 8°C that immediately drop back down. Which rule type fits, and why?
 
 A. A stateless rule comparing each raw event's temperature to 8°C  
-B. A stateful rule using an aggregation over the lookback window with a `BECOMES`/threshold-entry condition, so it fires only on the transition into the "too warm" state  
+B. A stateful rule using a lookback-window average with a `BECOMES` entry condition  
 C. An action-only rule with no condition, scheduled every 3 hours  
 D. A Power BI visual alert on a card showing the latest temperature reading  
 
 > [!success]- Answer
-> **B. A stateful rule using an aggregation over the lookback window with a BECOMES/threshold-entry condition, so it fires only on the transition into the "too warm" state**
+> **B. A stateful rule using a lookback-window average with a BECOMES entry condition**
 >
-> The scenario explicitly wants averaging over a window (requiring a lookback period) and a single alert on entering the bad state, not repeated alerts — that's the defining behavior of a stateful, transition-based rule. A stateless per-event comparison (A) would fire on every qualifying raw reading, including transient spikes, which is exactly the noise the team wants to avoid.
+> The scenario explicitly wants averaging over a window (requiring a lookback period) and a single alert on entering the bad state, not repeated alerts — that's the defining behavior of a stateful, transition-based rule: it fires only once, on the transition into the "too warm" state, not on every reading that happens to be above threshold. A stateless per-event comparison (A) would fire on every qualifying raw reading, including transient spikes, which is exactly the noise the team wants to avoid.
 
 **Practice Question 3** *(Medium)*
 
 An Activator rule is configured to send an email for every threshold breach on a high-volume IoT eventstream. During a sustained anomaly affecting thousands of devices simultaneously, some team members report they stopped receiving emails partway through the incident, even though the anomaly was still ongoing. What's the most likely explanation?
 
 A. Activator crashed under load and stopped evaluating rules entirely  
-B. The rule's action hit Activator's email rate limit (500 messages/Activator item/hour, 30 messages/rule/recipient/hour) and began throttling further sends  
-C. The eventstream exceeded its 1 MB message size limit and dropped events  
-D. The semantic model backing the alert fell back to DirectQuery and slowed down  
+B. The eventstream exceeded its 1 MB message size limit and dropped events  
+C. The semantic model backing the alert fell back to DirectQuery and slowed down  
+D. The rule's action hit Activator's email rate limit and began throttling further sends  
 
 > [!success]- Answer
-> **B. The rule's action hit Activator's email rate limit (500 messages/Activator item/hour, 30 messages/rule/recipient/hour) and began throttling further sends**
+> **D. The rule's action hit Activator's email rate limit and began throttling further sends**
 >
-> Activator enforces documented per-action rate limits — email is capped at 500 messages per Activator item per hour and 30 messages per rule per recipient per hour. A sustained, high-cardinality incident that fires many state transitions in a short window can hit these caps, and Activator throttles or cancels excess actions rather than crashing. Eventstream's 1 MB limit is a per-message size cap, unrelated to alert-volume throttling, and nothing here suggests a semantic model or DirectQuery is involved.
+> Activator enforces documented per-action rate limits — email is capped at **500 messages per Activator item per hour** and **30 messages per rule per recipient per hour**. A sustained, high-cardinality incident that fires many state transitions in a short window can hit these caps, and Activator throttles or cancels excess actions rather than crashing. Eventstream's 1 MB limit (B) is a per-message size cap, unrelated to alert-volume throttling, and nothing here suggests a semantic model or DirectQuery (C) is involved.
 
 ## Limits and Licensing Notes
 

@@ -21,6 +21,10 @@ exclude = [
   # every section index has been written.
   "certification/0[1-9]-",
   "certification/1[01]-",
+
+  # TODO remove in Task 5 (cheat sheets PR): cheat-sheets.md doesn't exist
+  # yet — section 11 links to it in anticipation of that PR.
+  "certification/resources/cheat-sheets/",
 ]
 
 # Don't check links inside fenced code blocks (SQL, Python, JSON, etc.)

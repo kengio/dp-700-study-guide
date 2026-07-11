@@ -99,14 +99,14 @@ Dataflow Gen2 refresh limits worth memorizing for throttling scenarios: ==up to 
 A pipeline activity fails, and its Output JSON shows `"failureType": "SystemError"` with an `errorCode` referencing a transient download error from Azure Storage. What is the most appropriate first action?
 
 A. Rewrite the copy activity's source dataset definition  
-B. Retry the activity — a `SystemError` on a transient download failure is typically recoverable without a config change  
+B. Escalate directly to Microsoft Support before attempting a rerun  
 C. Delete and recreate the linked service credentials  
-D. Escalate directly to Microsoft Support before attempting a rerun  
+D. Retry the activity — `SystemError` failures are typically transient  
 
 > [!success]- Answer
-> **B. Retry the activity — a SystemError on a transient download failure is typically recoverable without a config change**
+> **D. Retry the activity — SystemError failures are typically transient**
 >
-> `failureType: SystemError` signals a platform/transient issue rather than a pipeline authoring mistake. Rewriting the dataset (A) or credentials (C) targets a `UserError` scenario instead, and jumping straight to support (D) skips the cheapest, usually-successful first step: rerun.
+> `failureType: SystemError` signals a platform/transient issue rather than a pipeline authoring mistake, and this one (a transient download failure) is typically recoverable without any config change. Rewriting the dataset (A) or credentials (C) targets a `UserError` scenario instead, and jumping straight to support (B) skips the cheapest, usually-successful first step: rerun.
 
 ## Other Connector-Specific Error Codes
 
@@ -159,29 +159,29 @@ For `DataFormat.Error` on a specific row, select all columns in the dataflow edi
 
 A Dataflow Gen2 configured with an on-premises data gateway refreshes successfully for a query that writes to a Lakehouse, but a second query that references the first query's staged output fails with a "TCP Provider" network error, even though both Lakehouses share the same OneLake instance. What's the most likely root cause?
 
-A. The gateway's Microsoft Entra credentials expired between the two queries  
-B. The referencing query needs outbound TCP port 1433 open on the gateway server, which the firewall is currently blocking  
+A. The referencing query needs outbound TCP port 1433 open on the gateway  
+B. The gateway's Microsoft Entra credentials expired between the two queries  
 C. The staging Lakehouse ran out of OneLake storage capacity mid-refresh  
 D. Query folding failed silently on the referencing query  
 
 > [!success]- Answer
-> **B. The referencing query needs outbound TCP port 1433 open on the gateway server, which the firewall is currently blocking**
+> **A. The referencing query needs outbound TCP port 1433 open on the gateway**
 >
-> Writing to a Lakehouse uses HTTPS (443), but reading staged data back for a referencing query uses the TDS protocol over port 1433 — this is exactly why the first query can succeed while a dependent query fails with a TCP-level error. Credential expiry (A) would fail both queries identically, storage capacity (C) would show a capacity error, and folding failures (D) degrade performance rather than throwing a network exception.
+> Writing to a Lakehouse uses HTTPS (443), but reading staged data back for a referencing query uses the TDS protocol over port 1433, which the firewall is currently blocking — this is exactly why the first query can succeed while a dependent query fails with a TCP-level error. Credential expiry (B) would fail both queries identically, storage capacity (C) would show a capacity error, and folding failures (D) degrade performance rather than throwing a network exception.
 
 **Practice Question 3** *(Easy)*
 
 A Dataflow Gen2 refresh fails with `DataFormat.Error` referencing "We couldn't convert to Number" on a specific column. What is the fastest way to isolate exactly which rows are causing the failure?
 
 A. Download the detailed refresh logs and manually search the zipped mashup files for the row  
-B. Select all columns in the dataflow editor and apply Keep Rows → Keep Errors to surface only the malformed rows  
-C. Delete the offending column from the query entirely  
+B. Delete the offending column from the query entirely  
+C. Select all columns in the dataflow editor and apply Keep Rows → Keep Errors to surface only the malformed rows  
 D. Switch the query's data source connection to use a gateway  
 
 > [!success]- Answer
-> **B. Select all columns in the dataflow editor and apply Keep Rows → Keep Errors to surface only the malformed rows**
+> **C. Select all columns in the dataflow editor and apply Keep Rows → Keep Errors to surface only the malformed rows**
 >
-> "Keep Errors" is the purpose-built Power Query technique for isolating exactly which rows fail a type conversion without guessing — it's faster and more precise than manually searching downloaded logs (A), and neither deleting the column (C) nor changing the connection type (D) addresses a `DataFormat.Error` caused by bad values in the source data itself.
+> "Keep Errors" is the purpose-built Power Query technique for isolating exactly which rows fail a type conversion without guessing — it's faster and more precise than manually searching downloaded logs (A), and neither deleting the column (B) nor changing the connection type (D) addresses a `DataFormat.Error` caused by bad values in the source data itself.
 
 ## Symptom → Likely Error Class
 
@@ -242,7 +242,7 @@ D. Switch the query's data source connection to use a gateway
 
 - [09-Monitoring Surfaces](../09-monitoring-alerting/01-monitoring-surfaces.md)
 - [02-Notebook and T-SQL Errors](./02-notebook-tsql-errors.md)
-- [04-Fabric Workspace Settings: OneLake Settings](../01-fabric-workspace-settings/03-onelake-settings.md)
+- [01-Fabric Workspace Settings: OneLake Settings](../01-fabric-workspace-settings/03-onelake-settings.md)
 - [11-Performance Optimization](../11-performance-optimization/performance-optimization.md)
 
 ## Official Documentation

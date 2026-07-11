@@ -82,15 +82,15 @@ Key output columns:
 
 `.show ingestion failures` returns a row with `ErrorCode = Stream_ClosingQuoteMissing` and `FailureKind = Permanent` for a CSV ingestion into an Eventhouse table. What is the most appropriate response?
 
-A. Retry the exact same ingestion request — permanent failures often succeed on a second attempt  
-B. Fix the malformed CSV source file (the closing quote is missing) before re-ingesting  
+A. Fix the malformed CSV source file (the closing quote is missing) before re-ingesting  
+B. Retry the exact same ingestion request — permanent failures often succeed on a second attempt  
 C. Increase the ingestion batching latency to give the engine more time  
 D. Switch the table's update policy from transactional to non-transactional  
 
 > [!success]- Answer
-> **B. Fix the malformed CSV source file (the closing quote is missing) before re-ingesting**
+> **A. Fix the malformed CSV source file (the closing quote is missing) before re-ingesting**
 >
-> `Stream_ClosingQuoteMissing` is a `BadFormat` category error with `FailureKind = Permanent` — the CSV itself is malformed (an unclosed quoted field), and no amount of retrying (A), batching-latency tuning (C), or update-policy configuration (D) fixes malformed source data. The file must be corrected before it will ingest successfully.
+> `Stream_ClosingQuoteMissing` is a `BadFormat` category error with `FailureKind = Permanent` — the CSV itself is malformed (an unclosed quoted field), and no amount of retrying (B), batching-latency tuning (C), or update-policy configuration (D) fixes malformed source data. The file must be corrected before it will ingest successfully.
 
 ## Streaming vs. Queued Ingestion Error Surfaces
 
@@ -158,14 +158,14 @@ Eventstream's built-in transformation processors (filter, aggregate, join, manag
 A source table has a **non-transactional** update policy that writes to a derived summary table. After a schema change upstream, the update-policy query starts failing with `UpdatePolicy_QuerySchemaDoesNotMatchTableSchema`. What happens to new data arriving at the source table while this failure persists?
 
 A. Ingestion into the source table also fails, because the update policy is part of the same transaction  
-B. Ingestion into the source table continues to succeed; only the derived summary table stops receiving new rows  
-C. Ingestion pauses automatically until an administrator manually acknowledges the schema mismatch  
+B. Ingestion pauses automatically until an administrator manually acknowledges the schema mismatch  
+C. Ingestion into the source table continues to succeed; only the derived summary table stops receiving new rows  
 D. The source table's ingestion succeeds, but so does the derived table's, using stale cached results  
 
 > [!success]- Answer
-> **B. Ingestion into the source table continues to succeed; only the derived summary table stops receiving new rows**
+> **C. Ingestion into the source table continues to succeed; only the derived summary table stops receiving new rows**
 >
-> A non-transactional update policy decouples the source table's ingestion from the update-policy query's success — the source table keeps ingesting normally, while the failed update-policy write is logged as `UpdatePolicy_QuerySchemaDoesNotMatchTableSchema` (Permanent) against the target. A transactional policy (A) would instead roll back the whole ingestion. There's no automatic pause-and-acknowledge workflow (C), and a non-transactional failure doesn't silently substitute stale data (D) — it simply skips the write.
+> A non-transactional update policy decouples the source table's ingestion from the update-policy query's success — the source table keeps ingesting normally, while the failed update-policy write is logged as `UpdatePolicy_QuerySchemaDoesNotMatchTableSchema` (Permanent) against the target. A transactional policy (A) would instead roll back the whole ingestion. There's no automatic pause-and-acknowledge workflow (B), and a non-transactional failure doesn't silently substitute stale data (D) — it simply skips the write.
 
 **Practice Question 3** *(Easy)*
 

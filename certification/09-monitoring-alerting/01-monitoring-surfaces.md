@@ -75,15 +75,15 @@ For log-level detail beyond the run history UI, **workspace monitoring** (Worksp
 
 A pipeline failed on its fifth activity out of eight; the first four activities succeeded and wrote their outputs. The team wants to fix the underlying issue and get the pipeline finished without re-running the four already-successful activities. What's the fastest supported recovery action from the pipeline's monitoring view?
 
-A. Delete the pipeline run record and manually re-trigger the pipeline from the workspace  
-B. Select **Rerun**, and choose to rerun only from the failed activity  
+A. Select **Rerun**, and choose to rerun only from the failed activity  
+B. Delete the pipeline run record and manually re-trigger the pipeline from the workspace  
 C. Export the run to CSV, fix the data manually, and mark the run as succeeded  
 D. Open Monitor hub's Historical runs and edit the failed activity's status directly  
 
 > [!success]- Answer
-> **B. Select Rerun, and choose to rerun only from the failed activity**
+> **A. Select Rerun, and choose to rerun only from the failed activity**
 >
-> Fabric pipeline monitoring supports rerunning from the point of failure directly — the four succeeded activities aren't re-executed, and the pipeline resumes at activity five. There's no supported way to hand-edit a run's recorded status (C, D), and a full manual re-trigger (A) would waste the already-successful work.
+> Fabric pipeline monitoring supports rerunning from the point of failure directly — the four succeeded activities aren't re-executed, and the pipeline resumes at activity five. There's no supported way to hand-edit a run's recorded status (C, D), and a full manual re-trigger (B) would waste the already-successful work.
 
 ## Dataflow Gen2 Refresh History and Diagnostics
 
@@ -138,14 +138,14 @@ For programmatic access, Fabric exposes **Spark monitoring APIs** at two levels:
 A notebook run failed inside a Spark job. The team needs the exact driver-process log output to diagnose the failure, and wants to build an automated nightly report that pulls this information without opening the Fabric portal. Which two capabilities together satisfy both needs?
 
 A. The Monitor hub's Activities table for the log output, and CSV export for automation  
-B. The Spark application detail page's **Logs** tab (Driver logs) for diagnosis, and the **Driver Log** monitoring API for automation  
-C. Dataflow Gen2's detailed logs download for diagnosis, and the Capacity Metrics app for automation  
+B. Dataflow Gen2's detailed logs download for diagnosis, and the Capacity Metrics app for automation  
+C. The Spark application detail page's **Logs** tab (Driver logs) for diagnosis, and the **Driver Log** monitoring API for automation  
 D. The notebook's Item snapshot for the log output, and Real-Time hub for automation  
 
 > [!success]- Answer
-> **B. The Spark application detail page's Logs tab (Driver logs) for diagnosis, and the Driver Log monitoring API for automation**
+> **C. The Spark application detail page's Logs tab (Driver logs) for diagnosis, and the Driver Log monitoring API for automation**
 >
-> The Logs tab surfaces full Livy/Prelaunch/Driver logs interactively for a human diagnosing a failure; the Driver Log API returns the same underlying data programmatically, making it the right building block for an unattended nightly job. Monitor hub's Activities table shows status/timing, not log content. Dataflow Gen2's detailed logs are unrelated to Spark. Item snapshots capture code/config, not runtime log output.
+> The Logs tab surfaces full Livy/Prelaunch/Driver logs interactively for a human diagnosing a failure; the Driver Log API returns the same underlying data programmatically, making it the right building block for an unattended nightly job. Monitor hub's Activities table shows status/timing, not log content. Dataflow Gen2's detailed logs (B) are unrelated to Spark. Item snapshots capture code/config, not runtime log output.
 
 ## Eventstream Monitoring
 
@@ -200,14 +200,14 @@ Installing the app requires **capacity admin** rights; after install, an admin c
 A capacity administrator notices multiple items across several workspaces on the same F64 capacity are experiencing intermittent slow performance during business hours, but no individual pipeline or notebook is reporting failures. Which surface should the administrator open first to investigate, and why?
 
 A. Monitor hub, because it lists every item type's run status in one place  
-B. The Capacity Metrics app's Compute or Timepoint page, because the symptom is capacity-wide resource contention, not a single item's failure  
+B. Dataflow Gen2 refresh history, because dataflows are the most common cause of capacity throttling  
 C. Eventhouse ingestion monitoring, because ingestion logs capture all capacity events  
-D. Dataflow Gen2 refresh history, because dataflows are the most common cause of capacity throttling  
+D. The Capacity Metrics app's Compute or Timepoint page, because the symptom is capacity-wide resource contention, not a single item's failure  
 
 > [!success]- Answer
-> **B. The Capacity Metrics app's Compute or Timepoint page, because the symptom is capacity-wide resource contention, not a single item's failure**
+> **D. The Capacity Metrics app's Compute or Timepoint page, because the symptom is capacity-wide resource contention, not a single item's failure**
 >
-> Slowness across multiple items with no individual failures is a classic capacity-throttling signature — the Compute page's utilization trends or the Timepoint page's 30-second breakdown identify which operations are consuming the capacity during the affected windows. Monitor hub is item-status-centric and won't surface capacity-wide CU consumption. Eventhouse ingestion logs are scoped to one eventhouse's ingestion, not capacity-wide compute. Dataflow Gen2 is only one of many possible consumers.
+> Slowness across multiple items with no individual failures is a classic capacity-throttling signature — the Compute page's utilization trends or the Timepoint page's 30-second breakdown identify which operations are consuming the capacity during the affected windows. Monitor hub is item-status-centric and won't surface capacity-wide CU consumption. Eventhouse ingestion logs are scoped to one eventhouse's ingestion, not capacity-wide compute. Dataflow Gen2 (B) is only one of many possible consumers.
 
 ## THE Monitoring-Surfaces Table
 

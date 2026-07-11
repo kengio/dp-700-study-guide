@@ -99,14 +99,14 @@ Container memory is `spark.executor.memory + spark.executor.memoryOverhead`; in 
 A Spark job's Executors tab shows most tasks completing in under a minute, but two specific tasks run for 40+ minutes before failing with exit code 137. All other Spark configuration is default. What is the most likely root cause and first fix?
 
 A. Insufficient `spark.driver.memory` — increase the driver's heap size  
-B. Data skew — a small number of partitions are processing disproportionately more data; enable AQE skew-join handling or repartition  
+B. Data skew — a few partitions are processing disproportionately more data  
 C. A missing library dependency — reinstall the environment's Python packages  
 D. Gateway throttling — reduce the number of concurrent pipeline triggers  
 
 > [!success]- Answer
-> **B. Data skew — a small number of partitions are processing disproportionately more data; enable AQE skew-join handling or repartition**
+> **B. Data skew — a few partitions are processing disproportionately more data**
 >
-> A small subset of long-running, eventually-OOM-killed tasks against many fast-completing tasks is the textbook data-skew signature, confirmed by comparing input size across tasks in the Stages tab. Driver memory (A) wouldn't explain executor-level exit code 137 on specific tasks, a missing dependency (C) would fail immediately and consistently rather than after 40 minutes, and gateway throttling (D) is unrelated to Spark task execution.
+> A small subset of long-running, eventually-OOM-killed tasks against many fast-completing tasks is the textbook data-skew signature, confirmed by comparing input size across tasks in the Stages tab; the fix is enabling AQE skew-join handling or repartitioning the affected keys. Driver memory (A) wouldn't explain executor-level exit code 137 on specific tasks, a missing dependency (C) would fail immediately and consistently rather than after 40 minutes, and gateway throttling (D) is unrelated to Spark task execution.
 
 ## AnalysisException Patterns
 
@@ -163,14 +163,14 @@ Conflicts are evaluated at the **table level**, not the individual parquet file 
 Two concurrent ETL jobs both run `MERGE` statements against the same Warehouse table, updating different sets of rows. The second job to commit fails with error 24706. What is the correct interpretation and fix?
 
 A. The table has corrupted statistics; run `UPDATE STATISTICS` before retrying  
-B. This is expected snapshot-isolation behavior for concurrent writers on one table; add retry logic to the failing job  
+B. Switch the session to `READ COMMITTED` isolation to avoid the conflict  
 C. Fabric Warehouse doesn't support concurrent `MERGE` statements at all; serialize all writes through a single job  
-D. Switch the session to `READ COMMITTED` isolation to avoid the conflict  
+D. This is expected snapshot-isolation behavior for concurrent writers on one table; add retry logic to the failing job  
 
 > [!success]- Answer
-> **B. This is expected snapshot-isolation behavior for concurrent writers on one table; add retry logic to the failing job**
+> **D. This is expected snapshot-isolation behavior for concurrent writers on one table; add retry logic to the failing job**
 >
-> Write-write conflicts are a documented, expected outcome of table-level snapshot isolation when two transactions modify the same table concurrently — even when they touch different rows, since locking is table-scoped. The fix is retry logic (with backoff), not a statistics rebuild (A), and Fabric Warehouse doesn't forbid concurrent MERGE (C) — it just resolves conflicts at commit time. Isolation level changes (D) are silently ignored; Fabric Warehouse only offers snapshot isolation.
+> Write-write conflicts are a documented, expected outcome of table-level snapshot isolation when two transactions modify the same table concurrently — even when they touch different rows, since locking is table-scoped. The fix is retry logic (with backoff), not a statistics rebuild (A), and Fabric Warehouse doesn't forbid concurrent MERGE (C) — it just resolves conflicts at commit time. Isolation level changes (B) are silently ignored; Fabric Warehouse only offers snapshot isolation.
 
 ## COPY INTO Rejected-Row Diagnostics
 

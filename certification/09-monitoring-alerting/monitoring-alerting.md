@@ -27,8 +27,7 @@ mindmap
       Pipeline monitoring - Gantt, input/output JSON, rerun from failed activity
       Dataflow Gen2 - refresh history 50 UI rows / 250 or 6 months, logs 28 days
       Spark - Monitor hub, application detail Jobs/Resources/Logs/Data tabs, monitoring APIs
-      Eventstream - Data insights + Runtime logs, three severities
-      Eventhouse - Metrics, Command logs, Data operation logs, Ingestion results logs, Query logs
+      Eventstream/Eventhouse - Data insights + Runtime logs (3 severities); Metrics, Command/Data operation/Ingestion/Query logs
       Capacity Metrics app - admin-only, CU and throttling, no alerts
     Semantic Model Refresh
       Import refresh = full data copy vs Direct Lake framing = metadata only

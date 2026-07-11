@@ -45,7 +45,7 @@ Full mechanics — Velox/Gluten architecture, enablement at the environment/sess
 - **Fallback**: automatic and silent by default — an unsupported operator or expression reverts to the JVM engine with no interruption; **Fabric Spark Advisor** surfaces a real-time alert in the notebook cell when a fallback happens, and Spark UI query plans show *Transformer*/`NativeFileScan`/`VeloxColumnarToRowExec`-suffixed nodes (green in the Query Execution Graph) for anything the native engine actually handled
 
 > [!note] Mental model — native execution engine as a fast lane
-> Think of the native execution engine as a **fast lane on a highway** — supported operators (Parquet/Delta scans, most aggregations and joins) get routed onto it automatically, unsupported ones (structured streaming, JSON/XML, ANSI mode, certain UDFs) merge back into the regular lane without you doing anything. The performance question isn't "did I remember to route traffic correctly" — it's "how much of my workload's traffic *can* use the fast lane," which is what the Spark UI's native/JVM node coloring answers.
+> Think of the native execution engine as a **fast lane on a highway** — supported operators (Parquet/Delta scans, most aggregations and joins) get routed onto it automatically, unsupported ones (structured streaming, JSON/XML, ANSI mode) merge back into the regular lane without you doing anything. The performance question isn't "did I remember to route traffic correctly" — it's "how much of my workload's traffic *can* use the fast lane," which is what the Spark UI's native/JVM node coloring answers.
 
 ## Autotune
 
@@ -134,18 +134,18 @@ Intelligent cache is enabled by default for all Spark pools with **50% of node c
 A Spark job filters a 500-partition DataFrame down to roughly 2% of its original rows, then writes the result to a Delta table. The write produces hundreds of very small files. What's the most appropriate fix?
 
 A. Call `repartition(500)` before the write to keep the original partition count  
-B. Call `coalesce(n)` with a small `n` before the write, to merge the now-mostly-empty partitions without a full shuffle  
+B. Call `coalesce(n)` with a small `n` before the write  
 C. Increase `spark.sql.shuffle.partitions` to 1000  
 D. Enable autotune for the session  
 
 > [!success]- Answer
-> **B. Call coalesce(n) with a small n before the write, to merge the now-mostly-empty partitions without a full shuffle**
+> **B. Call coalesce(n) with a small n before the write**
 >
-> After an aggressive filter, most of the original 500 partitions hold very few rows — writing them as-is produces hundreds of tiny files. `coalesce()` merges partitions cheaply (no full shuffle) to consolidate into a small number of well-sized output files. `repartition(500)` (A) would keep the small-file problem and add shuffle cost. Increasing `shuffle.partitions` (C) affects future shuffles, not the already-filtered DataFrame's current partition count. Autotune (D) doesn't target post-filter partition consolidation — it tunes shuffle/broadcast/file-read configs, not this specific write pattern.
+> After an aggressive filter, most of the original 500 partitions hold very few rows — writing them as-is produces hundreds of tiny files. `coalesce()` merges the now-mostly-empty partitions cheaply (no full shuffle) to consolidate into a small number of well-sized output files. `repartition(500)` (A) would keep the small-file problem and add shuffle cost. Increasing `shuffle.partitions` (C) affects future shuffles, not the already-filtered DataFrame's current partition count. Autotune (D) doesn't target post-filter partition consolidation — it tunes shuffle/broadcast/file-read configs, not this specific write pattern.
 
 ## optimizeWrite and Bin-Size Configs
 
-The Delta-table-side small-file mechanics (`optimizeWrite`, `optimizeWrite.binSize`, adaptive target file size, resource profiles) are covered in full in [01-Lakehouse Optimization](01-lakehouse-optimization.md#the-small-file-problem) — this file's angle is purely the Spark session/job configuration surface: these are `spark.conf.set(...)` session properties (or environment-level Spark properties) exactly like the other tuning knobs on this page, so they compose with `shuffle.partitions`, autotune, and resource profiles in the same session.
+The Delta-table-side small-file mechanics (`optimizeWrite`, `optimizeWrite.binSize`, adaptive target file size, resource profiles) are covered in full in [01-Lakehouse Optimization](./01-lakehouse-optimization.md#the-small-file-problem) — this file's angle is purely the Spark session/job configuration surface: these are `spark.conf.set(...)` session properties (or environment-level Spark properties) exactly like the other tuning knobs on this page, so they compose with `shuffle.partitions`, autotune, and resource profiles in the same session.
 
 ## High-Concurrency Session Reuse
 
@@ -169,14 +169,14 @@ High concurrency mode lets compatible Spark workloads share one running Spark se
 A workspace runs 20 notebook activities in parallel every night via a pipeline, all against the same default Lakehouse and identical Spark compute settings, on custom pools with high concurrency mode enabled. Session acquisition is still slow because the default sharing limit caps out well before all 20 activities can join one session. What's the fix?
 
 A. Switch from custom pools to starter pools  
-B. Increase `spark.highConcurrency.max` on the shared Environment to a value up to 50, so more than the default 5 notebooks can share one session  
-C. Enable autotune to speed up session acquisition  
+B. Enable autotune to speed up session acquisition  
+C. Increase `spark.highConcurrency.max` on the Environment, up to 50  
 D. Disable high concurrency mode so each activity gets a dedicated session  
 
 > [!success]- Answer
-> **B. Increase spark.highConcurrency.max on the shared Environment to a value up to 50, so more than the default 5 notebooks can share one session**
+> **C. Increase spark.highConcurrency.max on the Environment, up to 50**
 >
-> The default session-sharing limit is 5 notebooks; it's explicitly documented as tunable up to 50 via `spark.highConcurrency.max` on the Environment used by the notebooks/pipeline activities. Switching pool types (A) doesn't change the sharing limit. Autotune (C) tunes query-level Spark configs, not session-sharing behavior. Disabling high concurrency (D) would make the slow-session-start problem worse, not better, since every activity would then provision its own session from scratch.
+> The default session-sharing limit is 5 notebooks; it's explicitly documented as tunable up to 50 via `spark.highConcurrency.max` on the Environment used by the notebooks/pipeline activities, so more than the default 5 can share one session. Switching pool types (A) doesn't change the sharing limit. Autotune (B) tunes query-level Spark configs, not session-sharing behavior. Disabling high concurrency (D) would make the slow-session-start problem worse, not better, since every activity would then provision its own session from scratch.
 
 ## Decision Guidance: Symptom → Lever
 
@@ -197,15 +197,15 @@ D. Disable high concurrency mode so each activity gets a dedicated session
 
 A recurring nightly notebook job runs the same parameterized aggregation query (only a date filter value changes) against a large Delta table, taking 45 seconds each run. The team wants to reduce this without rewriting the query. Which combination of levers is most appropriate to try first?
 
-A. Enable autotune at the environment level, since this is a repetitive, long-running (>15s) query that's a strong autotune candidate; leave AQE and intelligent cache as-is since they're already on by default  
+A. Enable autotune at the environment level for this repetitive query  
 B. Manually tune `spark.sql.shuffle.partitions` to a random higher value  
 C. Switch to a starter pool to reduce session startup time, since that's the entire 45 seconds  
 D. Disable AQE to reduce runtime re-optimization overhead  
 
 > [!success]- Answer
-> **A. Enable autotune at the environment level, since this is a repetitive, long-running (>15s) query that's a strong autotune candidate; leave AQE and intelligent cache as-is since they're already on by default**
+> **A. Enable autotune at the environment level for this repetitive query**
 >
-> This query matches autotune's ideal profile precisely: repetitive shape, long-running (well over the 15-second minimum), Spark SQL API. AQE and intelligent cache are already active by default and don't need action. Randomly guessing a `shuffle.partitions` value (B) is exactly the manual trial-and-error autotune exists to replace. Startup time (C) is a session-acquisition cost, not query execution time, and 45 seconds of *query* runtime isn't explained by pool startup alone. Disabling AQE (D) would very likely make performance worse, not better.
+> This query matches autotune's ideal profile precisely: repetitive shape, long-running (well over the 15-second minimum), Spark SQL API — a strong autotune candidate, while AQE and intelligent cache stay as-is since they're already active by default and don't need action. Randomly guessing a `shuffle.partitions` value (B) is exactly the manual trial-and-error autotune exists to replace. Startup time (C) is a session-acquisition cost, not query execution time, and 45 seconds of *query* runtime isn't explained by pool startup alone. Disabling AQE (D) would very likely make performance worse, not better.
 
 ## Use Cases
 
@@ -249,12 +249,12 @@ D. Disable AQE to reduce runtime re-optimization overhead
 - AQE and intelligent cache require no action to benefit from — they're on by default; the exam angle is recognizing that, not enabling them
 - `coalesce()` vs. `repartition()` is a shuffle-cost decision, not just a partition-count decision
 - High concurrency's 36x session-start improvement and up-to-50 sharing limit make it the primary lever for high-fanout parallel notebook pipelines
-- Small-file mechanics for Spark writes live in [01-Lakehouse Optimization](01-lakehouse-optimization.md) — this file only covers the session-level configuration surface
+- Small-file mechanics for Spark writes live in [01-Lakehouse Optimization](./01-lakehouse-optimization.md) — this file only covers the session-level configuration surface
 
 ## Related Topics
 
 - [01-Fabric Workspace Settings: Spark Settings](../01-fabric-workspace-settings/01-spark-settings.md)
-- [01-Lakehouse Optimization](01-lakehouse-optimization.md)
+- [01-Lakehouse Optimization](./01-lakehouse-optimization.md)
 - [07-Batch Transformation: PySpark Transformations](../07-batch-transformation/02-pyspark-transformations.md)
 - [10-Error Resolution: Notebook and T-SQL Errors](../10-error-resolution/02-notebook-tsql-errors.md)
 
@@ -269,4 +269,4 @@ D. Disable AQE to reduce runtime re-optimization overhead
 
 ---
 
-**[← Previous](02-warehouse-optimization.md) | [↑ Back to Section](./performance-optimization.md) | [Next →](04-realtime-optimization.md)**
+**[← Previous](./02-warehouse-optimization.md) | [↑ Back to Section](./performance-optimization.md) | [Next →](./04-realtime-optimization.md)**

@@ -81,14 +81,14 @@ To force a faster refresh when the 30–60 minute wait is unacceptable: **pause 
 An admin revokes a lakehouse owner's Read access at the producer workspace, expecting all shortcut-based access at consumer workspaces to stop immediately. Twenty minutes later, a consumer using a delegated shortcut to that lakehouse can still read the previously-visible data. What's the most likely explanation?
 
 A. OneLake security roles take up to 24 hours to propagate across workspaces  
-B. The consumer's SQL analytics endpoint is caching the item owner's storage access token, which can remain valid for up to 30–60 minutes after the permission change  
+B. Delegated shortcuts ignore producer-side permission changes entirely and must be manually recreated  
 C. The revocation only applies to Spark access, not SQL access  
-D. Delegated shortcuts ignore producer-side permission changes entirely and must be manually recreated  
+D. The consumer's SQL analytics endpoint is caching the item owner's storage access token  
 
 > [!success]- Answer
-> **B. The consumer's SQL analytics endpoint is caching the item owner's storage access token, which can remain valid for up to 30–60 minutes after the permission change**
+> **D. The consumer's SQL analytics endpoint is caching the item owner's storage access token**
 >
-> Delegated-mode shortcuts access OneLake using the item owner's cached storage access token rather than re-authorizing on every request, so a permission revocation at the producer doesn't take effect at the consumer until that cached token expires and is reissued — documented as up to 30–60 minutes. There's no 24-hour propagation window (A), the caching behavior applies regardless of engine (C), and delegated shortcuts do eventually honor the change without manual recreation (D) — they just lag behind the change.
+> Delegated-mode shortcuts access OneLake using the item owner's cached storage access token rather than re-authorizing on every request, so a permission revocation at the producer doesn't take effect at the consumer until that cached token expires and is reissued — documented as up to 30–60 minutes after the permission change. There's no 24-hour propagation window (A), the caching behavior applies regardless of engine (C), and delegated shortcuts do eventually honor the change without manual recreation (B) — they just lag behind the change.
 
 ## S3 / ADLS-Specific Issues
 
@@ -131,14 +131,14 @@ The single highest-yield exam fact in this section: **in delegated mode, a short
 A data engineer queries the same shortcut-backed table twice — once from a Spark notebook, once through the SQL analytics endpoint (confirmed to be in **delegated identity mode**) — and gets different row counts. RLS is defined on the source table in OneLake security. What explains the discrepancy, and what's the fix?
 
 A. The SQL analytics endpoint has a caching bug; clear the cache to resolve it  
-B. Delegated identity mode doesn't honor OneLake security roles, so RLS isn't applied through SQL; switch the endpoint to user identity mode to align the results  
+B. Delegated identity mode doesn't honor OneLake security roles, so RLS isn't applied through SQL  
 C. Spark and SQL analytics endpoints always return different row counts for shortcut-backed tables by design  
 D. The shortcut target was moved between the two queries, causing a 404 on one of them  
 
 > [!success]- Answer
-> **B. Delegated identity mode doesn't honor OneLake security roles, so RLS isn't applied through SQL; switch the endpoint to user identity mode to align the results**
+> **B. Delegated identity mode doesn't honor OneLake security roles, so RLS isn't applied through SQL**
 >
-> Spark always enforces OneLake security, but a SQL analytics endpoint running in delegated identity mode does not — it uses the item owner's identity and doesn't evaluate the caller against RLS rules, producing a broader (unfiltered) result set than Spark's. There's no caching bug (A), the divergence is specific to delegated mode rather than universal (C), and a moved target would produce a 404 error rather than a quietly different row count (D).
+> Spark always enforces OneLake security, but a SQL analytics endpoint running in delegated identity mode does not — it uses the item owner's identity and doesn't evaluate the caller against RLS rules, producing a broader (unfiltered) result set than Spark's; switching the endpoint to user identity mode aligns the two. There's no caching bug (A), the divergence is specific to delegated mode rather than universal (C), and a moved target would produce a 404 error rather than a quietly different row count (D).
 
 ## Diagnosing Across Engines
 
@@ -153,15 +153,15 @@ When the same shortcut behaves differently across surfaces, check in this order:
 
 A schema-enabled lakehouse has a shortcut in the `Tables` folder pointing at an ADLS Gen2 location, and a second shortcut is created pointing at the *first* shortcut to expose the same data from another lakehouse. A colleague proposes extending this pattern five more times to reach six total hops. What should you tell them?
 
-A. There's no limit on shortcut chaining, so this is fine  
-B. Fabric caps direct shortcut-to-shortcut links at 5 — a sixth hop will fail; shortcut directly to the original ADLS location instead  
+A. Fabric caps direct shortcut-to-shortcut links at 5 — a sixth hop will fail; shortcut directly to the original ADLS location instead  
+B. There's no limit on shortcut chaining, so this is fine  
 C. Transitive shortcuts are unsupported entirely; only one level of shortcut is ever allowed  
 D. The limit only applies to external shortcuts, not OneLake-to-OneLake shortcuts, so six hops of OneLake-to-OneLake shortcuts is fine  
 
 > [!success]- Answer
-> **B. Fabric caps direct shortcut-to-shortcut links at 5 — a sixth hop will fail; shortcut directly to the original ADLS location instead**
+> **A. Fabric caps direct shortcut-to-shortcut links at 5 — a sixth hop will fail; shortcut directly to the original ADLS location instead**
 >
-> OneLake documents a hard limit of 5 direct shortcut-to-shortcut links; transitive shortcuts are supported up to that cap (ruling out C), but there is a limit (ruling out A), and the cap isn't restricted to external-only chains (ruling out D). The practical fix once a chain gets long is to shortcut directly to the original source rather than continuing to extend the relay.
+> OneLake documents a hard limit of 5 direct shortcut-to-shortcut links; transitive shortcuts are supported up to that cap (ruling out C), but there is a limit (ruling out B), and the cap isn't restricted to external-only chains (ruling out D). The practical fix once a chain gets long is to shortcut directly to the original source rather than continuing to extend the relay.
 
 ## Symptom → Likely Cause
 

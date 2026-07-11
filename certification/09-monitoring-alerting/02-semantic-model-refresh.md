@@ -179,28 +179,28 @@ Semantic model refreshes are one of the item types Monitor hub tracks natively (
 A large Import-mode semantic model's nightly scheduled refresh keeps timing out at the default limit, and the team wants to shorten failure-detection time for a specific problematic table while leaving the rest of the model on its normal schedule. What approach fits best?
 
 A. Switch the entire model to Direct Lake to avoid refresh timeouts altogether  
-B. Use the enhanced refresh API with the `objects` parameter scoped to the problematic table and an adjusted `timeout`  
+B. Disable automatic updates on the model  
 C. Increase the scheduled refresh frequency so failures are caught sooner  
-D. Disable automatic updates on the model  
+D. Use the enhanced refresh API's `objects` parameter and a custom `timeout`  
 
 > [!success]- Answer
-> **B. Use the enhanced refresh API with the objects parameter scoped to the problematic table and an adjusted timeout**
+> **D. Use the enhanced refresh API's objects parameter and a custom timeout**
 >
-> Enhanced refresh's `objects` array supports table/partition-level refresh, and `timeout` is independently configurable per request — exactly the tool for isolating one table's refresh behavior without touching the rest of the model's schedule. A full Direct Lake migration (A) is a much bigger architectural change than the problem calls for; refreshing more often (C) doesn't fix a timeout; automatic updates (D) is a Direct Lake concept and doesn't apply to Import mode.
+> Enhanced refresh's `objects` array supports table/partition-level refresh — scoping it to just the problematic table — and `timeout` is independently configurable per request, exactly the tool for isolating one table's refresh behavior without touching the rest of the model's schedule. A full Direct Lake migration (A) is a much bigger architectural change than the problem calls for; refreshing more often (C) doesn't fix a timeout; automatic updates (B) is a Direct Lake concept and doesn't apply to Import mode.
 
 **Practice Question 3** *(Easy)*
 
 A semantic model's scheduled refresh has silently stopped running for the past several days, and no one on the team disabled it manually. What's the most likely cause, and where would you confirm it?
 
-A. The capacity was paused — check the Capacity Metrics app's paused-capacity tracking  
-B. Four consecutive refresh failures automatically deactivated the schedule — check refresh history for the failure pattern, then fix the root cause and re-enable  
+A. Four consecutive refresh failures automatically deactivated the schedule  
+B. The capacity was paused — check the Capacity Metrics app's paused-capacity tracking  
 C. The model switched to Direct Lake automatically, which doesn't need scheduled refresh  
 D. Workspace lineage view removed the model's data source connection  
 
 > [!success]- Answer
-> **B. Four consecutive refresh failures automatically deactivated the schedule — check refresh history for the failure pattern, then fix the root cause and re-enable**
+> **A. Four consecutive refresh failures automatically deactivated the schedule**
 >
-> Power BI/Fabric automatically deactivates a refresh schedule after four consecutive failures (or immediately on an unrecoverable configuration error like expired credentials) — this is a deliberate protective behavior, not a bug, and the schedule stays off until someone fixes the underlying cause and manually re-enables it.
+> Power BI/Fabric automatically deactivates a refresh schedule after four consecutive failures (or immediately on an unrecoverable configuration error like expired credentials) — this is a deliberate protective behavior, not a bug. Confirm it by checking refresh history for the failure pattern, then fix the root cause and manually re-enable the schedule; it stays off until someone does.
 
 ## Use Cases
 

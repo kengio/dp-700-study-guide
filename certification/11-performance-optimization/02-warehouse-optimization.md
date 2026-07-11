@@ -88,6 +88,9 @@ In-memory and disk caching apply regardless of data origin — warehouse tables,
 
 Result-set caching persists the *final* output of a `SELECT` so a repeated query (same dashboard refresh, same report filter) can skip re-executing joins and aggregations entirely.
 
+> [!warning] Currently disabled tenant-wide
+> As of **2026-02-16**, Microsoft disabled result-set caching tenant-wide as a known issue, due to a bug that could return stale results. The mechanic below (enabled by default at the item level, disable per item/query) is how the feature is *documented* to behave — but it is not currently live for any tenant. Check the [known issues page](https://aka.ms/fabricdwrscki) for current status before relying on this feature or assuming a `result_cache_hit = 0` result reflects a disqualified query rather than the feature being off entirely.
+
 - Documented as **enabled by default at the item level** for both Warehouse and lakehouse SQL analytics endpoints
 - Can be disabled per item or per query
 
@@ -151,15 +154,15 @@ Note: `data_scanned_*` values show `0` for `COPY INTO` statements, and don't nec
 
 A dashboard query runs against a Fabric Warehouse table and, on every refresh, `queryinsights.exec_requests_history` shows `result_cache_hit = 0`. The query is a plain `SELECT` with no security features, no time travel, and it's a same-database query. What's the most likely remaining disqualifier to check first?
 
-A. The table doesn't have a primary key defined  
-B. The query's estimated result size exceeds 10,000 rows, or it references a runtime constant like `GETDATE()`  
+A. The query's estimated result size exceeds 10,000 rows, or it references a runtime constant like `GETDATE()`  
+B. The table doesn't have a primary key defined  
 C. Result-set caching only works on the lakehouse SQL endpoint, not the Warehouse  
 D. Statistics haven't been created on the queried columns yet  
 
 > [!success]- Answer
-> **B. The query's estimated result size exceeds 10,000 rows, or it references a runtime constant like GETDATE()**
+> **A. The query's estimated result size exceeds 10,000 rows, or it references a runtime constant like GETDATE()**
 >
-> With security features, time travel, and cross-database access already ruled out, the next most common disqualifiers are result-size (>10,000 rows) and non-deterministic/runtime-constant usage — both very common in dashboard queries with a "last refreshed" timestamp column. A missing primary key (A) doesn't disqualify caching. Result-set caching applies to both Warehouse and SQL analytics endpoint items (ruling out C). Missing statistics (D) affects plan quality, not cache eligibility.
+> With security features, time travel, and cross-database access already ruled out, the next most common disqualifiers are result-size (>10,000 rows) and non-deterministic/runtime-constant usage — both very common in dashboard queries with a "last refreshed" timestamp column. A missing primary key (B) doesn't disqualify caching. Result-set caching applies to both Warehouse and SQL analytics endpoint items (ruling out C). Missing statistics (D) affects plan quality, not cache eligibility. Caveat: this question tests the documented disqualification mechanic — but result-set caching is currently disabled tenant-wide by Microsoft (known issue since 2026-02-16), so in practice `result_cache_hit = 0` right now means the feature is off, not that this specific query tripped a disqualifier. Check the known-issues page before diagnosing a real, live query this way.
 
 ## Data Clustering, Distribution, and Load Patterns
 
@@ -167,7 +170,7 @@ Fabric Warehouse doesn't expose the manual distribution/index knobs of a classic
 
 - **CTAS (`CREATE TABLE AS SELECT`)** is the preferred pattern for bulk transform-and-load: it's fully parallel and produces a table with a fresh, optimizer-friendly layout in one pass. Use it for large rebuilds, dimension reloads, or any transformation that's cheaper to reconstruct wholesale than to patch.
 - **`INSERT ... SELECT`** suits incremental, set-based appends — still parallel, but doesn't rewrite existing data, so it's the right choice when only new rows need to land.
-- **Row-by-row `INSERT`** (one statement per record, typically from an external orchestration loop) does not scale in a distributed engine designed for set-based operations — see [05-Pipeline and Query Optimization](05-pipeline-query-optimization.md) for the pipeline-side version of this same anti-pattern (`ForEach`-wrapped per-row activities).
+- **Row-by-row `INSERT`** (one statement per record, typically from an external orchestration loop) does not scale in a distributed engine designed for set-based operations — see [05-Pipeline and Query Optimization](./05-pipeline-query-optimization.md) for the pipeline-side version of this same anti-pattern (`ForEach`-wrapped per-row activities).
 
 > [!note] Mental model — CTAS vs. INSERT
 > CTAS is **pouring a fresh concrete slab** — you get a brand-new, optimally laid-out table, but the whole thing gets rebuilt. `INSERT ... SELECT` is **adding a room onto an existing house** — faster for small additions, but the original structure (and any of its layout inefficiencies) stays as-is. Use CTAS when the transformation logic changed or the table's layout has degraded; use `INSERT` for routine incremental loads.
@@ -210,14 +213,14 @@ Because they're `NOT ENFORCED`, the engine never validates uniqueness or referen
 A data modeler adds `FOREIGN KEY` constraints between a fact table and its dimension tables in a Fabric Warehouse, expecting the engine to reject any fact row referencing a dimension key that doesn't exist. After deployment, several orphaned fact rows are found with no matching dimension key. What's the explanation?
 
 A. Foreign keys aren't supported at all in Fabric Warehouse  
-B. Foreign keys in Fabric Warehouse are only supported as `NOT ENFORCED`, so referential integrity isn't validated by the engine — the constraint still helps the optimizer and BI tools, but doesn't block bad writes  
+B. Foreign keys in Fabric Warehouse are only supported as `NOT ENFORCED`, so integrity isn't validated  
 C. The constraint was created inline in `CREATE TABLE`, which silently disables enforcement  
 D. Foreign keys only enforce integrity when result-set caching is enabled  
 
 > [!success]- Answer
-> **B. Foreign keys in Fabric Warehouse are only supported as NOT ENFORCED, so referential integrity isn't validated by the engine — the constraint still helps the optimizer and BI tools, but doesn't block bad writes**
+> **B. Foreign keys in Fabric Warehouse are only supported as NOT ENFORCED, so integrity isn't validated**
 >
-> Fabric Warehouse does support foreign keys (ruling out A), but exclusively as `NOT ENFORCED` — there's no enforced variant to fall back to. Constraints must be added via `ALTER TABLE` regardless of enforcement (C is a red herring — inline creation isn't even allowed). Result-set caching (D) is unrelated to constraint enforcement.
+> Fabric Warehouse does support foreign keys (ruling out A), but exclusively as `NOT ENFORCED` — there's no enforced variant to fall back to. The constraint still helps the optimizer and BI tools, it just doesn't block bad writes. Constraints must be added via `ALTER TABLE` regardless of enforcement (C is a red herring — inline creation isn't even allowed). Result-set caching (D) is unrelated to constraint enforcement.
 
 ## Use Cases
 
@@ -235,7 +238,7 @@ D. Foreign keys only enforce integrity when result-set caching is enabled
 | A qualifying-looking `SELECT` never shows a result-set cache hit | Query trips one of the documented disqualifiers (row count, runtime constants, wide types, security features, etc.) | Check `queryinsights.exec_requests_history.result_cache_hit` and cross-reference the disqualification list |
 | Join between fact and dimension tables produces unexpected duplicate rows | A `NOT ENFORCED` primary/unique key was declared but the underlying data isn't actually unique | Fix the data quality issue; the constraint won't catch it for you |
 | Query plan seems to badly misestimate row counts on a large text column | Missing or stale average-column-length statistics on a wide `VARCHAR` | Run `UPDATE STATISTICS` on the column, or reduce the column width if `MAX`/oversized types aren't needed |
-| Row-by-row `INSERT` loop from an external orchestrator is far slower than expected | Fabric Warehouse is a distributed, set-based engine — single-row inserts don't parallelize well | Replace with CTAS or set-based `INSERT ... SELECT`; see [05-Pipeline and Query Optimization](05-pipeline-query-optimization.md) for the pipeline-side equivalent |
+| Row-by-row `INSERT` loop from an external orchestrator is far slower than expected | Fabric Warehouse is a distributed, set-based engine — single-row inserts don't parallelize well | Replace with CTAS or set-based `INSERT ... SELECT`; see [05-Pipeline and Query Optimization](./05-pipeline-query-optimization.md) for the pipeline-side equivalent |
 
 ## Best Practices
 
@@ -266,8 +269,8 @@ D. Foreign keys only enforce integrity when result-set caching is enabled
 
 ## Related Topics
 
-- [01-Lakehouse Optimization](01-lakehouse-optimization.md)
-- [05-Pipeline and Query Optimization](05-pipeline-query-optimization.md)
+- [01-Lakehouse Optimization](./01-lakehouse-optimization.md)
+- [05-Pipeline and Query Optimization](./05-pipeline-query-optimization.md)
 - [09-Monitoring & Alerting: Monitoring Surfaces](../09-monitoring-alerting/01-monitoring-surfaces.md)
 - [10-Error Resolution: Notebook and T-SQL Errors](../10-error-resolution/02-notebook-tsql-errors.md)
 
@@ -282,4 +285,4 @@ D. Foreign keys only enforce integrity when result-set caching is enabled
 
 ---
 
-**[← Previous](01-lakehouse-optimization.md) | [↑ Back to Section](./performance-optimization.md) | [Next →](03-spark-optimization.md)**
+**[← Previous](./01-lakehouse-optimization.md) | [↑ Back to Section](./performance-optimization.md) | [Next →](./03-spark-optimization.md)**

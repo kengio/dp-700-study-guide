@@ -18,10 +18,7 @@ status: complete
 
 # Error Resolution (Domain 3 · 30–35%)
 
-Error Resolution covers the exam blueprint's **"Identify and resolve errors"** bullet, which names seven distinct error surfaces: pipeline, Dataflow Gen2, notebook, Eventhouse, Eventstream, T-SQL (Warehouse), and OneLake shortcut. This section walks each surface the same way — the symptom you'd see, where to go to diagnose it, and a resolution table mapping cause to fix — building directly on [09-Monitoring & Alerting](../09-monitoring-alerting/monitoring-alerting.md)'s coverage of *where to look*. This section instead answers *what you're looking at once you get there*.
-
-> [!info]
-> This section assumes you already know which monitoring surface to open for a given item type. If a symptom description doesn't immediately map to a surface, revisit [09-Monitoring & Alerting: Monitoring Surfaces](../09-monitoring-alerting/01-monitoring-surfaces.md) first — its Decision Guidance table is the fastest way in.
+Error Resolution covers the exam blueprint's **"Identify and resolve errors"** bullet, which names seven distinct error surfaces: pipeline, Dataflow Gen2, notebook, Eventhouse, Eventstream, T-SQL (Warehouse), and OneLake shortcut. This section walks each surface the same way — the symptom you'd see, where to go to diagnose it, and a resolution table mapping cause to fix — building directly on [09-Monitoring & Alerting](../09-monitoring-alerting/monitoring-alerting.md)'s coverage of *where to look*. This section instead answers *what you're looking at once you get there*; it assumes you already know which monitoring surface to open for a given item type, so if a symptom description doesn't immediately map to a surface, revisit [09-Monitoring & Alerting: Monitoring Surfaces](../09-monitoring-alerting/01-monitoring-surfaces.md) first — its Decision Guidance table is the fastest way in.
 
 ---
 

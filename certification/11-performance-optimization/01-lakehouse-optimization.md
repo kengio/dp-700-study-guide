@@ -105,14 +105,14 @@ Fabric also exposes two **resource profiles** that flip V-Order and optimize wri
 A team's nightly Spark ingestion job writes 200 GB of new data into a lakehouse table every night, and a separate Power BI Direct Lake report queries that same table throughout the business day. The ingestion job has recently slowed down noticeably. What is the most likely cause, and what's the fix?
 
 A. VACUUM retention is too short, causing time-travel failures during ingestion  
-B. V-Order was enabled at the session or table level, adding write-time cost to every nightly write; disable it for the ingestion session and instead enable it only via a scheduled read-optimizing `OPTIMIZE ... VORDER` pass  
-C. The lakehouse SQL endpoint has stale statistics, slowing the Spark write path  
+B. The lakehouse SQL endpoint has stale statistics, slowing the Spark write path  
+C. V-Order is enabled, adding write-time cost to every nightly ingestion write  
 D. Auto compaction is disabled, so file counts have grown unbounded  
 
 > [!success]- Answer
-> **B. V-Order was enabled at the session or table level, adding write-time cost to every nightly write; disable it for the ingestion session and instead enable it only via a scheduled read-optimizing `OPTIMIZE ... VORDER` pass**
+> **C. V-Order is enabled, adding write-time cost to every nightly ingestion write**
 >
-> V-Order's documented tradeoff is exactly this: ~15% slower writes for faster reads. A write-heavy nightly job doesn't need V-Order applied during ingestion — applying it later via a scheduled `OPTIMIZE ... VORDER` (or switching only the read-facing table copy to a read-heavy profile) captures the Direct Lake benefit without taxing every nightly write. VACUUM retention (A) and stale SQL endpoint statistics (C) don't affect Spark write throughput, and auto compaction being off (D) would show up as growing file counts, not uniformly slower writes.
+> V-Order's documented tradeoff is exactly this: ~15% slower writes for faster reads. A write-heavy nightly job doesn't need V-Order applied during ingestion — disable it for the ingestion session and instead apply it later via a scheduled read-optimizing `OPTIMIZE ... VORDER` pass (or switch only the read-facing table copy to a read-heavy profile), capturing the Direct Lake benefit without taxing every nightly write. VACUUM retention (A) and stale SQL endpoint statistics (B) don't affect Spark write throughput, and auto compaction being off (D) would show up as growing file counts, not uniformly slower writes.
 
 ## VACUUM and Retention
 
@@ -177,7 +177,7 @@ Maintenance applies to Delta tables only — legacy Hive tables (Parquet/ORC/AVR
 
 ### Statistics in the lakehouse SQL endpoint
 
-The lakehouse SQL analytics endpoint shares the same statistics engine as Fabric Warehouse (see [02-Warehouse Optimization](02-warehouse-optimization.md) for the full mechanics) — statistics are **automatically created and refreshed at query time** for columns used in `GROUP BY`, `JOIN`, `WHERE`, and `ORDER BY`, with no manual step required. Manual `CREATE STATISTICS`/`UPDATE STATISTICS` is also supported against the SQL endpoint for cases where you want to pre-warm statistics ahead of a known heavy workload rather than pay the cost synchronously on first query.
+The lakehouse SQL analytics endpoint shares the same statistics engine as Fabric Warehouse (see [02-Warehouse Optimization](./02-warehouse-optimization.md) for the full mechanics) — statistics are **automatically created and refreshed at query time** for columns used in `GROUP BY`, `JOIN`, `WHERE`, and `ORDER BY`, with no manual step required. Manual `CREATE STATISTICS`/`UPDATE STATISTICS` is also supported against the SQL endpoint for cases where you want to pre-warm statistics ahead of a known heavy workload rather than pay the cost synchronously on first query.
 
 ## Deletion Vectors
 
@@ -192,14 +192,14 @@ Deletion vectors let Delta Lake mark rows as deleted (or updated-away) without r
 A 40 GB lakehouse table receives frequent `MERGE` statements that each update roughly 0.1% of its rows, on Fabric Spark Runtime 2.0. The table currently sits in a handful of 30 GB files left over from an early bulk load, and `MERGE` latency has been climbing. What's the most likely explanation?
 
 A. Deletion vectors are disabled on Runtime 2.0, forcing full-file rewrites on every MERGE  
-B. The 30 GB files are far above the adaptive target file size range (128 MB–1 GB); even with deletion vectors avoiding full rewrites for the tiny row-level changes, the oversized files make eventual cleanup and any full-file operations disproportionately expensive — run `OPTIMIZE` to bring files into the adaptive size range  
+B. The table needs a `ZORDER BY` on the merge key to fix MERGE performance  
 C. V-Order is enabled, which is incompatible with MERGE operations  
-D. The table needs a `ZORDER BY` on the merge key to fix MERGE performance  
+D. The oversized 30 GB files, not deletion vectors, are driving MERGE latency  
 
 > [!success]- Answer
-> **B. The 30 GB files are far above the adaptive target file size range (128 MB–1 GB); even with deletion vectors avoiding full rewrites for the tiny row-level changes, the oversized files make eventual cleanup and any full-file operations disproportionately expensive — run OPTIMIZE to bring files into the adaptive size range**
+> **D. The oversized 30 GB files, not deletion vectors, are driving MERGE latency**
 >
-> Deletion vectors are on by default on Runtime 2.0 (ruling out A), and they aren't incompatible with V-Order (ruling out C). Z-Order (D) helps selective multi-column filtering, not MERGE latency driven by oversized files. The real issue is file size: 30 GB files are roughly 30–240× the adaptive target range, so any operation that eventually needs to touch or rewrite them (including deletion-vector purges once the 5% threshold is crossed) does dramatically more I/O than necessary.
+> Deletion vectors are on by default on Runtime 2.0 (ruling out A), and they aren't incompatible with V-Order (ruling out C). Z-Order (B) helps selective multi-column filtering, not MERGE latency driven by oversized files. The real issue is file size: the 30 GB files are far above the adaptive target file size range (128 MB–1 GB) — roughly 30–240× too large — so even though deletion vectors avoid a full rewrite for each tiny MERGE, any operation that eventually touches or rewrites those files (including a deletion-vector purge once the 5% threshold is crossed) does dramatically more I/O than necessary. Run `OPTIMIZE` to bring the files into the adaptive size range.
 
 ## Use Cases
 
@@ -248,8 +248,8 @@ D. The table needs a `ZORDER BY` on the merge key to fix MERGE performance
 
 ## Related Topics
 
-- [02-Warehouse Optimization](02-warehouse-optimization.md)
-- [05-Pipeline and Query Optimization](05-pipeline-query-optimization.md) — Direct Lake guardrails tie back to file-size health covered here
+- [02-Warehouse Optimization](./02-warehouse-optimization.md)
+- [05-Pipeline and Query Optimization](./05-pipeline-query-optimization.md) — Direct Lake guardrails tie back to file-size health covered here
 - [07-Batch Transformation: PySpark Transformations](../07-batch-transformation/02-pyspark-transformations.md)
 - [10-Error Resolution: Pipeline and Dataflow Errors](../10-error-resolution/01-pipeline-dataflow-errors.md)
 
@@ -266,4 +266,4 @@ D. The table needs a `ZORDER BY` on the merge key to fix MERGE performance
 
 ---
 
-**[← Previous](../10-error-resolution/04-shortcut-errors.md) | [↑ Back to Section](./performance-optimization.md) | [Next →](02-warehouse-optimization.md)**
+**[← Previous](../10-error-resolution/04-shortcut-errors.md) | [↑ Back to Section](./performance-optimization.md) | [Next →](./02-warehouse-optimization.md)**
