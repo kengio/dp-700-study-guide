@@ -100,7 +100,7 @@ D. Delete the conflicted item and re-create it, since Conflict status has no oth
 >
 > A Git status of Conflict has three documented resolution paths: pick a version directly in the UI (**Accept incoming changes** to take Git's version, or **Keep current content** to keep the workspace's), revert to a previous synced state, or resolve the conflict in Git itself. When the team simply wants Git's version to win with no reconciliation needed, the UI's **Accept incoming changes** action is the fastest of the three — no branch or PR required.
 >
-> Option B invents a disconnect/reconnect mechanism that doesn't resolve conflicts at all. Option C describes the branch-and-PR path, which is the right tool when both versions need reconciling and review — not the fastest option when Git's version should simply win. Option D is a disproportionate, unnecessary fix for a status with three lighter-weight, documented resolution paths.
+> Option B is a blunt all-items overwrite — disconnecting and reconnecting picks one sync direction for every item, not a targeted per-item resolution, and is slower than Accept incoming changes. Option C describes the branch-and-PR path, which is the right tool when both versions need reconciling and review — not the fastest option when Git's version should simply win. Option D is a disproportionate, unnecessary fix for a status with three lighter-weight, documented resolution paths.
 
 ---
 
