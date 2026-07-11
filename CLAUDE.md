@@ -174,6 +174,21 @@ Each cheat sheet (`resources/cheat-sheets/`) ends with:
 1. `## Gotchas & Traps` — 4–8 bullets on common errors and exam traps specific to the topic
 2. `## Before the Exam, I Can…` — 5–8 unchecked checkboxes (`- [ ]`) the reader should be able to tick before taking the exam
 
+### Lab Structure
+
+Labs live in `certification/resources/labs/`. Each lab follows this order:
+
+1. YAML frontmatter
+2. `# Lab NN: Title`
+3. `## Overview` paragraph, plus an `> [!abstract]` summary
+4. `> [!info] Prerequisites` — names the specific prior labs required (and any soft/optional dependency), plus an estimated time
+5. `## Steps` — numbered steps with complete, runnable code and `> [!success] Expected result` callouts after the steps that produce a checkable outcome
+6. `## Cleanup` — notes which artifacts must survive for later labs vs. what's safe to remove
+7. `## What the Exam Asks About This`
+8. Back/Next navigation
+
+Labs chain together on one shared workspace (`dp700-labs`) and build on the Lab 01 dataset — a later lab's Prerequisites callout must name every earlier lab it depends on. Target length is 200–450 lines.
+
 ### Mock Exam Structure
 
 Each mock exam (`resources/mock-exam/`, `resources/mock-exam-2/`, `resources/mock-exam-3/`) has:
