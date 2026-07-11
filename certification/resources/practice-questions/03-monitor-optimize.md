@@ -19,15 +19,15 @@ Domain 3 covers 30–35% of the DP-700 exam and spans three sections: monitoring
 
 A workspace admin filters Monitor hub's Activities view by every available Item type trying to find a legacy Dataflow Gen1's refresh status, but it never appears — even though the dataflow refreshed successfully an hour ago. What explains this, and where should the admin look instead?
 
-A. Dataflow Gen1 isn't one of Monitor hub's 17 covered item types — check the dataflow's own refresh history or notifications instead  
+A. Dataflow Gen1 isn't one of Monitor hub's 17 covered item types  
 B. Monitor hub only shows the last 100 rows from the past 30 days, and this run is outside that window  
 C. The admin lacks the Contributor workspace role, which hides certain item types from Monitor hub  
 D. Dataflow Gen1 items only appear in Monitor hub after being migrated to Dataflow Gen2  
 
 > [!success]- Answer
-> **A. Dataflow Gen1 isn't one of Monitor hub's 17 covered item types — check the dataflow's own refresh history or notifications instead**
+> **A. Dataflow Gen1 isn't one of Monitor hub's 17 covered item types**
 >
-> Monitor hub's Activities page covers 17 item types, and Dataflow Gen1 is explicitly excluded — no filter combination will surface it, because it was never tracked there in the first place.
+> Check the dataflow's own refresh history or notifications instead. Monitor hub's Activities page covers 17 item types, and Dataflow Gen1 is explicitly excluded — no filter combination will surface it, because it was never tracked there in the first place.
 >
 > Option B invents a retention explanation that doesn't fit — the run happened an hour ago, well inside the 30-day window. Option C invents a role-based hiding behavior that isn't documented; Monitor hub visibility depends on item permissions, not a blanket role gate on entire item types. Option D invents a migration requirement that doesn't exist — Dataflow Gen1 simply never appears, migrated or not.
 
@@ -40,12 +40,12 @@ D. Dataflow Gen1 items only appear in Monitor hub after being migrated to Datafl
 Immediately after a 200 GB append lands in a lakehouse table feeding a Direct Lake report, users notice dashboard queries have gotten noticeably slower — not broken, just slower. What's the correct sequence: what do you check first to confirm what's actually happening, what's the likely diagnosis, and what's the performance lever if the table turns out to be healthy but under-optimized?
 
 A. Assume the DirectQuery fallback is the cause without checking anything, and switch the model to Import mode  
-B. Check the semantic model's refresh history Direct Lake tab to confirm reframing has run since the append and the table hasn't fallen back to DirectQuery; if it's genuinely healthy but slow, apply V-Order (and `OPTIMIZE`) to the newly appended files for faster cold-cache reads  
+B. Check the semantic model's refresh history Direct Lake tab to confirm reframing has run  
 C. Open the Capacity Metrics app first, since any large data append is inherently a capacity-wide event  
 D. Assume query folding was lost during the append and redesign the Dataflow Gen2 query  
 
 > [!success]- Answer
-> **B. Check the semantic model's refresh history Direct Lake tab to confirm reframing has run since the append and the table hasn't fallen back to DirectQuery; if it's genuinely healthy but slow, apply V-Order (and OPTIMIZE) to the newly appended files for faster cold-cache reads**
+> **B. Check the semantic model's refresh history Direct Lake tab to confirm reframing has run**
 >
 > This is the monitor → diagnose → optimize chain in miniature: confirm via the refresh history's Direct Lake tab (and `EVALUATE TABLETRAITS()` if needed) that the model actually reframed and isn't silently falling back to DirectQuery, and only once that's ruled out reach for a performance lever — V-Order trades write cost for the read-side compression and cold-cache speedup that a large, un-V-Ordered append specifically lacks.
 >
@@ -61,13 +61,13 @@ A finance team wants an alert when a specific aggregate value in a Fabric Wareho
 
 A. Create the alert directly against the SQL analytics endpoint, since Activator can query any SQL surface live  
 B. Route it through the Capacity Metrics app, since it already tracks warehouse-level compute  
-C. Use the Fabric Data Warehouse SQL query results source (preview), which evaluates a query on a schedule and triggers on the result — don't attempt to alert from the SQL analytics endpoint directly, which isn't a supported source  
+C. Use the Fabric Data Warehouse SQL query results source (preview), which evaluates a query on a schedule and triggers on the result  
 D. Build a KQL queryset against the warehouse table, since KQL querysets can target any Fabric data store including Warehouse tables  
 
 > [!success]- Answer
-> **C. Use the Fabric Data Warehouse SQL query results source (preview), which evaluates a query on a schedule and triggers on the result — don't attempt to alert from the SQL analytics endpoint directly, which isn't a supported source**
+> **C. Use the Fabric Data Warehouse SQL query results source (preview), which evaluates a query on a schedule and triggers on the result**
 >
-> The Warehouse SQL query (preview) mechanism exists precisely for this case — alerting on warehouse data on a schedule without a streaming source — while creating alerts directly from a SQL analytics endpoint is explicitly unsupported and a documented distractor.
+> Don't attempt to alert from the SQL analytics endpoint directly, which isn't a supported source. The Warehouse SQL query (preview) mechanism exists precisely for this case — alerting on warehouse data on a schedule without a streaming source — while creating alerts directly from a SQL analytics endpoint is explicitly unsupported and a documented distractor.
 >
 > Option A names the one alert source the guide explicitly flags as unsupported. Option B misapplies the Capacity Metrics app, which can't fire alerts at all regardless of source. Option D misapplies KQL querysets, which are scoped to KQL/Eventhouse data, not arbitrary Warehouse tables.
 
@@ -82,12 +82,12 @@ A team wants a single Activator rule to both notify the on-call engineer in Team
 A. No — a rule can take exactly one action; two separate rules are required for notify-plus-remediate  
 B. No — running a Fabric item as an action requires a dedicated, separate Activator item  
 C. Yes, but only if the notification action is listed first in the rule's action order  
-D. Yes — a single rule can combine multiple actions, such as a Teams notification and running a Fabric item (notebook, pipeline, SJD, dataflow, UDF, or copy job)  
+D. Yes — a single rule can combine multiple actions, such as a notification and running a Fabric item  
 
 > [!success]- Answer
-> **D. Yes — a single rule can combine multiple actions, such as a Teams notification and running a Fabric item (notebook, pipeline, SJD, dataflow, UDF, or copy job)**
+> **D. Yes — a single rule can combine multiple actions, such as a notification and running a Fabric item**
 >
-> A single rule can be configured to take more than one action when a scenario calls for it — notify and remediate on the same rule is a documented, common pattern.
+> A single rule can be configured to take more than one action when a scenario calls for it — notify and remediate on the same rule is a documented, common pattern. The Fabric-item action covers a notebook, pipeline, SJD, dataflow, UDF, or copy job.
 >
 > Option A invents a one-action-per-rule limit that doesn't exist. Option B invents a separation requirement between notification actions and Fabric-item actions that isn't documented. Option C invents an action-ordering constraint with no basis in how Activator rules are configured.
 
@@ -120,14 +120,14 @@ D. Schedule the Capacity Metrics app's own semantic model to email a status scre
 A large semantic model's refresh has been running far longer than usual, and the team wants to stop it immediately rather than wait for a timeout. The refresh was started from the portal's manual **Refresh** button, not the enhanced refresh API. What happens if they call `DELETE` on a `requestId` for this refresh?
 
 A. The refresh cancels immediately — `DELETE` works on any in-progress refresh regardless of how it was triggered  
-B. `DELETE` only cancels refreshes that were themselves triggered via the enhanced refresh API — a portal-triggered refresh has to run to completion or timeout instead  
+B. `DELETE` only cancels refreshes that were themselves triggered via the enhanced refresh API  
 C. `DELETE` cancels the refresh but leaves the semantic model permanently locked until a capacity restart  
 D. `DELETE` first requires switching the model to Direct Lake mode before it will accept a cancellation request  
 
 > [!success]- Answer
-> **B. DELETE only cancels refreshes that were themselves triggered via the enhanced refresh API — a portal-triggered refresh has to run to completion or timeout instead**
+> **B. `DELETE` only cancels refreshes that were themselves triggered via the enhanced refresh API**
 >
-> Refresh cancellation via `DELETE /refreshes/{requestId}` is scoped to refreshes started through the enhanced refresh API itself — a standard portal-button refresh can't be cancelled this way, only let run to completion or timeout.
+> A portal-triggered refresh has to run to completion or timeout instead. Refresh cancellation via `DELETE /refreshes/{requestId}` is scoped to refreshes started through the enhanced refresh API itself — a standard portal-button refresh can't be cancelled this way, only let run to completion or timeout.
 >
 > Option A overstates what `DELETE` can cancel. Option C invents a permanent-lock consequence that isn't documented. Option D invents a Direct Lake precondition for cancellation that has nothing to do with the actual limitation, which is about trigger source, not storage mode.
 
@@ -141,11 +141,11 @@ A logistics team's Activator rule emails the team every time a vehicle's speed r
 
 A. Lower the email rate limit on the action so excess sends are silently dropped during a flapping episode  
 B. Add a heartbeat/absence-of-data condition in place of the threshold condition  
-C. Switch to a stateful condition using `BECOMES`, so the rule fires only on the transition into the over-threshold state rather than on every qualifying event  
+C. Switch to a stateful condition using `BECOMES`, firing only on the transition into the over-threshold state  
 D. Move the rule from an Eventstreams source to a KQL queryset with a 5-minute check frequency  
 
 > [!success]- Answer
-> **C. Switch to a stateful condition using BECOMES, so the rule fires only on the transition into the over-threshold state rather than on every qualifying event**
+> **C. Switch to a stateful condition using BECOMES, firing only on the transition into the over-threshold state**
 >
 > `BECOMES` is exactly the transition-only vocabulary Activator provides for this: it fires once on entry into the "too fast" state and stays quiet until a transition back to normal and a subsequent re-entry, which is precisely the "one alert per episode" behavior the team wants — this is the same state-transition mechanism that keeps a threshold breach from spamming one alert per incoming event.
 >
@@ -162,10 +162,10 @@ A development team wants any Direct Lake query that would silently fall back to 
 A. `DirectLakeOnly` in both environments, since production should never tolerate a fallback either  
 B. `DirectQueryOnly` in development to force every query through the fallback path, `Automatic` in production  
 C. `Automatic` in both environments, since `DirectLakeBehavior` only governs Direct Lake on OneLake models  
-D. `DirectLakeOnly` in development to surface fallback conditions as hard errors, `Automatic` (the default) in production for silent, functional fallback  
+D. `DirectLakeOnly` in development to surface fallback conditions as hard errors, `Automatic` in production  
 
 > [!success]- Answer
-> **D. DirectLakeOnly in development to surface fallback conditions as hard errors, Automatic (the default) in production for silent, functional fallback**
+> **D. DirectLakeOnly in development to surface fallback conditions as hard errors, Automatic in production**
 >
 > `DirectLakeOnly` is documented as the development-time setting precisely because it turns a would-be silent fallback into a hard, catchable error, while `Automatic` — the production default — keeps queries functional (just slower) when a fallback condition is met, which is the behavior production users actually want.
 >
@@ -179,37 +179,37 @@ D. `DirectLakeOnly` in development to surface fallback conditions as hard errors
 
 A pipeline activity's Output JSON shows `"failureType": "UserError"` and `errorCode: "InvalidTemplate"`, referencing a dynamic content expression that points at an undefined dataset parameter. What's the correct first action?
 
-A. Fix the dynamic content expression referencing the undefined parameter — `UserError` means the pipeline authoring itself needs a correction  
+A. Fix the dynamic content expression referencing the undefined parameter  
 B. Retry the activity — `UserError` failures usually resolve themselves on a second attempt  
 C. Escalate directly to Microsoft Support, since `InvalidTemplate` is a platform-side error code  
 D. Configure built-in retry with a longer interval so the parameter has time to resolve  
 
 > [!success]- Answer
-> **A. Fix the dynamic content expression referencing the undefined parameter — UserError means the pipeline authoring itself needs a correction**
+> **A. Fix the dynamic content expression referencing the undefined parameter**
 >
-> `failureType: UserError` signals a pipeline authoring/configuration mistake that a rerun won't fix — the undefined parameter reference has to be corrected in the pipeline itself.
+> `UserError` means the pipeline authoring itself needs a correction. `failureType: UserError` signals a pipeline authoring/configuration mistake that a rerun won't fix — the undefined parameter reference has to be corrected in the pipeline itself.
 >
 > Option B misapplies the retry-worthy behavior that belongs to `SystemError`, not `UserError`. Option C jumps to support before attempting the cheap, obvious fix the error message already points to. Option D configures retry for a class of failure that will simply fail identically on every attempt, since nothing about waiting longer resolves an undefined parameter reference.
 
 ---
 
-## Question 10: One Query Succeeds, the Next One Fails
+## Question 10: When You Can't Get the Firewall Rule Approved
 
 **Question** *(Easy)*:
 
-A gateway-based Dataflow Gen2 query that writes directly to a Lakehouse succeeds every night, but a second query in the same dataflow — one that references the first query's staged output — consistently fails with a TCP-level network error, even though both point at the same OneLake instance. What's the most likely fix?
+A Dataflow Gen2 using an on-premises gateway writes one query to a Lakehouse successfully, but a second query that references the first query's staged output fails with a TCP-level network error. The team traces the cause to a blocked outbound port on the gateway server, but the network team refuses to open it, calling it "just a workaround." What are the two documented ways around this without opening the port, and why does only the second query fail?
 
-A. Re-enter the gateway's stored credentials, since they've likely expired between the two queries  
-B. Open outbound TCP port 1433 on the gateway server, which the referencing query needs for the TDS read-back of staged data  
-C. Increase the dataflow's refresh timeout, since the second query is simply processing more data  
-D. Disable the on-premises gateway entirely and switch the connection to a cloud-only path  
+A. Combine the two queries into one, or disable staging — writing uses HTTPS (443), but reading staged data back needs TDS on port 1433  
+B. Increase the refresh timeout and shrink the batch size, since the second query transfers more data than the gateway buffer allows  
+C. Re-authenticate the gateway's Entra credentials before each refresh, since credentials silently expire mid-run  
+D. Move the dataflow off the gateway entirely, since on-premises gateways can't reach OneLake on any other port  
 
 > [!success]- Answer
-> **B. Open outbound TCP port 1433 on the gateway server, which the referencing query needs for the TDS read-back of staged data**
+> **A. Combine the two queries into one, or disable staging — writing uses HTTPS (443), but reading staged data back needs TDS on port 1433**
 >
-> Writing to a Lakehouse uses HTTPS (443), but reading staged data back for a referencing query uses the TDS protocol over port 1433 — exactly why the first (writing) query can succeed while the second (referencing) query fails with a TCP-level error at the same gateway.
+> Writing to the Lakehouse uses HTTPS, so the first query succeeds even through a gateway that blocks port 1433. Reading staged data back for the referencing query specifically needs the TDS protocol on that port, so only the second query fails. When opening the port isn't an option, the two documented workarounds are combining the queries so there's no cross-query staging read, or disabling staging entirely.
 >
-> Option A would fail both queries identically rather than just the referencing one, since both share the same gateway credentials. Option C misdiagnoses a protocol/port issue as a data-volume issue — no amount of extra timeout fixes a blocked port. Option D is a disproportionate fix that abandons the gateway architecture instead of opening the one missing port.
+> Option B misdiagnoses a blocked-port issue as a data-volume issue — no timeout or batch-size change fixes a firewall rule. Option C invents a credential-expiry cause that would fail both queries identically, not just the referencing one. Option D is a disproportionate architecture change when two documented, much smaller workarounds already exist.
 
 ---
 
@@ -221,13 +221,13 @@ A notebook cell runs `display(df)` on a 40-million-row DataFrame with no `.limit
 
 A. This is executor-side data skew — enable `spark.sql.adaptive.skewJoin.enabled`  
 B. Exit code 137 here means the JVM crashed from native memory corruption — reduce the number of custom libraries  
-C. This is driver OOM from pulling the entire, unlimited result set into the driver process — add `.limit(N)` before `display()`, or aggregate first  
+C. This is driver OOM from pulling the entire, unlimited result set into the driver process  
 D. This is a capacity-queueing issue — the job should have queued instead of failing outright  
 
 > [!success]- Answer
-> **C. This is driver OOM from pulling the entire, unlimited result set into the driver process — add .limit(N) before display(), or aggregate first**
+> **C. This is driver OOM from pulling the entire, unlimited result set into the driver process**
 >
-> `display(df)` without a `.limit(N)` first pulls the entire result set into driver memory, exactly like `.collect()`/`.toPandas()` — a documented driver-OOM cause reported as exit code 137 on the driver process.
+> Add `.limit(N)` before `display()`, or aggregate first. `display(df)` without a `.limit(N)` first pulls the entire result set into driver memory, exactly like `.collect()`/`.toPandas()` — a documented driver-OOM cause reported as exit code 137 on the driver process.
 >
 > Option A misattributes a driver-side symptom to executor-side skew — the failure is on the driver, not a specific subset of executor tasks. Option B misreads exit code 137 (`SIGKILL`/OOM) as exit code 134 (`SIGABRT`/JVM crash) — different code, different cause. Option D is unrelated: interactive notebook runs don't queue at all, and nothing in the scenario points to a capacity-admission failure.
 
@@ -242,10 +242,10 @@ Two nightly batch jobs both run large `UPDATE` statements against the same Fabri
 A. Yes — switching isolation level avoids table-level write conflicts between non-overlapping updates  
 B. No — the real fix is adding a `NOT ENFORCED` primary key so the engine can detect non-overlapping writes  
 C. Yes, but only if the isolation-level change is made inside an explicit transaction block  
-D. No — Fabric Warehouse only offers snapshot isolation and silently ignores `SET TRANSACTION ISOLATION LEVEL`; conflicts are evaluated at the table level regardless of row overlap, so retry logic with backoff is the only fix  
+D. No — Fabric Warehouse only offers snapshot isolation and silently ignores isolation-level changes  
 
 > [!success]- Answer
-> **D. No — Fabric Warehouse only offers snapshot isolation and silently ignores SET TRANSACTION ISOLATION LEVEL; conflicts are evaluated at the table level regardless of row overlap, so retry logic with backoff is the only fix**
+> **D. No — Fabric Warehouse only offers snapshot isolation and silently ignores isolation-level changes**
 >
 > Fabric Warehouse enforces snapshot isolation on every transaction; any attempt to set a different isolation level is silently ignored, and write-write conflicts are evaluated at the table level — even non-overlapping row ranges can conflict, and the only documented fix is retry logic with backoff.
 >
@@ -259,15 +259,15 @@ D. No — Fabric Warehouse only offers snapshot isolation and silently ignores `
 
 A team's nightly CSV `COPY INTO` load reliably tolerates a handful of malformed rows using `MAXERRORS = 25` and a configured `ERRORFILE`. They switch the same source to a Parquet export for efficiency, keeping the same `WITH` options, expecting the same tolerance. The next load, with only 3 bad rows, fails outright. Why?
 
-A. `ERRORFILE`/`MAXERRORS` only apply to CSV and JSONL loads — Parquet data-type conversion errors always fail the whole `COPY INTO`, regardless of `MAXERRORS`  
+A. `ERRORFILE`/`MAXERRORS` only apply to CSV and JSONL loads  
 B. Parquet sources require a higher default `MAXERRORS` value than CSV sources  
 C. Parquet loads need a separate `ERRORFILE_CREDENTIAL` even when the error file targets the same storage account as the source  
 D. `MAXERRORS` silently resets to 0 whenever the source `FILE_TYPE` changes between loads  
 
 > [!success]- Answer
-> **A. ERRORFILE/MAXERRORS only apply to CSV and JSONL loads — Parquet data-type conversion errors always fail the whole COPY INTO, regardless of MAXERRORS**
+> **A. `ERRORFILE`/`MAXERRORS` only apply to CSV and JSONL loads**
 >
-> `ERRORFILE`/`MAXERRORS` are documented to apply only to CSV and JSONL loads in Fabric Data Warehouse — Parquet data-type conversion errors always fail the entire statement, which is exactly why a generously configured `MAXERRORS = 25` didn't save a load with only 3 bad rows.
+> Parquet data-type conversion errors always fail the whole `COPY INTO`, regardless of `MAXERRORS`. `ERRORFILE`/`MAXERRORS` are documented to apply only to CSV and JSONL loads in Fabric Data Warehouse — Parquet data-type conversion errors always fail the entire statement, which is exactly why a generously configured `MAXERRORS = 25` didn't save a load with only 3 bad rows.
 >
 > Option B invents a Parquet-specific default that doesn't exist. Option C misapplies `ERRORFILE_CREDENTIAL`, which is only needed when the error file targets a *different* storage account — nothing in the scenario suggests that. Option D invents a silent-reset behavior that isn't how `MAXERRORS` works; it was explicitly set and stays set regardless of `FILE_TYPE`.
 
@@ -280,14 +280,14 @@ D. `MAXERRORS` silently resets to 0 whenever the source `FILE_TYPE` changes betw
 `.show ingestion failures` returns two rows for the same table: one with `ErrorCode = General_ThrottledIngestion`, `FailureKind = Transient`, and another with `ErrorCode = BadRequest_TableNotExist`, `FailureKind = Permanent`. A junior engineer proposes writing one retry loop to resubmit both failed batches. What's wrong with that plan?
 
 A. Nothing — both `FailureKind` values are retry-worthy given enough attempts  
-B. Retrying the throttled batch is reasonable, but retrying the table-not-exist batch wastes effort — the target table doesn't exist and must be created before that batch can ever succeed  
+B. Retrying the throttled batch is reasonable, but retrying the table-not-exist batch wastes effort  
 C. Neither batch should be retried, since `General_RetryAttemptsExceeded` means the platform already gave up on both  
 D. Both failures are actually Permanent despite the differing `FailureKind` label — ingestion failures default to non-retryable  
 
 > [!success]- Answer
-> **B. Retrying the throttled batch is reasonable, but retrying the table-not-exist batch wastes effort — the target table doesn't exist and must be created before that batch can ever succeed**
+> **B. Retrying the throttled batch is reasonable, but retrying the table-not-exist batch wastes effort**
 >
-> `FailureKind` is the single most important field for exactly this decision: `Transient` (the throttled batch) is worth retrying, while `Permanent` (the missing table) will fail identically on every retry until the underlying data/config issue — here, a nonexistent table — is fixed.
+> The target table doesn't exist and must be created before that batch can ever succeed. `FailureKind` is the single most important field for exactly this decision: `Transient` (the throttled batch) is worth retrying, while `Permanent` (the missing table) will fail identically on every retry until the underlying data/config issue — here, a nonexistent table — is fixed.
 >
 > Option A ignores the documented distinction the two rows explicitly carry. Option C misreads the scenario — neither error code shown is `General_RetryAttemptsExceeded`, which is a distinct, separate error category. Option D contradicts the data given; the rows explicitly show two different `FailureKind` values, not a uniform Permanent classification.
 
@@ -301,11 +301,11 @@ A compliance team requires that a derived "flagged transactions" table always st
 
 A. Non-transactional — it's the safer default and requires no extra configuration  
 B. Neither — update policies can't guarantee synchronization; use a scheduled pipeline comparison instead  
-C. Transactional — the entire source ingestion rolls back if the update-policy query fails, guaranteeing sync, at the cost of blocking otherwise-healthy raw data whenever the derivation fails  
+C. Transactional — the entire source ingestion rolls back if the update-policy query fails, guaranteeing sync  
 D. Transactional, but only if the target table is a materialized view rather than a plain table  
 
 > [!success]- Answer
-> **C. Transactional — the entire source ingestion rolls back if the update-policy query fails, guaranteeing sync, at the cost of blocking otherwise-healthy raw data whenever the derivation fails**
+> **C. Transactional — the entire source ingestion rolls back if the update-policy query fails, guaranteeing sync**
 >
 > A transactional update policy is the documented mechanism for exactly this requirement — if the update-policy query fails, the entire ingestion into the source table rolls back too, so the raw and derived tables can never drift out of sync — at the real cost of blocking perfectly good raw data whenever the derivation query has a problem.
 >
@@ -322,54 +322,54 @@ An eventstream fails to connect to an Azure Event Hub with error `AADSTS65002`, 
 A. Regenerate the Event Hub's shared access key and update the eventstream's connection  
 B. Recreate the eventstream item from scratch, since the connection object itself is likely corrupted  
 C. Switch the eventstream's source from Event Hubs to a custom endpoint to bypass the error  
-D. Escalate to a tenant admin for preauthorization — this is a tenant-level gap that end users can't self-resolve  
+D. Escalate to a tenant admin for preauthorization  
 
 > [!success]- Answer
-> **D. Escalate to a tenant admin for preauthorization — this is a tenant-level gap that end users can't self-resolve**
+> **D. Escalate to a tenant admin for preauthorization**
 >
-> `AADSTS65002` specifically means the Fabric Eventstream service principal isn't preauthorized against that Event Hubs namespace at the Microsoft Entra tenant level — a fix only a tenant admin can apply, regardless of how correct the connection string or firewall rules look.
+> This is a tenant-level gap that end users can't self-resolve. `AADSTS65002` specifically means the Fabric Eventstream service principal isn't preauthorized against that Event Hubs namespace at the Microsoft Entra tenant level — a fix only a tenant admin can apply, regardless of how correct the connection string or firewall rules look.
 >
 > Option A and B both retry connection-level fixes that don't touch the actual tenant-level authorization gap. Option C sidesteps the underlying problem rather than fixing it, and changes the architecture for no real reason.
 
 ---
 
-## Question 17: Revoked Access That Still Seems to Work
+## Question 17: Which Permission Change Actually Needs a Workaround
 
 **Question** *(Hard)*:
 
-A security team revokes a lakehouse owner's OneLake permissions at 9:00 AM, expecting every delegated shortcut pointing at that lakehouse to stop working immediately. At 9:15 AM, a consumer workspace's delegated shortcut still returns data successfully, and the security team escalates it as a possible OneLake security bypass. What's the accurate explanation, and what would actually force an immediate cutoff?
+A security team audits four permission changes made at 9:00 AM against a lakehouse consumed elsewhere through delegated shortcuts: (1) a SQL `REVOKE` issued directly against a consumer-side Warehouse table, (2) the lakehouse owner's OneLake Read permission revoked at the producer, (3) a new OneLake security role/filter created at the producer affecting a shortcut source, and (4) an OneLake security role's membership changed at the producer. Which take effect immediately at the consumer, and which lag behind the cached-token window?
 
-A. Delegated shortcuts use a cached storage access token for the item owner that can remain valid for 30–60 minutes after revocation; forcing an immediate cutoff requires pausing/resuming the capacity or toggling the endpoint's identity mode, both of which drop existing SQL connections  
-B. This is a genuine security bypass — OneLake security roles have failed and must be reapplied  
-C. The revocation only propagates to Spark, never to delegated SQL access, so it will never take effect until the shortcut is recreated  
-D. OneLake security sync always takes a fixed 24 hours regardless of which access layer changed  
+A. All four are subject to the same up-to-30–60-minute lag, since every change ultimately routes through OneLake security  
+B. Only (1) applies immediately; (2) and (3) are both subject to the cached-storage-token lag; (4) isn't delayed by the token cache at all  
+C. Only (2) is delayed; (1), (3), and (4) all apply immediately since none of them touch the item owner's own storage token  
+D. None are delayed — Fabric re-validates every permission on each query regardless of layer  
 
 > [!success]- Answer
-> **A. Delegated shortcuts use a cached storage access token for the item owner that can remain valid for 30–60 minutes after revocation; forcing an immediate cutoff requires pausing/resuming the capacity or toggling the endpoint's identity mode, both of which drop existing SQL connections**
+> **B. Only (1) applies immediately; (2) and (3) are both subject to the cached-storage-token lag; (4) isn't delayed by the token cache at all**
 >
-> This is documented, expected caching behavior, not a bypass: delegated mode runs against a cached storage access token for the item owner rather than re-authorizing on every request, so a producer-side revocation can lag by up to 30–60 minutes at the consumer — and forcing an earlier cutoff means pausing/resuming the capacity or switching identity modes, both real operational tradeoffs since they drop existing SQL connections.
+> Four permission layers, four different propagation rules. A SQL `GRANT`/`REVOKE` or security policy at the consumer applies on the very next query — no cache involved. The item owner's OneLake permissions (2) and a new OneLake security role/filter affecting a shortcut source (3) are both gated by the same cached storage access token for the item owner, which can remain valid up to 30–60 minutes after either change. OneLake security role *membership* changes (4) are different again — they aren't delayed by the consumer's token cache and take effect on the normal sync path.
 >
-> Option B escalates documented caching behavior as if OneLake security itself had failed. Option C overstates the gap — the change does eventually take effect at the consumer, it just lags rather than never applying. Option D invents a fixed 24-hour figure that doesn't match any documented delegated-mode cache window.
+> Option A collapses four distinct propagation rules into one, which contradicts the documented table this scenario is built from. Option C gets the SQL-layer change right but wrongly claims (3) and (4) apply immediately — (3) shares the exact same cached-token lag as (2). Option D denies that any caching exists at all, which is the opposite of the documented, expected behavior.
 
 ---
 
-## Question 18: Same Query, Different Row Counts, No Errors
+## Question 18: RLS That Silently Doesn't Apply
 
 **Question** *(Hard)*:
 
-A source table has Row-Level Security defined in OneLake security. A data engineer queries a shortcut to that table from a Spark notebook and gets a filtered result matching their own permissions. A colleague queries the exact same shortcut through a SQL analytics endpoint currently in delegated identity mode and gets every row, unfiltered — no errors from either engine. What explains the discrepancy, and how would you align the two?
+A data engineer defines a restrictive RLS predicate in a OneLake security role, `RegionalReader`, scoped to a sales table, expecting each regional analyst to see only their own region's rows. `bob@contoso.com` is a member of `RegionalReader` and also a member of `AuditFullAccess`, a separate OneLake security role on the same table granting unrestricted full-row access for compliance auditing. Bob reports seeing every region's rows, not just his own, with no errors from any engine. What explains this, and what's the fix if RLS enforcement for Bob is actually required?
 
-A. Spark's result is the wrong one — OneLake security only applies at the SQL layer, not to Spark queries  
-B. The SQL analytics endpoint's delegated identity mode doesn't evaluate the caller against OneLake RLS, while Spark always enforces it — switch the endpoint to user identity mode to align results  
-C. The shortcut's transitive-hop limit (5) was silently exceeded on the SQL path, causing it to skip RLS evaluation  
-D. Both engines are serving cached query results from before the RLS rule existed — wait up to an hour for both to refresh  
+A. This is a bug — OneLake security roles are supposed to intersect, not union, so `RegionalReader`'s RLS should win  
+B. Multiple roles on the same table evaluate additively: the most permissive role wins, so RLS appears not to apply  
+C. Bob's SQL analytics endpoint is in delegated identity mode, which is bypassing the RLS predicate entirely  
+D. RLS predicates only apply to Spark queries, never to roles evaluated through OneLake security directly  
 
 > [!success]- Answer
-> **B. The SQL analytics endpoint's delegated identity mode doesn't evaluate the caller against OneLake RLS, while Spark always enforces it — switch the endpoint to user identity mode to align results**
+> **B. Multiple roles on the same table evaluate additively: the most permissive role wins, so RLS appears not to apply**
 >
-> Spark always enforces OneLake security, but a SQL analytics endpoint in delegated identity mode uses the item owner's identity and never evaluates the caller against RLS rules — producing exactly this pattern of a broader, unfiltered result via SQL and a correctly filtered result via Spark. Switching the endpoint to user identity mode aligns the two.
+> OneLake security roles union at the table/folder level — a user in *any* role granting access to a table can see it. When one role (`AuditFullAccess`) grants unrestricted full-row access and another (`RegionalReader`) carries a restrictive RLS predicate, the more permissive role wins for that user, and the RLS appears not to apply even though it's configured correctly. If RLS enforcement for Bob is actually required, restrictive and permissive roles need to stay mutually exclusive per user or group — Bob can't be a member of both if the restriction is supposed to hold.
 >
-> Option A gets the direction backward — Spark's filtered result is the one correctly enforcing OneLake security. Option C invents an unrelated transitive-shortcut mechanism with no connection to RLS enforcement. Option D misapplies the cached-query-results window, which applies specifically to switching between identity modes, not to a steady-state discrepancy between two engines.
+> Option A invents an intersect-not-union model that isn't how OneLake security roles evaluate at the table level. Option C reaches for the delegated-identity-mode explanation used elsewhere in this domain, but nothing in the scenario mentions a SQL analytics endpoint or its identity mode — the discrepancy here is role stacking, a different mechanism entirely. Option D invents a Spark-only scope for RLS that contradicts OneLake security's whole cross-engine design.
 
 ---
 
@@ -381,13 +381,13 @@ A new team inherits a lakehouse in a recently created workspace and wants faster
 
 A. `spark.databricks.delta.autoCompact.enabled` — this property controls V-Order directly  
 B. Nothing needs checking — V-Order has been on by default in every Fabric workspace since GA  
-C. `spark.sql.parquet.vorder.default` — new workspaces default it to `false` under the `writeHeavy` resource profile, so V-Order must be enabled deliberately for read-heavy tables  
+C. `spark.sql.parquet.vorder.default`  
 D. The Lakehouse Maintenance pipeline activity's schedule — V-Order only applies when triggered through a scheduled pipeline  
 
 > [!success]- Answer
-> **C. spark.sql.parquet.vorder.default — new workspaces default it to false under the writeHeavy resource profile, so V-Order must be enabled deliberately for read-heavy tables**
+> **C. `spark.sql.parquet.vorder.default`**
 >
-> New Fabric workspaces default to the `writeHeavy` resource profile, meaning `spark.sql.parquet.vorder.default = false` — V-Order is opt-in, not automatic, and read-heavy tables need it enabled deliberately at the session, table, or write-operation level.
+> New workspaces default it to `false` under the `writeHeavy` resource profile, so V-Order must be enabled deliberately for read-heavy tables. New Fabric workspaces default to the `writeHeavy` resource profile, meaning `spark.sql.parquet.vorder.default = false` — V-Order is opt-in, not automatic, and read-heavy tables need it enabled deliberately at the session, table, or write-operation level.
 >
 > Option A misattributes V-Order control to an unrelated auto-compaction property. Option B repeats the exact outdated assumption the scenario is testing against — the current default is off, not on. Option D invents a false dependency on the Lakehouse Maintenance pipeline activity; V-Order can be applied via `OPTIMIZE ... VORDER`, a table property, or a session/write setting, with no pipeline requirement.
 
@@ -402,10 +402,10 @@ A developer runs `VACUUM sales.orders RETAIN 48 HOURS` to reclaim storage faster
 A. The syntax is invalid — `RETAIN` must specify a value in `DAYS`, never `HOURS`  
 B. `VACUUM` can only be run from the portal's Maintenance dialog, never from a notebook command  
 C. The table has active deletion vectors, which block `VACUUM` below a 30-day retention window  
-D. The 7-day default retention safety check is blocking a shorter interval; use 7+ days, or explicitly set `spark.databricks.delta.retentionDurationCheck.enabled = false` after confirming no reader/writer needs the shorter history  
+D. The 7-day default retention safety check is blocking a shorter interval  
 
 > [!success]- Answer
-> **D. The 7-day default retention safety check is blocking a shorter interval; use 7+ days, or explicitly set spark.databricks.delta.retentionDurationCheck.enabled = false after confirming no reader/writer needs the shorter history**
+> **D. The 7-day default retention safety check is blocking a shorter interval**
 >
 > `VACUUM`'s default retention is 7 days, and 48 hours falls under that threshold — the portal and API deliberately fail shorter requests by default as a safety guard tied to time-travel history; the documented override is disabling the retention-duration check explicitly, only after confirming no dependency on that history.
 >
@@ -419,15 +419,15 @@ D. The 7-day default retention safety check is blocking a shorter interval; use 
 
 A team designs a Warehouse dashboard query to be a strong result-set caching candidate: a plain `SELECT`, well under 10,000 result rows, no security features, and no runtime constants. `result_cache_hit` still reads `0` on every single run. Before assuming a hidden disqualifier inside the query itself, what should the team check first?
 
-A. `sys.databases.is_result_set_caching_on` for the item — Microsoft disabled result-set caching tenant-wide as a known issue (since 2026-02-16), so the feature may simply be off rather than the query tripping a disqualifier  
+A. `sys.databases.is_result_set_caching_on` for the item  
 B. Whether the table has a declared `NOT ENFORCED` primary key, since caching requires one  
 C. Whether the query was issued from the Fabric portal instead of SSMS, since caching only applies to portal-issued queries  
 D. Whether `queryinsights` has finished its 15-minute ingestion lag before checking `result_cache_hit`  
 
 > [!success]- Answer
-> **A. sys.databases.is_result_set_caching_on for the item — Microsoft disabled result-set caching tenant-wide as a known issue (since 2026-02-16), so the feature may simply be off rather than the query tripping a disqualifier**
+> **A. `sys.databases.is_result_set_caching_on` for the item**
 >
-> Before hunting for a subtle disqualifier in an already-clean-looking query, check whether result-set caching is even live for the item — it was disabled tenant-wide as a known issue due to a stale-results bug, so a persistent `result_cache_hit = 0` may simply mean the feature is off, not that the query failed some documented rule.
+> Microsoft disabled result-set caching tenant-wide as a known issue (since 2026-02-16), so the feature may simply be off rather than the query tripping a disqualifier. Before hunting for a subtle disqualifier in an already-clean-looking query, check whether result-set caching is even live for the item — it was disabled tenant-wide as a known issue due to a stale-results bug, so a persistent `result_cache_hit = 0` may simply mean the feature is off, not that the query failed some documented rule.
 >
 > Option B invents a primary-key precondition for caching that isn't documented. Option C invents a client-surface restriction that doesn't exist — caching applies regardless of which client issued the query. Option D addresses a visibility delay in `queryinsights` history, not the underlying cause of a persistent `0` across many runs.
 
@@ -440,14 +440,14 @@ D. Whether `queryinsights` has finished its 15-minute ingestion lag before check
 A team investigating a slow join wants to "enable Adaptive Query Execution" to fix partition skew, assuming it's an opt-in feature they've somehow been missing. What should they be told, and where should they actually look?
 
 A. AQE must be enabled per-session with `spark.conf.set('spark.sql.adaptive.enabled', 'true')` before every job  
-B. AQE is on by default in every Fabric runtime — no enablement step exists; investigate why AQE's skew-join handling isn't fully absorbing this specific case, such as extreme skew that needs manual salting  
+B. AQE is on by default in every Fabric runtime  
 C. AQE only activates once autotune has converged on the query shape, after roughly 20–25 iterations  
 D. AQE is a preview feature currently limited to Runtime 2.0 and later  
 
 > [!success]- Answer
-> **B. AQE is on by default in every Fabric runtime — no enablement step exists; investigate why AQE's skew-join handling isn't fully absorbing this specific case, such as extreme skew that needs manual salting**
+> **B. AQE is on by default in every Fabric runtime**
 >
-> AQE ships on by default across every Fabric runtime — there's no enablement action to take. The real question for a still-slow, still-skewed join is why AQE's dynamic skew-join detection isn't fully resolving it, which usually points to skew extreme enough that manual salting or repartitioning is needed on top of AQE's default handling.
+> No enablement step exists; investigate why AQE's skew-join handling isn't fully absorbing this specific case, such as extreme skew that needs manual salting. AQE ships on by default across every Fabric runtime — there's no enablement action to take. The real question for a still-slow, still-skewed join is why AQE's dynamic skew-join detection isn't fully resolving it, which usually points to skew extreme enough that manual salting or repartitioning is needed on top of AQE's default handling.
 >
 > Option A invents an enablement step for a feature that's already on. Option C invents a dependency between AQE and autotune that doesn't exist — the two are independent, unrelated accelerators. Option D invents a runtime restriction; AQE is documented as on by default in all Fabric runtimes, not gated to Runtime 2.0+.
 
@@ -461,13 +461,13 @@ A data modeler declares a `NOT ENFORCED FOREIGN KEY` between a fact and dimensio
 
 A. No — `NOT ENFORCED` constraints are purely cosmetic and can't influence the optimizer; the improvement must come from something else  
 B. Yes, but only because declaring any constraint automatically triggers a full statistics rebuild  
-C. Yes — the declared relationship gives the optimizer extra cardinality and join-elimination information even though it's unenforced; the catch is the benefit only holds if the relationship is actually true in the data, since bad data won't be caught  
+C. Yes — the declared relationship gives the optimizer extra cardinality and join-elimination information  
 D. No — plan improvements only ever come from a CTAS rebuild, never from a constraint declaration  
 
 > [!success]- Answer
-> **C. Yes — the declared relationship gives the optimizer extra cardinality and join-elimination information even though it's unenforced; the catch is the benefit only holds if the relationship is actually true in the data, since bad data won't be caught**
+> **C. Yes — the declared relationship gives the optimizer extra cardinality and join-elimination information**
 >
-> `NOT ENFORCED` constraints genuinely feed the optimizer additional cardinality and join-elimination information even though the engine never validates them at write time — real plan-quality benefit, real risk: if the declared relationship isn't actually true in the data, nothing catches that, and the optimizer's assumptions (and potentially query results) can be wrong.
+> Bad data won't be caught. `NOT ENFORCED` constraints genuinely feed the optimizer additional cardinality and join-elimination information even though the engine never validates them at write time — real plan-quality benefit, real risk: if the declared relationship isn't actually true in the data, nothing catches that, and the optimizer's assumptions (and potentially query results) can be wrong.
 >
 > Option A denies a documented optimizer benefit that Fabric Warehouse explicitly attributes to declared, unenforced constraints. Option B invents an automatic statistics-rebuild trigger tied to constraint declaration that isn't documented. Option D denies that constraint declaration alone can influence plan quality, which contradicts the documented reason to declare `NOT ENFORCED` constraints at all.
 
@@ -482,10 +482,10 @@ Two lakehouses both accumulate small files past their Parquet file-count guardra
 A. Both refreshes fail outright with no queryable model, since guardrail behavior is identical across variants  
 B. Both models fall back to DirectQuery automatically and keep functioning, just at slower query speed  
 C. The Direct Lake on SQL model fails outright, while the Direct Lake on OneLake model silently falls back to DirectQuery  
-D. The Direct Lake on OneLake model's refresh fails and the model is unqueryable until compaction runs; the Direct Lake on SQL model's refresh succeeds with a fallback warning and keeps serving queries via DirectQuery  
+D. The Direct Lake on OneLake model fails and stays unqueryable until compaction runs; the SQL variant falls back and keeps serving  
 
 > [!success]- Answer
-> **D. The Direct Lake on OneLake model's refresh fails and the model is unqueryable until compaction runs; the Direct Lake on SQL model's refresh succeeds with a fallback warning and keeps serving queries via DirectQuery**
+> **D. The Direct Lake on OneLake model fails and stays unqueryable until compaction runs; the SQL variant falls back and keeps serving**
 >
 > Direct Lake guardrail behavior diverges sharply by variant: Direct Lake on OneLake has no DirectQuery fallback path at all, so exceeding guardrails behaves like Import mode — the refresh fails and the model is unqueryable until the underlying table is compacted back within limits. Direct Lake on SQL, by contrast, falls back to DirectQuery (if enabled), so the refresh succeeds with a warning and queries keep returning results, just at DirectQuery's slower latency.
 >
@@ -499,15 +499,15 @@ D. The Direct Lake on OneLake model's refresh fails and the model is unqueryable
 
 A team ingests raw sensor readings into an Eventhouse and needs two things: lightly parsing and typing each incoming event as it lands, and maintaining a deduplicated latest-reading-per-device result that dozens of dashboards query throughout the day. Which mechanism fits each need, and why not the other way around?
 
-A. Update policy for the per-event parsing/typing, since its cost is folded into ingestion; materialized view for the deduplicated aggregate, since dozens of dashboards would otherwise each re-run the deduplication  
+A. Update policy for the per-event parsing/typing  
 B. Update policy for both needs, since it's the lower-cost mechanism in every case  
 C. Materialized view for both needs, since dashboards should never query raw update-policy output directly  
 D. Materialized view for the parsing, since it can run continuously; update policy for the dedup, since it happens once per ingested batch  
 
 > [!success]- Answer
-> **A. Update policy for the per-event parsing/typing, since its cost is folded into ingestion; materialized view for the deduplicated aggregate, since dozens of dashboards would otherwise each re-run the deduplication**
+> **A. Update policy for the per-event parsing/typing**
 >
-> The cost-profile split is exactly this: update policies fold a small, predictable transform cost into every ingested event — ideal for simple parsing/typing with no aggregation state — while materialized views pay an aggregation cost once, continuously, in the background, which is far cheaper than dozens of dashboard refreshes each re-running the same deduplication over raw data.
+> Its cost is folded into ingestion; materialized view for the deduplicated aggregate, since dozens of dashboards would otherwise each re-run the deduplication. The cost-profile split is exactly this: update policies fold a small, predictable transform cost into every ingested event — ideal for simple parsing/typing with no aggregation state — while materialized views pay an aggregation cost once, continuously, in the background, which is far cheaper than dozens of dashboard refreshes each re-running the same deduplication over raw data.
 >
 > Option B ignores that a per-event update policy doesn't maintain a queryable rolling aggregate the way a materialized view does — it would leave every dashboard re-deduplicating raw data on each refresh. Option C overstates the restriction; simple per-event transforms are exactly what update policies are for, materialized views aren't required for every downstream read. Option D swaps the two mechanisms' actual execution models — parsing has no aggregation state to maintain continuously, and deduplication is precisely the kind of repeated-read aggregate a materialized view is built for.
 
@@ -520,14 +520,14 @@ D. Materialized view for the parsing, since it can run continuously; update poli
 A Copy activity moving a 5 TB on-premises SQL Server table into a Fabric Warehouse has its DIUs manually set to 256 (the maximum) and degree of copy parallelism set to 32, but throughput hasn't improved over the Auto defaults. The source table has no Partition option configured. What's the most likely explanation?
 
 A. 256 DIUs already exceeds what a single Copy activity can use effectively — lower it back to Auto  
-B. The source read itself is still single-threaded because no Partition option is configured on the source — parallelism settings have nothing to parallelize until the source read is split  
+B. The source read itself is still single-threaded because no Partition option is configured on the source  
 C. Fabric Warehouse sinks cap effective copy throughput regardless of DIU or parallelism settings, by design  
 D. Staging wasn't enabled on the Copy activity, which silently overrides both DIU and parallelism settings  
 
 > [!success]- Answer
-> **B. The source read itself is still single-threaded because no Partition option is configured on the source — parallelism settings have nothing to parallelize until the source read is split**
+> **B. The source read itself is still single-threaded because no Partition option is configured on the source**
 >
-> Degree of copy parallelism and DIUs are downstream of the source read itself — without a Partition option (Physical partitions of table, or Dynamic range) configured on the source, the read runs through a single connection regardless of how high DIUs or parallelism are set, since there's nothing yet to parallelize.
+> Parallelism settings have nothing to parallelize until the source read is split. Degree of copy parallelism and DIUs are downstream of the source read itself — without a Partition option (Physical partitions of table, or Dynamic range) configured on the source, the read runs through a single connection regardless of how high DIUs or parallelism are set, since there's nothing yet to parallelize.
 >
 > Option A doubles down on a setting that isn't the actual bottleneck. Option C invents a Warehouse-sink throughput cap that isn't documented. Option D invents a silent override relationship between staging and DIU/parallelism settings that doesn't exist — staging is required for Warehouse sinks regardless, and doesn't govern source-read parallelism.
 
@@ -542,10 +542,10 @@ A user reports that a nightly notebook "seems to run forever some nights and jus
 A. Open the Capacity Metrics app first, since this is a capacity-wide symptom → confirm `CapacityLimitExceeded` → scale up the SKU  
 B. Open Dataflow Gen2 refresh history first, since "runs forever" always means query folding loss → redesign the query for folding → no Spark-side change needed  
 C. Open Monitor hub's Historical runs first → confirm `SystemError` → rerun from the failed activity → no further action needed  
-D. Open the Spark application detail page's Stages/Executors tabs first → confirm executor OOM from data skew (exit code 137), evidenced by a handful of tasks with disproportionately larger input → enable AQE skew-join handling or repartition the skewed keys, then consider the native execution engine for the steady-state workload  
+D. Open the Spark application detail page's Stages/Executors tabs → confirm executor OOM from data skew → enable AQE skew-join handling or repartition  
 
 > [!success]- Answer
-> **D. Open the Spark application detail page's Stages/Executors tabs first → confirm executor OOM from data skew (exit code 137), evidenced by a handful of tasks with disproportionately larger input → enable AQE skew-join handling or repartition the skewed keys, then consider the native execution engine for the steady-state workload**
+> **D. Open the Spark application detail page's Stages/Executors tabs → confirm executor OOM from data skew → enable AQE skew-join handling or repartition**
 >
 > This is the full monitor → diagnose → optimize chain for a single-item symptom: the Spark application detail page's Stages tab confirms the described pattern (a handful of tasks with far larger input than their peers), the Executors tab's exit code 137 confirms OOM, and data skew is the textbook cause of exactly this shape — a small subset of long-running tasks eventually killed for memory, not a uniform slowdown. Once stabilized with AQE skew-join handling or repartitioning, the native execution engine is a reasonable next lever for the steady-state, computationally heavy workload.
 >

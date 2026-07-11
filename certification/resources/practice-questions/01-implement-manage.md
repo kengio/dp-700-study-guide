@@ -20,12 +20,12 @@ Domain 1 covers 30–35% of the DP-700 exam and spans four sections: Fabric work
 A team attaches a Spark environment created in Workspace A to a notebook running in Workspace B. Workspace A's environment defines a custom pool with X-Large nodes and several Full-mode libraries. What happens to the notebook's session in Workspace B?
 
 A. It inherits both the compute configuration and the libraries from Workspace A's environment  
-B. It inherits only the libraries and resources; compute configuration comes from Workspace B's own pool and compute settings  
+B. It inherits only the libraries and resources, not the compute configuration  
 C. The attachment fails outright because environments can't be shared across workspaces  
-D. It inherits only the compute configuration; libraries must be reinstalled manually in Workspace B  
+D. It inherits only the compute configuration; the libraries must be reinstalled manually from scratch in Workspace B  
 
 > [!success]- Answer
-> **B. It inherits only the libraries and resources; compute configuration comes from Workspace B's own pool and compute settings**
+> **B. It inherits only the libraries and resources, not the compute configuration**
 >
 > Attaching an environment from a different workspace silently drops that environment's compute configuration — the session falls back to Workspace B's own pool and compute settings, keeping only the libraries and resources.
 >
@@ -39,13 +39,13 @@ D. It inherits only the compute configuration; libraries must be reinstalled man
 
 A notebook has the native execution engine enabled at the environment level. A cell reads a Delta table and applies heavy JSON parsing transformations on a string column, alongside several standard aggregations. What should the team expect?
 
-A. The entire job fails because NEE doesn't support JSON at all  
-B. The JSON parsing portion falls back to the standard JVM Spark engine automatically, while other supported operators in the same query can still run natively  
-C. NEE accelerates JSON parsing identically to Parquet and CSV  
-D. The job must be rewritten in Scala for NEE to process JSON natively  
+A. The entire job fails outright, since NEE has no fallback path for an unsupported format  
+B. The JSON parsing portion falls back automatically to the standard JVM Spark engine  
+C. NEE accelerates JSON parsing identically to how it accelerates Parquet and CSV reads  
+D. The job must be entirely rewritten in Scala before NEE will process JSON natively  
 
 > [!success]- Answer
-> **B. The JSON parsing portion falls back to the standard JVM Spark engine automatically, while other supported operators in the same query can still run natively**
+> **B. The JSON parsing portion falls back automatically to the standard JVM Spark engine**
 >
 > JSON (and XML) aren't accelerated by the native execution engine, but NEE's automatic fallback is granular — an unsupported operator or format only causes that portion of the query to fall back, not the entire job.
 >
@@ -100,14 +100,14 @@ D. General settings
 A Lakehouse's `Files` folder contains two objects that differ only by case: `Report.csv` and `report.csv`. A user browses this folder using OneLake file explorer on Windows. What do they see?
 
 A. Both files, since OneLake file explorer preserves case exactly as OneLake stores it  
-B. Only the older of the two files, because Windows File Explorer is case-insensitive while OneLake is case-sensitive  
+B. Only the older of the two files  
 C. An error preventing the folder from opening at all  
 D. Both files merged into a single entry with combined content  
 
 > [!success]- Answer
-> **B. Only the older of the two files, because Windows File Explorer is case-insensitive while OneLake is case-sensitive**
+> **B. Only the older of the two files**
 >
-> This is a documented case-sensitivity mismatch: Windows File Explorer can't distinguish the two names, so when two files differ only by case, it shows only the oldest one.
+> Windows File Explorer is case-insensitive while OneLake is case-sensitive. This is a documented case-sensitivity mismatch: Windows File Explorer can't distinguish the two names, so when two files differ only by case, it shows only the oldest one.
 >
 > Option A gets the mismatch backward — OneLake's case sensitivity doesn't help here because the *client* (Windows File Explorer) is the limiting factor, not the server. Option C is too severe a failure mode for a naming collision like this. Option D invents a merge behavior that isn't how File Explorer resolves the collision — it picks one file, it doesn't combine content.
 
@@ -119,10 +119,10 @@ D. Both files merged into a single entry with combined content
 
 A team currently uses Azure Data Factory's Workflow Orchestration Manager, which relies on Blob Storage integration for storing DAG artifacts and native diagnostic logs/metrics for monitoring. They plan to migrate to Fabric's Apache Airflow job. Which capability will they need to replace, since Fabric's Apache Airflow job doesn't currently offer it?
 
-A. High availability  
-B. Deferrable operators  
+A. High availability for the Airflow scheduler component  
+B. Deferrable operators, which free idle workers during long waits  
 C. Diagnostic logs and metrics, plus Blob Storage integration  
-D. Pause/resume TTL  
+D. Pause/resume TTL for temporarily suspending an idle environment  
 
 > [!success]- Answer
 > **C. Diagnostic logs and metrics, plus Blob Storage integration**
@@ -141,11 +141,11 @@ A company runs a self-hosted GitHub Enterprise Server behind a private network, 
 
 A. Yes, as long as the server is reachable from the Fabric service's IP range  
 B. Yes, but only with a service principal, not OAuth2  
-C. No — Fabric only supports GitHub Enterprise's cloud offering, not self-hosted GitHub Enterprise Server  
+C. No — Fabric only supports GitHub Enterprise's cloud offering  
 D. Yes, if the workspace is on a Premium Per User (PPU) capacity  
 
 > [!success]- Answer
-> **C. No — Fabric only supports GitHub Enterprise's cloud offering, not self-hosted GitHub Enterprise Server**
+> **C. No — Fabric only supports GitHub Enterprise's cloud offering**
 >
 > Fabric Git integration supports GitHub Enterprise cloud (`.com`/`ghe.com`) only. A self-hosted GitHub Enterprise Server instance is explicitly unsupported, regardless of public accessibility, network configuration, or authentication method.
 >
@@ -160,12 +160,12 @@ D. Yes, if the workspace is on a Premium Per User (PPU) capacity
 A developer deleted a Lakehouse item in a Git-connected workspace but hasn't committed the deletion yet. They select **Undo** to revert to the last-synced state. What happens to the recreated Lakehouse?
 
 A. It's restored exactly as it was, including its original sensitivity label and ownership  
-B. It's recreated, but any sensitivity label is lost and ownership resets to the user who performed the Undo  
+B. It's recreated with fresh metadata: the sensitivity label is lost and ownership resets  
 C. Undo can't recreate a deleted item — only newly added items can be undone  
 D. The Lakehouse is restored with its label intact, but ownership resets  
 
 > [!success]- Answer
-> **B. It's recreated, but any sensitivity label is lost and ownership resets to the user who performed the Undo**
+> **B. It's recreated with fresh metadata: the sensitivity label is lost and ownership resets**
 >
 > Undoing a deleted item recreates it, but with fresh metadata: any sensitivity label applied to the original is lost, and ownership resets to whoever performed the Undo.
 >
@@ -200,12 +200,12 @@ D. They're preserved in a separate "uncommitted" folder in the new workspace
 A developer adds a new nullable column to an existing table by editing its `.sql` file in a Git-connected SQL database project, then triggers **Update from source control**. The table currently holds 50 million rows. What is the documented risk of this specific change?
 
 A. The update fails outright because ALTER TABLE isn't supported in database projects  
-B. The deployment process drops and recreates the table to apply the change, risking data loss unless a create-new-table/copy-data/rename workaround is used  
+B. The deployment process drops and recreates the table, risking data loss on a populated table  
 C. The column is added instantly with zero risk, since ALTER TABLE ADD COLUMN is always a metadata-only operation  
 D. The table is automatically backed up before the ALTER TABLE runs  
 
 > [!success]- Answer
-> **B. The deployment process drops and recreates the table to apply the change, risking data loss unless a create-new-table/copy-data/rename workaround is used**
+> **B. The deployment process drops and recreates the table, risking data loss on a populated table**
 >
 > This is a documented, exam-relevant limitation shared by both Git integration and deployment pipelines for Warehouse/SQL database: using `ALTER TABLE` to add a constraint or column currently causes the deployment process to drop and recreate the table, which is a genuine data-loss risk on a populated table.
 >
@@ -221,13 +221,13 @@ A pipeline admin unassigns a workspace from the Test stage of a deployment pipel
 
 A. Both are preserved and automatically reapplied when a new workspace is assigned to the stage  
 B. Deployment history is preserved, but deployment rules are lost  
-C. Both are permanently lost — deployment history and deployment rules for that stage are gone for good  
+C. Both are permanently lost  
 D. Deployment rules are preserved, but deployment history is lost  
 
 > [!success]- Answer
-> **C. Both are permanently lost — deployment history and deployment rules for that stage are gone for good**
+> **C. Both are permanently lost**
 >
-> Unassigning a workspace from a pipeline stage loses that stage's deployment history and any configured deployment rules — both disappear entirely, not just hidden until reassignment.
+> Deployment history and deployment rules for that stage are gone for good. Unassigning a workspace from a pipeline stage loses that stage's deployment history and any configured deployment rules — both disappear entirely, not just hidden until reassignment.
 >
 > Options A, B, and D each preserve at least one of the two, which doesn't match the documented behavior — neither history nor rules survive an unassignment. Anyone planning to swap a stage's workspace should treat this as a one-way loss and document rules externally if they'll need to reconfigure them.
 
@@ -239,13 +239,13 @@ D. Deployment rules are preserved, but deployment history is lost
 
 A team wants the Production stage's notebook to always point at the Production lakehouse after every deployment, regardless of which lakehouse the Test-stage notebook currently references. Where and how should this be configured?
 
-A. A default lakehouse deployment rule, defined on the notebook in the Production stage  
+A. A default lakehouse rule, defined on the notebook in the Production stage  
 B. A data source rule on the notebook, defined in the Development stage  
 C. A parameter rule on the notebook, defined in the Test stage  
 D. This isn't achievable — deployment rules don't support notebooks  
 
 > [!success]- Answer
-> **A. A default lakehouse deployment rule, defined on the notebook in the Production stage**
+> **A. A default lakehouse rule, defined on the notebook in the Production stage**
 >
 > Notebooks support exactly one deployment rule type: a **default lakehouse rule**, which sets the target stage's default lakehouse for that notebook on every subsequent deployment. Like all deployment rules, it's defined in the *target* stage — here, Production.
 >
@@ -281,13 +281,13 @@ A user holds the Contributor role in a workspace and wants to schedule a refresh
 
 A. Contributor role doesn't include schedule permissions at all  
 B. Only Admins can schedule any refresh, regardless of data source  
-C. The user lacks a separate permission on the gateway itself — gateway access is managed independently of workspace roles  
+C. The user lacks a separate permission on the gateway itself  
 D. The gateway must be reconfigured to allow Contributor-level access  
 
 > [!success]- Answer
-> **C. The user lacks a separate permission on the gateway itself — gateway access is managed independently of workspace roles**
+> **C. The user lacks a separate permission on the gateway itself**
 >
-> Scheduling refreshes through an on-premises data gateway requires Admin/Member/Contributor in the workspace *plus* a matching permission on the gateway itself — gateway access sits entirely outside the Fabric workspace-role system, typically administered by whoever runs the gateway cluster.
+> Gateway access is managed independently of workspace roles. Scheduling refreshes through an on-premises data gateway requires Admin/Member/Contributor in the workspace *plus* a matching permission on the gateway itself — gateway access sits entirely outside the Fabric workspace-role system, typically administered by whoever runs the gateway cluster.
 >
 > Option A is wrong — Contributor does include schedule-refresh capability in general; the gateway is the specific blocker here, not the workspace role. Option B overstates the requirement — Admin isn't needed for non-gateway refreshes, and even for gateway refreshes, Contributor is sufficient *if* the separate gateway permission is also granted. Option D describes a real-sounding but nonexistent "Contributor-level access" concept on the gateway side — gateway permissions aren't expressed in Fabric workspace-role terms at all.
 
@@ -302,10 +302,10 @@ A developer migrating security logic from an on-premises SQL Server database wan
 A. Yes, BLOCK predicates work identically to on-premises SQL Server  
 B. Yes, but only for INSERT and UPDATE, not DELETE  
 C. No — Fabric Warehouse doesn't support RLS of any kind  
-D. No — Fabric Warehouse RLS supports FILTER predicates only; there's no BLOCK predicate type  
+D. No — Fabric Warehouse RLS supports FILTER predicates only  
 
 > [!success]- Answer
-> **D. No — Fabric Warehouse RLS supports FILTER predicates only; there's no BLOCK predicate type**
+> **D. No — Fabric Warehouse RLS supports FILTER predicates only**
 >
 > Fabric Warehouse RLS is built on `CREATE SECURITY POLICY` with FILTER predicates, silently filtering rows from `SELECT`/`UPDATE`/`DELETE`. There's no BLOCK predicate type as in on-premises Azure SQL/SQL Server — a scenario describing a BLOCK predicate for Fabric Warehouse RLS is describing a feature Fabric doesn't have.
 >
@@ -361,13 +361,13 @@ A Lakehouse has the default `DefaultReader` role (virtual membership: all users 
 
 A. Nothing further — role scopes always take precedence over DefaultReader  
 B. RegionEUReader must be given a higher priority number than DefaultReader  
-C. The user's ReadAll permission must be removed (or DefaultReader deleted), since DefaultReader's virtual membership otherwise still grants them broad access  
+C. The user's ReadAll permission must be removed (or DefaultReader deleted)  
 D. The user must be removed from the workspace entirely  
 
 > [!success]- Answer
-> **C. The user's ReadAll permission must be removed (or DefaultReader deleted), since DefaultReader's virtual membership otherwise still grants them broad access**
+> **C. The user's ReadAll permission must be removed (or DefaultReader deleted)**
 >
-> OneLake security roles are additive at the table/folder level — a user in *any* role granting access to a table can see it. Because `DefaultReader`'s membership is computed dynamically from anyone holding ReadAll, the user keeps full unrestricted read access through that role no matter what a new narrower role says, unless `DefaultReader` is deleted or their underlying ReadAll permission is removed.
+> DefaultReader's virtual membership otherwise still grants them broad access. OneLake security roles are additive at the table/folder level — a user in *any* role granting access to a table can see it. Because `DefaultReader`'s membership is computed dynamically from anyone holding ReadAll, the user keeps full unrestricted read access through that role no matter what a new narrower role says, unless `DefaultReader` is deleted or their underlying ReadAll permission is removed.
 >
 > Option A is the exact misconception this scenario tests — there's no "narrower role wins" precedence rule in OneLake security. Option B invents a priority/ranking mechanism that doesn't exist for OneLake security roles. Option D is a wildly disproportionate fix — removing the user from the workspace entirely isn't necessary; only their ReadAll permission (or the DefaultReader role itself) needs to change.
 
@@ -382,12 +382,12 @@ A developer wants to mask a `DateOfBirth` column in a Fabric Warehouse table, fo
 A. `datetime()` works identically in Fabric, revealing a partial date exactly as it would on-premises  
 B. Fabric supports `datetime()`, but only through the SQL analytics endpoint, not the Warehouse's own T-SQL surface  
 C. Date columns are entirely unsupported by dynamic data masking in Fabric, regardless of function  
-D. Fabric documents only four masking functions — `default()`, `email()`, `random(m,n)`, `partial()` — so `datetime()` isn't one of them; dates use `default()` instead  
+D. Fabric documents only four masking functions  
 
 > [!success]- Answer
-> **D. Fabric documents only four masking functions — `default()`, `email()`, `random(m,n)`, `partial()` — so `datetime()` isn't one of them; dates use `default()` instead**
+> **D. Fabric documents only four masking functions**
 >
-> Fabric Data Warehouse's own masking-functions reference documents exactly four functions. Unlike some on-premises SQL Server versions, there's no dedicated `datetime()` partial-date-reveal function — a date column masked in Fabric uses `default()`, which fully replaces the value with a fixed date rather than partially revealing it.
+> `default()`, `email()`, `random(m,n)`, `partial()` — so `datetime()` isn't one of them; dates use `default()` instead. Fabric Data Warehouse's own masking-functions reference documents exactly four functions. Unlike some on-premises SQL Server versions, there's no dedicated `datetime()` partial-date-reveal function — a date column masked in Fabric uses `default()`, which fully replaces the value with a fixed date rather than partially revealing it.
 >
 > Options A and B both assume `datetime()` exists somewhere in Fabric, which it doesn't, in either the Warehouse or the SQL analytics endpoint. Option C overcorrects — date columns absolutely can be masked in Fabric, just with `default()` rather than a dedicated partial-date function.
 
@@ -399,13 +399,13 @@ D. Fabric documents only four masking functions — `default()`, `email()`, `ran
 
 A Lakehouse is labeled "Confidential." A data engineer creates a new Notebook directly from that Lakehouse (using the "New notebook" action from within the Lakehouse item). Does the new Notebook inherit the label?
 
-A. Yes — inheritance upon creation applies to specific non-Power BI patterns, including a Notebook created from a Lakehouse  
+A. Yes — inheritance upon creation also covers specific non-Power BI patterns  
 B. No — inheritance upon creation only applies to Power BI items  
 C. Only if the tenant has enabled mandatory labeling  
 D. Only if the Notebook is created inside the same domain as the Lakehouse  
 
 > [!success]- Answer
-> **A. Yes — inheritance upon creation applies to specific non-Power BI patterns, including a Notebook created from a Lakehouse**
+> **A. Yes — inheritance upon creation also covers specific non-Power BI patterns**
 >
 > "Inheritance upon creation" — a new item created from an existing labeled item inheriting that label — works for all Power BI items *and* a specific list of non-Power BI patterns, one of which is exactly this case: a Pipeline or Notebook created from a Lakehouse.
 >
@@ -419,13 +419,13 @@ D. Only if the Notebook is created inside the same domain as the Lakehouse
 
 A data analyst has Write permission on a semantic model but is not on the Fabric admin's list of authorized reviewers. Can they mark the semantic model as **Promoted**?
 
-A. Yes — Promoted only requires write permission on the item; no special authorization is needed, unlike Certified or Master data  
+A. Yes — Promoted only requires write permission on the item  
 B. No — Promoted requires the same tenant-admin authorization as Certified  
 C. No — only workspace Admins can apply any endorsement tier  
 D. Yes, but only if the item is also endorsed as Certified first  
 
 > [!success]- Answer
-> **A. Yes — Promoted only requires write permission on the item; no special authorization is needed, unlike Certified or Master data**
+> **A. Yes — Promoted only requires write permission on the item**
 >
 > Promoted is the one endorsement tier open to *any* item owner or write-permission holder. Certified and Master data both additionally require the applier to be on the Fabric admin's authorized-reviewers list — Promoted has no such gate.
 >
@@ -442,10 +442,10 @@ A team wants a Dataflow Gen2 item to automatically trigger a Notebook run immedi
 A. Yes, using Dataflow Gen2's built-in "On refresh complete" trigger  
 B. Yes, but only if the notebook is in the same workspace  
 C. Yes, via a Dataflow Gen2 output destination set to "Notebook"  
-D. No — Dataflow Gen2 has no control-flow or scheduling-of-other-items capability; only a pipeline can orchestrate other items  
+D. No — Dataflow Gen2 can't trigger or orchestrate other items on its own  
 
 > [!success]- Answer
-> **D. No — Dataflow Gen2 has no control-flow or scheduling-of-other-items capability; only a pipeline can orchestrate other items**
+> **D. No — Dataflow Gen2 can't trigger or orchestrate other items on its own**
 >
 > This is one of the most common exam distractor shapes: Dataflow Gen2 can be scheduled itself, but it has no native mechanism to trigger or orchestrate any other item. Only a pipeline provides that coordination layer — the correct architecture is a pipeline with a Dataflow Gen2 activity followed by a Notebook activity.
 >
@@ -459,13 +459,13 @@ D. No — Dataflow Gen2 has no control-flow or scheduling-of-other-items capabil
 
 A team migrating from Azure Data Factory has two kinds of workloads: straightforward copy-and-transform jobs that map cleanly to drag-and-drop activities, and a subset of Python-authored DAGs that call third-party Airflow provider operators unavailable in Fabric's pipeline activity catalog. What's the correct architecture?
 
-A. Use pipelines for the ADF-equivalent copy/transform workloads, and Apache Airflow job for the Python-DAG-based subset that depends on the Airflow provider ecosystem  
+A. Use pipelines for the copy/transform workloads, and Apache Airflow job for the Python-DAG subset  
 B. Force everything into pipelines, since Fabric consolidates all orchestration into one tool  
 C. Use Apache Airflow job for everything, since it's the newer "next generation" tool  
 D. Rewrite the third-party Airflow provider operators as custom pipeline activities before migrating  
 
 > [!success]- Answer
-> **A. Use pipelines for the ADF-equivalent copy/transform workloads, and Apache Airflow job for the Python-DAG-based subset that depends on the Airflow provider ecosystem**
+> **A. Use pipelines for the copy/transform workloads, and Apache Airflow job for the Python-DAG subset**
 >
 > Fabric's orchestration surface isn't limited to Dataflow Gen2/pipelines/notebooks — Apache Airflow job is a fourth, code-first surface purpose-built for teams with existing Airflow DAGs or a dependency on the Airflow provider ecosystem. The correct migration doesn't force every workload into one tool; it matches each workload's requirements to the tool that actually satisfies them.
 >
@@ -479,13 +479,13 @@ D. Rewrite the third-party Airflow provider operators as custom pipeline activit
 
 A pipeline has an interval-based schedule (Preview) configured. The team wants to change the window start time. What must they do?
 
-A. Edit the Window start time field directly and save  
-B. Disable the schedule, make the change, then re-enable it  
-C. Contact Fabric support to modify the schedule  
-D. Delete the existing interval-based schedule and create a new one with the desired window  
+A. Edit the Window start time field directly, since it behaves like any other schedule setting  
+B. Disable the schedule first, apply the change, then toggle it back to enabled  
+C. Open a support ticket, since interval-based schedules require Microsoft-side changes  
+D. Delete the interval-based schedule and create a new one with the desired window  
 
 > [!success]- Answer
-> **D. Delete the existing interval-based schedule and create a new one with the desired window**
+> **D. Delete the interval-based schedule and create a new one with the desired window**
 >
 > Unlike a fixed schedule, an interval-based schedule can't be enabled, disabled, or edited in place after creation — the only supported way to change it is to delete it and create a new one with the desired configuration.
 >
@@ -501,13 +501,13 @@ A team configures a OneLake event trigger and wants to filter it so it only fire
 
 A. A dedicated "Folder" field, separate from the event source configuration  
 B. It isn't possible to filter by folder — only by file extension  
-C. The `Subject` field — folder name, file name, file type, and container are all part of `Subject`, filtered together, not as separate top-level fields  
+C. The `Subject` field  
 D. A pipeline parameter passed at trigger creation time  
 
 > [!success]- Answer
-> **C. The `Subject` field — folder name, file name, file type, and container are all part of `Subject`, filtered together, not as separate top-level fields**
+> **C. The `Subject` field**
 >
-> Event triggers filter using the `Subject` field of the underlying CloudEvents-shaped event — folder name, file name, file type, and container are all encoded within `Subject`, not exposed as separate top-level filter fields in the trigger authoring UI.
+> Folder name, file name, file type, and container are all part of `Subject`, filtered together, not as separate top-level fields. Event triggers filter using the `Subject` field of the underlying CloudEvents-shaped event — folder name, file name, file type, and container are all encoded within `Subject`, not exposed as separate top-level filter fields in the trigger authoring UI.
 >
 > Option A invents a dedicated folder field that doesn't exist as a separate concept from `Subject`. Option B is too restrictive — file extension is one of several things filterable via `Subject`, not the only option. Option D confuses trigger-time filtering (which determines *whether* the pipeline runs) with pipeline parameters (which pass values *into* a run that's already been triggered) — these are different mechanisms.
 
@@ -520,12 +520,12 @@ D. A pipeline parameter passed at trigger creation time
 A pipeline includes a Web activity calling an external REST API. The team wants to configure a Preview retry condition that only retries on a `429` error code, failing fast on anything else. Is this supported directly on the Web activity?
 
 A. Yes — retry conditions are a universal setting available on every pipeline activity type  
-B. No — condition-based retry only covers Copy data, Notebook, Dataflow, and Stored procedure; Web can still use basic retry count/interval  
+B. No — condition-based retry only covers Copy data, Notebook, Dataflow, and Stored procedure  
 C. No — Web activities don't support any form of retry, conditional or otherwise  
 D. Yes, but only when the Web activity is nested inside a ForEach loop's child activities  
 
 > [!success]- Answer
-> **B. No — condition-based retry only covers Copy data, Notebook, Dataflow, and Stored procedure; Web can still use basic retry count/interval**
+> **B. No — condition-based retry only covers Copy data, Notebook, Dataflow, and Stored procedure**
 >
 > Conditional retries (matching a specific error code/message/failure type) are documented as available only for a narrow subset of activity types. A Web activity can still retry — every activity supports the basic count/interval retry settings — but it can't restrict *which* failures trigger a retry using the Preview condition feature.
 >
@@ -542,10 +542,10 @@ A pipeline needs to iterate over a list of regions, and for each region, iterate
 A. Nest a `ForEach` activity directly inside another `ForEach` activity's child activities  
 B. Use a single `ForEach` with a combined region+table array, flattened via an expression  
 C. Use `Until` instead of the inner `ForEach`, since `Until` supports nesting  
-D. The outer `ForEach` should call a child pipeline via `Invoke Pipeline` for each region, with the inner `ForEach` living inside that child pipeline  
+D. The outer `ForEach` should call a child pipeline via `Invoke Pipeline` per region  
 
 > [!success]- Answer
-> **D. The outer `ForEach` should call a child pipeline via `Invoke Pipeline` for each region, with the inner `ForEach` living inside that child pipeline**
+> **D. The outer `ForEach` should call a child pipeline via `Invoke Pipeline` per region**
 >
 > `ForEach` can't be nested directly inside another `ForEach` (or an `Until`). The documented workaround for genuinely nested iteration is a two-level pipeline pattern: the outer `ForEach` invokes a child pipeline per item via `Invoke Pipeline`, and the inner loop lives inside that child pipeline.
 >
