@@ -142,7 +142,6 @@ Query acceleration ≠ shortcut caching (that's the OneLake-wide GCS/S3/OPDG fea
 - Query acceleration is a query-speed fix only — it never grants materialized views/update policies on a shortcut.
 - Shortcut caching and query acceleration are different mechanisms for different layers (general OneLake shortcuts vs. Eventhouse-specific) — don't conflate them.
 - Metadata mirroring moves zero data — confusing it with database mirroring leads to expecting replication lag that doesn't apply.
-- Backward-deployment-style thinking doesn't apply here, but the same "read requirement literally" discipline does: "everything ends up in OneLake" is never a valid reason to skip the store/tool decision matrix.
 - Eventstream is not a query engine — always trace a streaming scenario to its actual query destination before answering "which engine."
 
 ## Before the Exam, I Can…

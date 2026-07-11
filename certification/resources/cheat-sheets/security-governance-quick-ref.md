@@ -54,6 +54,8 @@ Max **1,000** users/groups per workspace in roles. Multi-group membership → **
 
 Item permission and workspace role are **independent grants** — removing an item share does nothing if the user still holds Contributor+ workspace role (they see it anyway). Full revocation requires clearing **both** layers.
 
+- Gateway permissions are a ==third independent axis== — configuring a scheduled refresh through an on-prem data gateway needs Contributor+ AND a permission on the gateway itself (managed outside Fabric roles); Contributor everywhere still can't schedule the refresh without it.
+
 RLS on a Power BI semantic model (DAX roles) is enforced **only for Viewer** — Contributor+ already has blanket view/modify access that supersedes it. Apps distribute packaged content to audiences; they never grant workspace or item access.
 
 ---
@@ -140,7 +142,7 @@ Deny-by-default. Supported items: ==Lakehouse== (Read, ReadWrite), Azure Databri
 | ==default()== | Type-based full mask (strings→`XXXX`, numerics→`0`, dates→`1900-01-01`) | |
 | ==email()== | `aXXX@XXXX.com` shape | |
 | ==random(m,n)== | Random numeric in range | numeric only |
-| partial(prefix,"pad",suffix) | Custom partial reveal | `partial(0,"XXX-XX-",4)` → `XXX-XX-6789` |
+| ==partial(prefix,"pad",suffix)== | Custom partial reveal | `partial(0,"XXX-XX-",4)` → `XXX-XX-6789` |
 
 - Fabric ships **only these 4** — no `datetime()` (that's an on-prem SQL Server extra). Date columns use `default()`.
 - Reveal unmasked: `UNMASK` on the column, or `CONTROL` on the database.
@@ -195,6 +197,7 @@ Write permission alone is **never** sufficient for Certified/Master data — the
 ## Before the Exam, I Can…
 
 - [ ] State which of the 4 workspace roles gets ReadData vs. ReadAll, and explain why Viewer is different
+- [ ] Explain why a Contributor still can't configure a gateway refresh
 - [ ] Recite the Who-Bypasses-What matrix from memory for RLS (SQL), DDM, OneLake security, and DAX RLS
 - [ ] Write the RLS drop→alter→recreate sequence and explain why direct `ALTER FUNCTION` fails
 - [ ] Name all 4 DDM mask functions and explain why DDM is not encryption
