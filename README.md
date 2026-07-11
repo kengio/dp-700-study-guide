@@ -39,10 +39,18 @@ tags:
   Aligned to the official skills-measured list updated <b>July 21, 2026</b>.</i>
 </p>
 
+<p align="center">
+  <a href="https://kengio.github.io/dp-700-study-guide/"><strong>🎯 Try the live adaptive practice quiz →</strong></a>
+</p>
+
+> [!TIP]
+> The **adaptive practice quiz is live**: 232 questions across 4 banks (82 practice + 3 × 50-question mock exams), scored and tracked entirely in your browser — no login, no server. **[Open it →](https://kengio.github.io/dp-700-study-guide/)**
+
 ---
 
 ## Contents
 
+- 🎯 [**Live practice quiz**](https://kengio.github.io/dp-700-study-guide/) — 232 questions, 4 banks, in your browser now
 - [Why this guide exists](#why-this-guide-exists)
 - [Who this is for](#who-this-is-for)
 - [What's covered](#whats-covered)
@@ -53,6 +61,7 @@ tags:
 - [Study roadmap](#study-roadmap) — 3-week, 6-week, and 10-week plans
 - [Repository layout](#repository-layout)
 - [Official Microsoft resources](#official-microsoft-resources)
+- [Project roadmap](#project-roadmap)
 - [Translations](#translations)
 - [Contributing](#contributing)
 - [License](#license)
@@ -83,6 +92,7 @@ You don't need to be taking the exam to get value — the guide doubles as a ref
 - **3 full-length mock exams** (50 questions each — 45 standalone + a 5-question case study mirroring the real exam format)
 - **Per-mock debrief files** mapping every missed question to a topic file + cheat sheet
 - **Hands-on lab pack** — runnable walkthroughs across lakehouse, warehouse, orchestration, and Real-Time Intelligence scenarios
+- **[Live adaptive practice quiz](https://kengio.github.io/dp-700-study-guide/)** — browser-based, 232 questions across 4 banks, localStorage progress tracking, no login
 - **Final review** designed to read in 20 minutes the morning of the exam
 - **PySpark / T-SQL / KQL code examples** side-by-side wherever the exam tests a choice between them
 
@@ -427,6 +437,22 @@ dp-700-study-guide/
 - [Exam Readiness Zone](https://learn.microsoft.com/en-us/shows/exam-readiness-zone/)
 
 </details>
+
+## Project roadmap
+
+Status as of **v1.0.0** (2026-07-11) — the guide is complete and out of scaffold phase:
+
+- ✅ Repository scaffold, CI (markdownlint + lychee), issue/PR templates
+- ✅ 11 topic sections — all three domains, mapped 1:1 to the July 21, 2026 blueprint
+- ✅ 7 cheat sheets + appendix (glossary, comparison tables, error-message reference)
+- ✅ 82 practice questions across all three domains, with full explanations
+- ✅ 3 full mock exams (3 × 50 questions — 45 standalone + 5-question case study each) with per-question debriefs
+- ✅ 10 hands-on labs, chained on one shared workspace across every exam domain
+- ✅ 146-card Anki deck, final review, exam tips, official links, companion-exam and renewal guides
+- ✅ [Adaptive practice quiz](https://kengio.github.io/dp-700-study-guide/) — live on GitHub Pages, 232 questions across 4 banks
+- ✅ i18n scaffolding (`i18n/`, `TRANSLATING.md`) — ready for community translations, no locales claimed yet
+
+See [`CHANGELOG.md`](./CHANGELOG.md) for the full version history.
 
 ## Translations
 

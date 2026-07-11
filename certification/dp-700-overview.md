@@ -95,7 +95,7 @@ pie title Exam Domain Distribution
 | [Code Examples](resources/code-examples/code-examples.md) | Standalone PySpark / T-SQL / KQL example files (`resources/code-examples/{pyspark,tsql,kql}/`) |
 | [Cheat Sheets](resources/cheat-sheets/cheat-sheets.md) | Quick-reference guides for exam topics, each with Gotchas & Traps + Before the Exam checklist |
 | [Anki Deck](resources/anki/anki-deck.md) | 146 spaced-repetition cards generated from the cheat sheets (`resources/anki/`) |
-| Adaptive Practice Quiz | Browser-based JSON-driven quiz ported from the practice quiz app (`practice/`) — ships with the practice quiz app |
+| [Adaptive Practice Quiz](https://kengio.github.io/dp-700-study-guide/) | **Live** — browser-based quiz, 232 questions across 4 banks (82 practice + 3 mock exams), localStorage progress tracking (`practice/`) |
 | [Hands-on Labs](resources/labs/labs.md) | Runnable labs across lakehouse, warehouse, orchestration, and Real-Time Intelligence scenarios (`resources/labs/`) |
 | [Final Review](resources/final-review.md) | 20-minute exam-morning scan: top facts and last-minute traps for all three domains |
 | [Renewal Guide](resources/renewal-guide.md) | DP-700 annual-renewal workflow |

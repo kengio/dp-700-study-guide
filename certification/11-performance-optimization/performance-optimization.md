@@ -109,4 +109,4 @@ flowchart TD
 
 ---
 
-**[← Previous](../10-error-resolution/error-resolution.md) | [↑ Back to Certification](../dp-700-overview.md) | [Next →](./01-lakehouse-optimization.md)**
+**[← Previous](../10-error-resolution/error-resolution.md) | [↑ Back to Certification](../dp-700-overview.md) | [Next →](../resources/cheat-sheets/cheat-sheets.md)**

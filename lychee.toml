@@ -29,9 +29,4 @@ exclude_path = [
   "node_modules/",
   ".git/",
   ".reference/",
-  # RELEASE_NOTES.md uses GitHub release-page-relative paths (../../README.md)
-  # that resolve correctly when rendered on the release page but not from the
-  # file's location in the repo root. It is a transient artifact, not a
-  # canonical file, so we exclude it from link checks.
-  "RELEASE_NOTES.md",
 ]

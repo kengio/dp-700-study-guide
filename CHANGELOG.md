@@ -4,6 +4,21 @@ Notable changes to the DP-700 study guide.
 
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/). Dates use ISO 8601. Each section is grouped under the Microsoft blueprint date it tracks, so future readers can match guide versions to the version of the exam they were preparing for.
 
+## [1.0.0] - 2026-07-11
+
+The complete DP-700 study guide, aligned to the **July 21, 2026** blueprint.
+
+### Added
+
+- Repository scaffold + CI (markdownlint-cli2 + lychee link checking on every PR and push to `main`)
+- 11 topic sections across all three domains, each mapped 1:1 to the official skills-measured list
+- 7 cheat sheets + appendix (glossary, comparison tables, error-message reference)
+- 82 practice questions across three domains, with full explanations
+- 3 full mock exams (150 questions total — 45 standalone + 5-question case study each) with per-mock debriefs
+- 10 hands-on labs chained on one shared workspace across every exam domain
+- Anki deck (146 cards) + final review + exam tips, official links, companion-exam, and renewal-guide resources
+- Adaptive practice quiz app, live on GitHub Pages (232 questions across 4 banks)
+
 ## [0.1.0] - 2026-07-11
 
 Initial scaffold of the open-source DP-700 study guide. Aligned to the Microsoft skills-measured list updated **2026-07-21**.
