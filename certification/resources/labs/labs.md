@@ -6,7 +6,7 @@ tags:
   - fabric
   - hands-on
   - labs
-status: in-progress
+status: complete
 ---
 
 # DP-700 Hands-on Labs
