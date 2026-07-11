@@ -56,7 +56,7 @@ tags:
 | 16 | Duplicate Rows After a Retried Append | Implement full and incremental loads | [01-full-incremental-loads.md](../../05-loading-patterns/01-full-incremental-loads.md) | [language-syntax-map](../cheat-sheets/language-syntax-map.md) |
 | 17 | SCD Type 2 in T-SQL vs. Delta | Implement dimensional model loading | [02-dimensional-model-loading.md](../../05-loading-patterns/02-dimensional-model-loading.md) | [language-syntax-map](../cheat-sheets/language-syntax-map.md) |
 | 18 | Default Output Mode for a Streaming Write | Implement a streaming loading pattern | [03-streaming-loading-pattern.md](../../05-loading-patterns/03-streaming-loading-pattern.md) | [streaming-windowing](../cheat-sheets/streaming-windowing-quick-ref.md) |
-| 19 | Choosing a Store for OLTP Plus Analytics | Choose a data store | [01-choosing-data-store.md](../../06-batch-ingestion/01-choosing-data-store.md) | [decision-matrices](../cheat-sheets/decision-matrices-quick-ref.md) |
+| 19 | A Star-Schema Load That Also Needs BI on the Same Tables | Choose a data store | [01-choosing-data-store.md](../../06-batch-ingestion/01-choosing-data-store.md) | [decision-matrices](../cheat-sheets/decision-matrices-quick-ref.md) |
 | 20 | Caching an ADLS Gen2 Shortcut | Implement OneLake shortcuts | [02-onelake-shortcuts.md](../../06-batch-ingestion/02-onelake-shortcuts.md) | — |
 | 21 | Writing a Correction Into a Mirrored Table | Implement mirroring | [03-mirroring.md](../../06-batch-ingestion/03-mirroring.md) | — |
 | 22 | Upsert Write Behavior on a File Sink | Implement pipeline ingestion | [04-pipeline-ingestion.md](../../06-batch-ingestion/04-pipeline-ingestion.md) | — |
@@ -73,28 +73,28 @@ tags:
 
 | # | Topic | Blueprint skill | Re-read | Cheat sheet |
 | :---: | :--- | :--- | :--- | :--- |
-| 31 | Dataflow Gen1 in Monitor Hub | Monitor Fabric items and activities | [01-monitoring-surfaces.md](../../09-monitoring-alerting/01-monitoring-surfaces.md) | [monitoring-surfaces](../cheat-sheets/monitoring-surfaces-quick-ref.md) |
+| 31 | Where a Pipeline's Notebook Activity Deep-Links To | Monitor Fabric items and activities | [01-monitoring-surfaces.md](../../09-monitoring-alerting/01-monitoring-surfaces.md) | [monitoring-surfaces](../cheat-sheets/monitoring-surfaces-quick-ref.md) |
 | 32 | Finding Dataflow Gen2 History Beyond 50 Rows | Monitor Fabric items and activities | [01-monitoring-surfaces.md](../../09-monitoring-alerting/01-monitoring-surfaces.md) | [monitoring-surfaces](../cheat-sheets/monitoring-surfaces-quick-ref.md) |
 | 33 | Direct Lake on OneLake Exceeding Guardrails | Monitor semantic model refresh | [02-semantic-model-refresh.md](../../09-monitoring-alerting/02-semantic-model-refresh.md) | [monitoring-surfaces](../cheat-sheets/monitoring-surfaces-quick-ref.md) |
 | 34 | Detecting a Threshold Crossing | Configure Activator alerts | [03-activator-alerts.md](../../09-monitoring-alerting/03-activator-alerts.md) | [monitoring-surfaces](../cheat-sheets/monitoring-surfaces-quick-ref.md) |
-| 35 | Alerting Directly From the Capacity Metrics App | Configure Activator alerts | [03-activator-alerts.md](../../09-monitoring-alerting/03-activator-alerts.md) | [monitoring-surfaces](../cheat-sheets/monitoring-surfaces-quick-ref.md) |
-| 36 | A Referencing Query That Fails After Staging | Resolve pipeline and Dataflow errors | [01-pipeline-dataflow-errors.md](../../10-error-resolution/01-pipeline-dataflow-errors.md) | [monitoring-surfaces](../cheat-sheets/monitoring-surfaces-quick-ref.md) |
+| 35 | Alerting on a Scheduled KQL Query vs. a Live Eventstream | Configure Activator alerts | [03-activator-alerts.md](../../09-monitoring-alerting/03-activator-alerts.md) | [monitoring-surfaces](../cheat-sheets/monitoring-surfaces-quick-ref.md) |
+| 36 | A Staging Permission Error With No Gateway in Sight | Resolve pipeline and Dataflow errors | [01-pipeline-dataflow-errors.md](../../10-error-resolution/01-pipeline-dataflow-errors.md) | [monitoring-surfaces](../cheat-sheets/monitoring-surfaces-quick-ref.md) |
 | 37 | Exit Code 143 During a Scale-Down | Resolve notebook and T-SQL errors | [02-notebook-tsql-errors.md](../../10-error-resolution/02-notebook-tsql-errors.md) | [optimization-levers](../cheat-sheets/optimization-levers-quick-ref.md) |
-| 38 | AADSTS65002 on an Eventstream Source | Resolve real-time errors | [03-realtime-errors.md](../../10-error-resolution/03-realtime-errors.md) | [monitoring-surfaces](../cheat-sheets/monitoring-surfaces-quick-ref.md) |
+| 38 | Data Is Arriving, Just Late | Resolve real-time errors | [03-realtime-errors.md](../../10-error-resolution/03-realtime-errors.md) | [monitoring-surfaces](../cheat-sheets/monitoring-surfaces-quick-ref.md) |
 | 39 | Delegated Mode Against an RLS-Protected Source | Resolve shortcut errors | [04-shortcut-errors.md](../../10-error-resolution/04-shortcut-errors.md) | [security-governance](../cheat-sheets/security-governance-quick-ref.md) |
 | 40 | Order of Operations in a Combined OPTIMIZE | Optimize Lakehouse performance | [01-lakehouse-optimization.md](../../11-performance-optimization/01-lakehouse-optimization.md) | [optimization-levers](../cheat-sheets/optimization-levers-quick-ref.md) |
 | 41 | Clearing the Warehouse's In-Memory Cache | Optimize Warehouse performance | [02-warehouse-optimization.md](../../11-performance-optimization/02-warehouse-optimization.md) | [optimization-levers](../cheat-sheets/optimization-levers-quick-ref.md) |
 | 42 | Autotune With High Concurrency Enabled | Optimize Spark performance | [03-spark-optimization.md](../../11-performance-optimization/03-spark-optimization.md) | [optimization-levers](../cheat-sheets/optimization-levers-quick-ref.md) |
-| 43 | Confirming AQE Is Active on a New Workspace | Optimize Spark performance | [03-spark-optimization.md](../../11-performance-optimization/03-spark-optimization.md) | [optimization-levers](../cheat-sheets/optimization-levers-quick-ref.md) |
+| 43 | A Join That Gets Faster Mid-Query, With No Hint Written | Optimize Spark performance | [03-spark-optimization.md](../../11-performance-optimization/03-spark-optimization.md) | [optimization-levers](../cheat-sheets/optimization-levers-quick-ref.md) |
 | 44 | Raising Throughput on a Low-Partition Event Hub | Optimize real-time performance | [04-realtime-optimization.md](../../11-performance-optimization/04-realtime-optimization.md) | [optimization-levers](../cheat-sheets/optimization-levers-quick-ref.md) |
-| 45 | Two Semantic Models, Two Guardrail Outcomes | Optimize pipeline and query performance | [05-pipeline-query-optimization.md](../../11-performance-optimization/05-pipeline-query-optimization.md) | [optimization-levers](../cheat-sheets/optimization-levers-quick-ref.md) |
+| 45 | Reframing After a Compaction Pass, Not a Data Change | Monitor semantic model refresh | [02-semantic-model-refresh.md](../../09-monitoring-alerting/02-semantic-model-refresh.md) | [monitoring-surfaces](../cheat-sheets/monitoring-surfaces-quick-ref.md) |
 
 ### Case Study: Fabrikam Freight (Qs 46–50)
 
 | # | Topic | Blueprint skill | Re-read | Cheat sheet |
 | :---: | :--- | :--- | :--- | :--- |
 | 46 | Orchestrating the Nightly Finance Load | Choose an orchestration tool (D1) | [01-choosing-orchestration-tool.md](../../04-orchestration/01-choosing-orchestration-tool.md) | [decision-matrices](../cheat-sheets/decision-matrices-quick-ref.md) |
-| 47 | Regional RLS Behind a Pooled Login | Implement RLS, CLS, and OLS (D1) | [02-granular-access-controls.md](../../03-security-governance/02-granular-access-controls.md) | [security-governance](../cheat-sheets/security-governance-quick-ref.md) |
+| 47 | Row Filtering and Masking Behind a Contributor Role | Implement RLS, CLS, and OLS (D1) | [02-granular-access-controls.md](../../03-security-governance/02-granular-access-controls.md) | [security-governance](../cheat-sheets/security-governance-quick-ref.md) |
 | 48 | Choosing a Streaming Engine for Dispatch | Choose a streaming engine (D2) | [01-choosing-streaming-engine.md](../../08-streaming-data/01-choosing-streaming-engine.md) | [decision-matrices](../cheat-sheets/decision-matrices-quick-ref.md) |
 | 49 | Idempotent Loading for Partner CSV Drops | Implement full and incremental loads (D2) | [01-full-incremental-loads.md](../../05-loading-patterns/01-full-incremental-loads.md) | [language-syntax-map](../cheat-sheets/language-syntax-map.md) |
 | 50 | Paging Before the Capacity Throttles | Configure Activator alerts (D3) | [03-activator-alerts.md](../../09-monitoring-alerting/03-activator-alerts.md) | [monitoring-surfaces](../cheat-sheets/monitoring-surfaces-quick-ref.md) |
