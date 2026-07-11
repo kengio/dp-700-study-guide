@@ -1421,7 +1421,7 @@
 
   ${timeRowsHtml || streakRow ? `<h2>Stats</h2><table class="stats"><tbody>${timeRowsHtml}${streakRow}</tbody></table>` : ""}
 
-  <p class="footer">Exported from Databricks Certification Practice — a study aid, not the official exam.</p>
+  <p class="footer">Exported from DP-700 Certification Practice — a study aid, not the official exam.</p>
 </main></body></html>`;
 
     downloadBlob(new Blob([html], { type: "text/html;charset=utf-8" }),
