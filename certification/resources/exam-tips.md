@@ -45,8 +45,8 @@ DP-700's 100-minute window is tighter than DP-800's 120 minutes, so pacing disci
 
 | Block | Allocation | Pace |
 | :--- | :--- | :--- |
-| Standalone questions (~45) | ~75 min | ≈ 1:40 per question |
-| Case-study block (5 sub-questions) | ~20 min | Read scenario once (~3 min), then ~3:30 per sub-question |
+| Standalone questions (~45) | ~80 min | ≈ 1:47 per question |
+| Case-study block (5 sub-questions) | ~12–15 min | ≈2.5–3 min per sub-question after a ~3-min scenario read |
 | Final review of flagged questions | ~5 min | Triage, don't re-derive from scratch |
 
 - **Skip and flag, don't stall.** If a question needs more than ~2 minutes of first-pass thought, mark it for review and move on — a 100-minute exam punishes getting stuck harder than a 120-minute one.
@@ -72,10 +72,10 @@ DP-700 mirrors DP-800's interactive case-study format — one multi-paragraph sc
 - **Read the full scenario once, end to end, before opening the first sub-question.** Requirements stated near the end of the scenario often reframe details from the opening paragraphs.
 - **Map facts to sub-questions as you read**, not after — jot a one-line note per stated requirement (workspace layout, security constraint, performance target, existing tooling) so you're not re-scanning the full scenario for each sub-question.
 - **You can move between sub-questions inside a case study, but once you submit the case study block you can't return to it** — use the in-exam Review/flag mechanism inside the case before moving on.
-- **Case studies are cross-domain by design.** This guide's three mock-exam case studies (Fabrikam Freight, and two more) each blend orchestration, security, and performance in one scenario — expect the real exam to do the same. Don't assume a case study only tests the domain its opening paragraph seems to be about.
+- **Case studies are cross-domain by design.** This guide's three mock-exam case studies — Fabrikam Freight (Mock 1), Meridian Health Network (Mock 2), and Nordscape Games (Mock 3, the hardest of the three) — each blend orchestration, security, and performance in one scenario — expect the real exam to do the same. Don't assume a case study only tests the domain its opening paragraph seems to be about.
 - **The "best" answer satisfies every stated constraint** — eliminate any option that fails one requirement before comparing the rest on cost or elegance.
 
-> **Practice with the case studies in this guide:** [Mock Exam 1](./mock-exam/questions.md), [Mock Exam 2](./mock-exam-2/questions.md), [Mock Exam 3](./mock-exam-3/questions.md) — each ends with a 5-question case-study block (Qs 46–50) matching the real DP-700 format.
+> **Practice with the case studies in this guide:** [Mock Exam 1](./mock-exam/questions.md), [Mock Exam 2](./mock-exam-2/questions.md), [Mock Exam 3](./mock-exam-3/questions.md) — each ends with a 5-question case-study block (Qs 46–50, ~12–15 minutes) matching the real DP-700 format.
 
 ## Elimination Tactics for This Guide's Distractor Patterns
 

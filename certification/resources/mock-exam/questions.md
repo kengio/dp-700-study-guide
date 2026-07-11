@@ -828,7 +828,7 @@ D. `OPTIMIZE` is blocked entirely on any table feeding a Direct Lake on OneLake 
 
 ---
 
-## Case Study: Fabrikam Freight *(5 linked questions, ~10 minutes)*
+## Case Study: Fabrikam Freight *(5 linked questions, ~12–15 minutes)*
 
 > [!info] Case-study format
 > The real DP-700 includes interactive case studies — a multi-paragraph scenario followed by linked questions. Read the whole scenario once, then answer Q46–Q50 in order. You can navigate within the case study, but cannot return to it after submission.

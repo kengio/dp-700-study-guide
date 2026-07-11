@@ -233,12 +233,14 @@ The sharpest, most-repeated traps pulled from the seven cheat sheets' Gotchas & 
 2. **Direct Lake on OneLake vs. Direct Lake on SQL behave oppositely on guardrail breach** — OneLake fails outright, SQL falls back to DirectQuery. The single most repeated Domain 3 miss across all three mocks.
 3. **`DefaultReader`'s virtual membership silently defeats a new restrictive OneLake security role** unless it's deleted or the user's `ReadAll` is removed — "I added a narrow role but the user still sees everything" is describing this.
 4. **A watermark never rejects late data** — it only bounds how long state is retained for dedup/windowed aggregation. Late data isn't dropped, just excluded from an already-finalized window's result.
-5. **Result-set caching is tenant-disabled right now in Fabric Warehouse** — a `result_cache_hit = 0` today may simply mean the feature is off, not that a query tripped a disqualifier.
+5. **Viewer gets `ReadData` (TDS/T-SQL) but NOT `ReadAll` (OneLake APIs/Spark)** — the single most-tested row in the role table; don't assume Viewer access is symmetric across query surfaces.
 6. **Activator cannot alert directly from the Capacity Metrics app or the SQL analytics endpoint** — route those through Real-Time hub capacity events / the Warehouse SQL query preview mechanism instead.
 7. **V-Order defaults to OFF on new workspaces** — don't assume older material or intuition that says "V-Order is on" still applies.
 8. **AQE is already on by default everywhere** — "enable AQE" as a proposed fix is always a distractor; the real question is why it isn't fully absorbing the problem.
 9. **RLS ignores `CONTROL`; DDM and OneLake security both honor it.** Don't apply one control's bypass rule to another — Warehouse T-SQL RLS filters even `db_owner`, but DDM and OneLake security are both bypassed by implicit Admin/Member/Contributor permissions.
 10. **A `ForEach`-wrapped per-row pattern is never fixed by tuning `batchCount`** — same for Warehouse's row-by-row `INSERT` anti-pattern. Both need a set-based redesign, not parameter tuning.
+
+> Known issue (not exam-testable, but useful in the field): result-set caching has been tenant-disabled in Fabric Warehouse since 2026-02-16 — a live `result_cache_hit=0` may just mean the feature is off.
 
 ---
 

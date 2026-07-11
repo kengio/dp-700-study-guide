@@ -26,12 +26,12 @@ tags:
 
 1. **Topic files** (`01-topic-name.md`) — core study material with PySpark/T-SQL/KQL examples, comparison tables, and practice questions. Start here.
 2. **Section indexes** — overview flowcharts and topic indexes named after their folder (e.g., `orchestration.md`). Use to orient before diving into a section.
-3. **Cheat sheets** (`resources/cheat-sheets/`) — compact quick-reference for exam day and review. Each ends with a `## Gotchas & Traps` section and a `## Before the Exam, I Can…` checklist. Use after studying a section to reinforce.
+3. **Cheat sheets** (`resources/cheat-sheets/`) — compact quick-reference for exam day and review. Each ends with a `## Gotchas & Traps` section and a `## Before the Exam, I Can…` checklist. Use after studying a section to reinforce, and drill the companion **Anki deck** (`resources/anki/anki-deck.md`, 146 cards) alongside each cheat sheet for spaced-repetition recall.
 4. **Practice questions** (`resources/practice-questions/`) — questions across the three domains, with explanations. Use to test knowledge after each domain.
-5. **Mock exams** (`resources/mock-exam/`, `resources/mock-exam-2/`, `resources/mock-exam-3/`) — full 50-question timed exams (45 standalone + 5-question case study mirroring the real DP-700 format). After each, use the matching **debrief** file (`mock-exam-N-debrief.md`) to map missed questions back to study material.
+5. **Mock exams** (`resources/mock-exam/`, `resources/mock-exam-2/`, `resources/mock-exam-3/`) — full 50-question timed exams (45 standalone + 5-question case study mirroring the real DP-700 format). Read **Exam Tips** (`resources/exam-tips.md`) before your first mock for time-budget and case-study strategy. After each mock, use the matching **debrief** file (`mock-exam-N-debrief.md`) to map missed questions back to study material.
 6. **Final Review** (`resources/final-review.md`) — 20-minute exam-morning scan: highest-probability facts across all three domains and last-minute traps. Read the morning of the exam.
 
-> Study path: topic files → cheat sheets → practice questions → mock exams → **final-review.md** (exam morning)
+> Study path: topic files → cheat sheets + Anki deck → practice questions → exam tips → mock exams → **final-review.md** (exam morning)
 
 ## Exam Overview
 
