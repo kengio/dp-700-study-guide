@@ -11,7 +11,7 @@ status: complete
 
 # DP-700 Hands-on Labs
 
-A ten-lab pack that builds one working Fabric solution end to end, in the order a real data engineering project would: stand up the workspace, wire lifecycle and security around it, orchestrate the flow, then ingest, load, transform, warehouse, stream, and finally monitor and optimize. Every lab chains onto a single shared workspace and a small synthetic retail dataset generated in Lab 01 — no external accounts or downloads required for the core path.
+A ten-lab pack that builds one working Fabric solution end to end, in the order a real data engineering project would: stand up the workspace, wire lifecycle and security around it, orchestrate the flow, then ingest, load, transform, warehouse, stream, and finally monitor and optimize. Every lab chains onto a single shared workspace and a small synthetic retail dataset generated in Lab 01 — no external accounts or downloads required for the core data path; Lab 02 does need a free GitHub or Azure DevOps account for Git integration.
 
 > [!abstract]
 >
@@ -32,7 +32,10 @@ A ten-lab pack that builds one working Fabric solution end to end, in the order 
 
 Every lab in this pack runs on the free, 60-day Microsoft Fabric trial capacity — no Azure subscription or credit card required to start. Steps below are summarized from the official trial documentation; if the portal has moved since this was written, follow the linked doc instead of guessing at a stale click path.
 
-1. **Sign in** to [https://app.fabric.microsoft.com](https://app.fabric.microsoft.com) with a Microsoft 365 / Entra ID account. If your organization has never enabled Fabric, you may need a Fabric (Free) license first — the portal prompts for this automatically the first time you try to use a Fabric feature.
+> [!warning] Prerequisite: Work or School Account Required
+> The Fabric trial requires a **work/school (Microsoft Entra ID) account** — a personal Microsoft account (outlook.com, hotmail.com, or an MSA tied to a personal Gmail sign-in) is **not eligible** and can't start a trial. If you don't have a work or school account, the [Microsoft 365 Developer Program](https://learn.microsoft.com/en-us/office/developer-program/microsoft-365-developer-program) is the documented path to a free developer tenant with its own Entra ID directory — verified live as of this writing. Note that automatic qualification for the program's free Microsoft 365 E5 sandbox subscription now favors Visual Studio subscribers, partners, and support-contract holders; an unaffiliated individual signup may see reduced eligibility, so check the program's current criteria before treating it as a guaranteed path.
+
+1. **Sign in** to [https://app.fabric.microsoft.com](https://app.fabric.microsoft.com) with a Microsoft 365 / Entra ID account (a personal Microsoft account will not work — see the prerequisite above). If your organization has never enabled Fabric, you may need a Fabric (Free) license first — the portal prompts for this automatically the first time you try to use a Fabric feature.
 2. **Start the trial**: select your account photo in the top-right corner → **Account manager** → **Start trial**. If you don't see a **Start trial** option, your tenant admin may have disabled trials — see the [Fabric trial capacity docs](https://learn.microsoft.com/en-us/fabric/fundamentals/fabric-trial) for the alternate "trigger a trial by using a feature" path.
 3. **Activate**: in the **Activate your 60-day free Fabric trial** dialog, review the **Trial capacity region** dropdown (default is usually your tenant's home region — keep it unless you have a specific reason to change it, since moving a populated workspace to a different region later requires deleting its items first), agree to the terms, and select **Activate**.
 4. You're now the **Capacity administrator** of an F4 (or F64, depending on tenant eligibility) trial capacity, plus a complementary Power BI Individual trial. The trial runs for **60 days**; check remaining days any time via **Account manager → Trial status**, or **Admin portal → Capacity settings → Trial**.
@@ -80,7 +83,7 @@ Every lab in this pack — 01 through 10 — operates on **one workspace** and *
 | # | Lab | Est. Time | Domain | Exam Section(s) |
 | :--- | :--- | :--- | :--- | :--- |
 | 01 | [Workspace & Capacity Setup](./01-workspace-capacity-setup.md) | 45 min | Domain 1 | [01-Fabric Workspace Settings](../../01-fabric-workspace-settings/fabric-workspace-settings.md) |
-| 02 | [Lifecycle, Git & Deployment](./02-lifecycle-git-deployment.md) | 40 min | Domain 1 | [02-Lifecycle Management](../../02-lifecycle-management/lifecycle-management.md) |
+| 02 | [Lifecycle, Git & Deployment](./02-lifecycle-git-deployment.md) | 60 min | Domain 1 | [02-Lifecycle Management](../../02-lifecycle-management/lifecycle-management.md) |
 | 03 | [Security, OneLake & DDM](./03-security-onelake-ddm.md) | 50 min | Domain 1 | [03-Security & Governance](../../03-security-governance/security-governance.md) |
 | 04 | [Orchestration: Pipelines & Notebooks](./04-orchestration-pipelines-notebooks.md) | 45 min | Domain 1 | [04-Orchestration](../../04-orchestration/orchestration.md) |
 | 05 | [Batch Ingestion: Shortcuts & Mirroring](./05-batch-ingestion-shortcuts-mirroring.md) | 50 min | Domain 2 | [06-Batch Ingestion](../../06-batch-ingestion/batch-ingestion.md) |
@@ -90,7 +93,7 @@ Every lab in this pack — 01 through 10 — operates on **one workspace** and *
 | 09 | [Streaming: Eventstream & KQL](./09-streaming-eventstream-kql.md) | 50 min | Domain 2 | [08-Streaming Data](../../08-streaming-data/streaming-data.md) |
 | 10 | [Monitor & Optimize](./10-monitor-optimize.md) | 35 min | Domain 3 | [09-Monitoring & Alerting](../../09-monitoring-alerting/monitoring-alerting.md), [11-Performance Optimization](../../11-performance-optimization/performance-optimization.md) |
 
-**Total**: roughly 7 hours end to end. Labs are designed to be run in order — each one's Cleanup section states exactly what the next lab needs kept.
+**Total**: roughly 7 hours 40 minutes end to end. Labs are designed to be run in order — each one's Cleanup section states exactly what the next lab needs kept.
 
 ---
 
@@ -103,6 +106,8 @@ Do these, in order:
 3. **[Lab 09 — Streaming: Eventstream & KQL](./09-streaming-eventstream-kql.md)** — the surface furthest from typical batch-engineering muscle memory, spanning Eventstream configuration and KQL syntax most candidates have never typed by hand before this exam.
 
 This trio touches all three domains and both of the exam's most-tested "type the exact syntax" surfaces (pipeline expressions and KQL). If a fourth slot opens up, add [Lab 03 — Security, OneLake & DDM](./03-security-onelake-ddm.md) for the RLS/CLS/DDM T-SQL practice — it's the single highest-density topic for exam traps.
+
+This trio is optimized for syntax-surface coverage, not raw blueprint weight — if you're maximizing strictly against the July 2026 blueprint's domain percentages, swap Lab 09 for Lab 03 (Security's RLS/CLS/DDM density scores higher against Domain 1's weighting than streaming scores against Domain 2), or, time permitting, add [Lab 10 — Monitor & Optimize](./10-monitor-optimize.md) as a fourth pick instead of trading anything away.
 
 ---
 

@@ -30,7 +30,7 @@ This lab stands up everything the rest of the lab pack depends on: an activated 
 > - Tours the Apache Airflow job workspace settings — the July 2026 blueprint's one wording change in Domain 1
 
 > [!info] Prerequisites
-> None — this is the first lab. You need a Microsoft 365 / Entra ID account capable of starting a Fabric trial (see [labs.md](./labs.md#setting-up-your-fabric-trial) if you haven't activated one yet).
+> None — this is the first lab. You need a **work/school (Microsoft Entra ID) account** capable of starting a Fabric trial — a personal Microsoft account (outlook.com, hotmail.com, or a personal Gmail-linked MSA) is **not eligible**. If you don't have a work or school account, see [labs.md § Setting Up Your Fabric Trial](./labs.md#setting-up-your-fabric-trial) for how to get a free developer tenant via the Microsoft 365 Developer Program.
 >
 > **Estimated time:** 45 minutes
 
@@ -40,7 +40,7 @@ This lab stands up everything the rest of the lab pack depends on: an activated 
 
 ### Step 1: Activate the Fabric trial
 
-1. Sign in at [https://app.fabric.microsoft.com](https://app.fabric.microsoft.com).
+1. Sign in at [https://app.fabric.microsoft.com](https://app.fabric.microsoft.com) with your work/school (Entra ID) account — see **Prerequisites** above if you only have a personal Microsoft account.
 2. Select your account photo (top-right) → **Account manager** → **Start trial**.
 3. Review the **Trial capacity region**, agree to the terms, select **Activate**.
 

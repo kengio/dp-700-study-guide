@@ -35,7 +35,7 @@ All three ALM layers get exercised in the order a real team would meet them: **G
 > [!info] Prerequisites
 > [Lab 01](./01-workspace-capacity-setup.md) completed — `dp700-labs` workspace with `lh_bronze` and the `nb-generate-dataset` notebook. You'll also need a **workspace Admin** role in `dp700-labs` (you have this by default if you created it) and a free GitHub account or Azure DevOps organization.
 >
-> **Estimated time:** 40 minutes
+> **Estimated time:** 60 minutes
 
 ---
 

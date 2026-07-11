@@ -124,6 +124,8 @@ VALUES (9999, 'Lab Test Product', 'Electronics', 42.00);
 
 ### Step 6: Final optimization pass across every lab table
 
+Open a new notebook (or reuse an existing one) and attach it to `lh_bronze` as its default lakehouse before running the cell below — the `spark.catalog.currentDatabase()` check needs a default lakehouse context to resolve unqualified table names against `lh_bronze` correctly.
+
 ```python
 tables_to_optimize = {
     "lh_bronze": ["customers", "products", "orders", "order_items", "events"],
@@ -147,13 +149,14 @@ for lakehouse, tables in tables_to_optimize.items():
 
 Two supported paths, neither wrong:
 
-**Keep the workspace** (recommended if you're still studying): do nothing. The trial capacity runs for 60 days from activation regardless of whether you keep working in it — check remaining days via **Account manager → Trial status**. Everything built across all ten labs stays queryable for continued review and spaced-repetition practice against the topic files.
+**Keep the workspace** (recommended if you're still studying): do nothing. The trial capacity runs for 60 days from activation regardless of whether you keep working in it — check remaining days via **Account manager → Trial status**. Everything built across all ten labs stays queryable for continued review and spaced-repetition practice against the topic files. If you want to stop background activity without tearing anything down, pause `es_dp700_stream`'s still-running Stock Market sample source per [Lab 09 Cleanup](./09-streaming-eventstream-kql.md#cleanup) — everything else in the pack is idle by default and doesn't need a similar pause.
 
 **Delete the workspace** (if you're done and want to reclaim OneLake storage / stop the Eventstream's background sample traffic immediately):
 
 1. Before deleting, confirm nothing here is referenced from outside `dp700-labs` — this lab pack never shared an item or built a cross-workspace shortcut *into* `dp700-labs`, so a full-workspace delete is safe without a separate per-item audit.
-2. **Workspace settings → General → Remove this workspace**.
-3. Confirm the deletion — this is irreversible and removes every item built across all ten labs at once, including `es_dp700_stream`'s still-running Stock Market sample source (see [Lab 09 Cleanup](./09-streaming-eventstream-kql.md#cleanup)) if you didn't already pause it.
+2. If you kept them from [Lab 02](./02-lifecycle-git-deployment.md#cleanup), also delete `dp700-labs-dev`, the `dp700-pipeline [Test]` workspace, and the `dp700-pipeline` deployment pipeline itself for a fully clean slate. Unassign the Test stage from the pipeline first (workspace page → **View Deployment Pipeline** → unassign) — deleting the Test-stage workspace while it's still assigned fails outright.
+3. **Workspace settings → General → Remove this workspace**.
+4. Confirm the deletion — this is irreversible and removes every item built across all ten labs at once, including `es_dp700_stream`'s still-running Stock Market sample source (see [Lab 09 Cleanup](./09-streaming-eventstream-kql.md#cleanup)) if you didn't already pause it.
 
 > [!success] Expected result
 > Either the workspace remains active with 60-day trial status visible, or it's fully removed and no longer appears in your workspace list. There's no partial-teardown requirement — Fabric doesn't charge anything additional for an idle trial-capacity workspace beyond the trial's own 60-day clock, so "keep everything until the trial expires naturally" is a perfectly reasonable default if undecided.
