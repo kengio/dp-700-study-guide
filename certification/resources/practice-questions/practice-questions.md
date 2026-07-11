@@ -26,8 +26,8 @@ Domain-specific practice questions to test your knowledge before the exam. Every
 | File | Domain | Questions |
 | :--- | :--- | :--- |
 | [01-implement-manage.md](./01-implement-manage.md) | Implement and Manage an Analytics Solution (30–35%) | 27 questions |
-| 02-ingest-transform.md | Ingest and Transform Data (30–35%) | 28 questions |
-| 03-monitor-optimize.md | Monitor and Optimize an Analytics Solution (30–35%) | 27 questions |
+| [02-ingest-transform.md](./02-ingest-transform.md) | Ingest and Transform Data (30–35%) | 28 questions |
+| [03-monitor-optimize.md](./03-monitor-optimize.md) | Monitor and Optimize an Analytics Solution (30–35%) | 27 questions |
 
 82 questions total across all three domains, roughly matching the exam's own domain-weight split.
 
