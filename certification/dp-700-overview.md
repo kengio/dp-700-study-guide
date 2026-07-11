@@ -85,23 +85,21 @@ pie title Exam Domain Distribution
 
 ### Practice & Resources
 
-> Most resources below are planned deliverables — each lands with its own build task. An entry becomes a link once the corresponding file exists; the rest stay plain text until then.
-
 | Resource | Description |
 | :--- | :--- |
-| **Practice Questions** | Domain-specific practice questions with explanations (`resources/practice-questions/`) |
-| **Mock Exam 1 / 2 / 3** | Three 50-question exams (45 standalone + 5-question case study each) (`resources/mock-exam/`, `resources/mock-exam-2/`, `resources/mock-exam-3/`) |
-| **Mock Exam Debriefs** | Per-question map to topic files + study plan by miss count, one per mock exam |
-| **Exam Tips** | Strategies, common-traps table, case-study playbook (`resources/exam-tips.md`) |
-| **Official Links** | Microsoft documentation and registration (`resources/official-links.md`) |
-| **Code Examples** | Standalone PySpark / T-SQL / KQL example files (`resources/code-examples/{pyspark,tsql,kql}/`) |
+| [Practice Questions](resources/practice-questions/practice-questions.md) | Domain-specific practice questions with explanations (`resources/practice-questions/`) |
+| [Mock Exam 1](resources/mock-exam/mock-exam-1.md) / [2](resources/mock-exam-2/mock-exam-2.md) / [3](resources/mock-exam-3/mock-exam-3.md) | Three 50-question exams (45 standalone + 5-question case study each) |
+| [Mock Exam Debriefs](resources/mock-exam/mock-exam-1-debrief.md) | Per-question map to topic files + study plan by miss count, one per mock exam |
+| [Exam Tips](resources/exam-tips.md) | Time management, question-type strategies, elimination tactics, case-study playbook, exam-day logistics |
+| [Official Links](resources/official-links.md) | Microsoft documentation and registration, verified live |
+| [Code Examples](resources/code-examples/code-examples.md) | Standalone PySpark / T-SQL / KQL example files (`resources/code-examples/{pyspark,tsql,kql}/`) |
 | [Cheat Sheets](resources/cheat-sheets/cheat-sheets.md) | Quick-reference guides for exam topics, each with Gotchas & Traps + Before the Exam checklist |
-| **Anki Deck** | Spaced-repetition cards generated from the cheat sheets (`resources/anki/`) |
-| **Adaptive Practice Quiz** | Browser-based JSON-driven quiz ported from the practice quiz app (`practice/`) |
+| [Anki Deck](resources/anki/anki-deck.md) | 146 spaced-repetition cards generated from the cheat sheets (`resources/anki/`) |
+| [Adaptive Practice Quiz](https://kengio.github.io/dp-700-study-guide/) | Browser-based JSON-driven quiz ported from the practice quiz app (`practice/`) |
 | [Hands-on Labs](resources/labs/labs.md) | Runnable labs across lakehouse, warehouse, orchestration, and Real-Time Intelligence scenarios (`resources/labs/`) |
-| **Final Review** | 20-minute exam-morning scan: top facts and last-minute traps for all three domains (`resources/final-review.md`) |
-| **Renewal Guide** | DP-700 annual-renewal workflow (`resources/renewal-guide.md`) |
-| **Companion Exams** | Cross-references to related Microsoft certifications (`resources/companion-exams.md`) |
+| [Final Review](resources/final-review.md) | 20-minute exam-morning scan: top facts and last-minute traps for all three domains |
+| [Renewal Guide](resources/renewal-guide.md) | DP-700 annual-renewal workflow |
+| [Companion Exams](resources/companion-exams.md) | Cross-references to DP-600, PL-300, and DP-800 |
 | [Appendix](resources/appendix/appendix.md) | Glossary, comparison tables, error messages |
 
 ## Study Progress Tracker
