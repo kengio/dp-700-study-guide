@@ -1061,7 +1061,7 @@
   }
 
   // Weak areas = domains attempted with pct strictly below 70% (the
-  // Databricks passing line), sorted by pct ascending so the most
+  // DP-700 passing line (700/1000 scaled)), sorted by pct ascending so the most
   // urgent gap is first. "Not attempted" domains are excluded.
   function getWeakDomains(domains) {
     return domains
