@@ -91,7 +91,7 @@ The capstone lab: tour the Monitor hub against everything the previous nine labs
 4. Save the model.
 
 > [!success] Expected result
-> `sm_dp700_gold` appears as a new item in `dp700-labs`. Because its tables come from a Fabric Warehouse's Delta-backed tables, the model uses **Direct Lake on SQL** storage mode automatically — no explicit "choose storage mode" step exists for a warehouse-sourced model, unlike Power BI Desktop's Import/DirectQuery choice. Confirm this from **Model settings → Direct Lake behavior**.
+> `sm_dp700_gold` appears as a new item in `dp700-labs`. Because its tables come from a Fabric Warehouse's Delta-backed tables, the model uses **Direct Lake on SQL** storage mode automatically — no explicit "choose storage mode" step exists for a warehouse-sourced model, unlike Power BI Desktop's Import/DirectQuery choice. Confirm this from **Model settings → Direct Lake behavior**. `dbo.Customers` intentionally holds only the 5 demo rows seeded in [Lab 03](./03-security-onelake-ddm.md), so most `FactOrderItems` rows will show blank customer attributes when you browse the model — that's expected, not a bug: Direct Lake tolerates orphaned fact keys with no matching dimension row rather than failing the relationship.
 
 Next, add a new row to `dbo.DimProduct` via a **New SQL query** in `wh_gold`:
 

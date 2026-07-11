@@ -28,7 +28,7 @@ This lab builds the two loading patterns Domain 2 tests hardest, entirely in PyS
 > - Proves idempotency by re-running the incremental load twice and comparing row counts
 
 > [!info] Prerequisites
-> [Lab 01](./01-workspace-capacity-setup.md) and [Lab 05](./05-batch-ingestion-shortcuts-mirroring.md) completed — `dp700-labs` workspace with `lh_bronze`'s Delta tables and `lh_silver` (with its `customers` shortcut and `orders_incremental` table). This lab is code-first: almost everything runs from one notebook attached to `lh_silver`.
+> [Lab 01](./01-workspace-capacity-setup.md) and [Lab 05](./05-batch-ingestion-shortcuts-mirroring.md) completed — `dp700-labs` workspace with `lh_bronze`'s Delta tables and `lh_silver` (its `customers` shortcut; `orders_incremental` is created in this lab if Lab 05's optional Copy job wasn't run). This lab is code-first: almost everything runs from one notebook attached to `lh_silver`.
 >
 > **Estimated time:** 40 minutes
 
