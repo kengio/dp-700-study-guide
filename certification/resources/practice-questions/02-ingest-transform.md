@@ -71,11 +71,11 @@ Is this correct?
 
 A. This is incorrect — `overwrite` always replaces the whole table regardless of `replaceWhere`, wiping out every other day's data  
 B. This is incorrect — `replaceWhere` requires a `MERGE INTO` to take effect; plain `overwrite` ignores it  
-C. This is correct  
+C. This is correct — `replaceWhere` scopes the overwrite to the day's partition, so a re-run after a failure reproduces the same end state  
 D. This is correct, but only because Delta automatically deduplicates append-mode writes underneath `overwrite`  
 
 > [!success]- Answer
-> **C. This is correct**
+> **C. This is correct — `replaceWhere` scopes the overwrite to the day's partition, so a re-run after a failure reproduces the same end state**
 >
 > `overwrite` with `replaceWhere` scoped to the day's partition is idempotent, because the end state depends only on that partition's source data, not on how many times the write runs. `replaceWhere` scopes the overwrite to matching partitions instead of the whole table, and because the source extract is a complete, self-contained day, re-running the write after a failure produces the same end state every time — no `MERGE INTO` required.
 >
@@ -98,10 +98,10 @@ What happens, and what's the correct fix?
 A. The statement succeeds — `ALTER TABLE ADD` fully supports adding `IDENTITY` columns to existing Fabric Warehouse tables  
 B. The statement succeeds, but only populates `StoreKey` for rows inserted after the `ALTER TABLE` runs, leaving existing rows `NULL`  
 C. The statement fails because `IDENTITY` requires an explicit custom seed and increment to be specified  
-D. The statement fails  
+D. The statement fails — Fabric Warehouse's Preview `IDENTITY` can't be retrofitted via `ALTER TABLE`; it must be declared at `CREATE TABLE` time  
 
 > [!success]- Answer
-> **D. The statement fails**
+> **D. The statement fails — Fabric Warehouse's Preview `IDENTITY` can't be retrofitted via `ALTER TABLE`; it must be declared at `CREATE TABLE` time**
 >
 > Fabric Warehouse's Preview `IDENTITY` support can't be added to an existing table via `ALTER TABLE`; rebuild the table with `CTAS`/`SELECT...INTO` including `IDENTITY` at creation, or generate a `ROW_NUMBER()`-based key instead. `IDENTITY` in Fabric Warehouse is documented Preview functionality with real limitations, one of which is that it must be defined at `CREATE TABLE` time — it cannot be retrofitted onto an existing table via `ALTER TABLE`. The fix is a CTAS/`SELECT...INTO` rebuild with `IDENTITY` declared up front, or falling back to the GA-safe `ROW_NUMBER()` + max-key-offset pattern.
 >
@@ -162,7 +162,7 @@ D. Reject the fact row until the dimension record arrives, to preserve referenti
 
 ## Question 7: A Streaming Bronze Layer That's Already Deduplicating
 
-**Question** *(Easy)*:
+**Question** *(Medium)*:
 
 A developer, worried about downstream duplicate rows, adds `.dropDuplicates(["event_id"])` directly to a new IoT pipeline's bronze streaming write, before landing in `bronze.raw_events`. The team's requirement is that bronze stay a complete, replayable record of every event exactly as received, so a downstream bug fix can reprocess from raw. What's wrong with deduping at this layer, and where should the fix belong instead?
 
@@ -182,7 +182,7 @@ D. Dedup is fine at bronze, but only once `outputMode("complete")` replaces `out
 
 ## Question 8: An Inventory App Needing Both OLTP and Analytics
 
-**Question** *(Easy)*:
+**Question** *(Medium)*:
 
 A team is building a new inventory-management application that needs strict foreign-key-enforced transactional writes at high concurrency, plus a requirement that the warehousing team build Power BI reports over the same data within minutes of a change — without standing up a separate ETL pipeline. Which Fabric data store fits?
 
@@ -206,13 +206,13 @@ D. Fabric SQL database
 
 A team lands raw sensor data in an Eventhouse and needs to decide which language surface to use for both continuous transformation and any downstream reshaping of that same data, without introducing a second data store. Per the Domain 2 decision spine (data store determines native transform surface), which combination is correct?
 
-A. KQL for both transformation (update policy/materialized view) and the streaming destination role  
+A. KQL for both continuous transformation (update policy/materialized view) and any downstream reshaping of that same data  
 B. PySpark for transformation, T-SQL for streaming ingestion  
-C. T-SQL for transformation, since every Fabric data store exposes full DML through its SQL analytics endpoint  
+C. T-SQL for transformation, since every Fabric data store — including Eventhouse — exposes full DML through its SQL analytics endpoint  
 D. Dataflow Gen2 for transformation, since it has the broadest connector library  
 
 > [!success]- Answer
-> **A. KQL for both transformation (update policy/materialized view) and the streaming destination role**
+> **A. KQL for both continuous transformation (update policy/materialized view) and any downstream reshaping of that same data**
 >
 > Eventhouse's native transform surface is KQL and its T-SQL endpoint is read-only. The decision spine's point is that once you've named the data store, the transform tool mostly follows: land data in an Eventhouse and transformation happens natively via KQL update policies and materialized views. Introducing a second store just to get a different transform surface contradicts the stated constraint.
 >
@@ -342,7 +342,7 @@ D. Caching works, but only for files under 1 GB
 
 ## Question 16: A Warehouse-Resident MERGE Requirement
 
-**Question** *(Easy)*:
+**Question** *(Medium)*:
 
 A team's star schema already lives entirely inside a Fabric Warehouse, and the nightly load upserts dimension rows using `MERGE`. The team has no Spark or Power Query experience. Which transform tool is the obvious fit?
 
@@ -435,33 +435,23 @@ D. `MERGE` was never unsupported in Fabric Warehouse at any point, so the team's
 
 ---
 
-## Question 20: Using NEXT VALUE FOR in a Fabric Warehouse Load
+## Question 20: Consolidating Many Small SaaS Extracts Without a Data Engineer
 
-**Question** *(Hard)*:
+**Question** *(Medium)*:
 
-A developer, porting a load script from an on-premises SQL Server warehouse, writes:
+A marketing operations team pulls daily extracts from 40 different SaaS ad and CRM platforms, each landing under a few hundred MB, and needs to combine, clean, and reshape them before they reach a lakehouse. The team has no Spark or T-SQL experience and wants every transformation step to stay visually inspectable so a non-engineer can audit exactly what changed. Which transform tool fits, and why do the alternatives fall short?
 
-```sql
-CREATE SEQUENCE dbo.RegionKeySeq START WITH 1 INCREMENT BY 1;
-
-INSERT INTO dim.Region (RegionKey, RegionName)
-SELECT NEXT VALUE FOR dbo.RegionKeySeq, RegionName
-FROM #StagingRegions;
-```
-
-What happens when this runs against a Fabric Warehouse, and what's the correct fix?
-
-A. It runs successfully — `SEQUENCE` objects work identically to SQL Server  
-B. `CREATE SEQUENCE` succeeds, but `NEXT VALUE FOR` always returns `NULL` in Fabric Warehouse  
-C. It runs successfully, but only inside a `#temp` table context  
-D. `CREATE SEQUENCE` fails  
+A. Notebook (PySpark), since Spark's programmatic connectors can reach more SaaS sources than any low-code tool's connector library  
+B. T-SQL, since the extracts can be staged into a Warehouse table and reshaped there with `MERGE` once landed  
+C. KQL, since Eventhouse's update policies can ingest and reshape data from any external source, including SaaS APIs  
+D. Dataflow Gen2, since its 150+ connector library and visual, low-code interface match both the team's skillset and the many-small-source profile  
 
 > [!success]- Answer
-> **D. `CREATE SEQUENCE` fails**
+> **D. Dataflow Gen2, since its 150+ connector library and visual, low-code interface match both the team's skillset and the many-small-source profile**
 >
-> `SEQUENCE` objects aren't supported in Fabric Warehouse; use a `ROW_NUMBER()` + max-key-offset pattern to generate the surrogate key instead. `SEQUENCE` objects are explicitly listed as an unsupported table feature in Fabric Warehouse — the `CREATE SEQUENCE` statement itself fails, before `NEXT VALUE FOR` is ever reached. The documented, GA-safe replacement is a `ROW_NUMBER()`-based surrogate key generated with an offset from the current max key.
+> No single extract is large enough to justify Spark's scale-out machinery, and the team has neither the Spark nor the T-SQL skills the other two options assume. Dataflow Gen2's 150+ connector library covers the long tail of SaaS sources directly, and its low-code, step-by-step Power Query authoring is exactly what "visually inspectable so a non-engineer can audit" calls for — the same breadth-of-small-sources-plus-self-service signal that makes Dataflow Gen2 the right tool over Spark's raw processing power.
 >
-> Option A assumes full SQL Server parity that doesn't exist for this feature. Option B invents a silent-`NULL` failure mode that doesn't match reality — the object creation itself fails, not a downstream value lookup. Option C invents a `#temp`-table-scoped exception to the `SEQUENCE` restriction that isn't documented anywhere.
+> Option A correctly notes Spark's flexibility but ignores that the team has no Spark experience and that no single source is large enough to need Spark's scale-out at all. Option B invents a warehouse-resident data location the scenario never describes — the extracts land as SaaS pulls, not existing warehouse tables, and the team has no T-SQL skills either. Option C misapplies KQL, whose transformation surface is scoped to Eventhouse-resident, time-series-shaped data, not general SaaS batch consolidation into a lakehouse.
 
 ---
 
@@ -481,13 +471,13 @@ A KQL update policy's function is defined as:
 
 When this function is attached as an update policy's `Query` on a target table, what happens?
 
-A. Validation fails  
+A. Validation fails — update-policy queries must reference the `Source` table unqualified, not through a `database()`-qualified path  
 B. It works as expected — qualifying the source table with `database()` makes the reference more explicit and reliable  
-C. It works, but only for the first ingested batch  
+C. It works, but only for the first ingested batch, since Fabric caches the resolved source-table reference for later update-policy runs  
 D. It works, but doubles the ingestion latency because of the extra database lookup  
 
 > [!success]- Answer
-> **A. Validation fails**
+> **A. Validation fails — update-policy queries must reference the `Source` table unqualified, not through a `database()`-qualified path**
 >
 > Update-policy queries must reference the `Source` table unqualified (`RawOrders`, not `database("SalesDB").RawOrders`). Fabric requires update-policy queries (and any function they reference) to use the unqualified table name for the source table — a qualified reference like `database("SalesDB").RawOrders` isn't allowed there, even though it works fine in ad hoc queries.
 >
@@ -537,7 +527,7 @@ D. `MERGE` using only a `WHEN NOT MATCHED THEN INSERT` clause, with no matched-r
 
 ## Question 24: An Ops Team Assumes Aggregation Needs Spark
 
-**Question** *(Easy)*:
+**Question** *(Medium)*:
 
 A three-person ops team wants to ingest server heartbeat events, count heartbeats per host in a 5-minute tumbling window, and land the result in a lakehouse for a monthly capacity report. There's no sub-second query requirement, and the team assumes the windowed count forces them into a Spark notebook, since they have no Spark experience and were hoping to avoid one. Which engine minimizes engineering effort, and why is the team's assumption wrong?
 

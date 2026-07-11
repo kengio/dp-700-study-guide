@@ -70,7 +70,7 @@
       },
       "correctAnswer": "C",
       "shortAnswer": "The \"by workspace admin\" bulk-assignment method is a one-time operation against existing workspaces — it excludes \"My workspaces\" and doesn't track ongoing group membership for future workspace creation.",
-      "explanation": "Option A confuses this method with **default domain**, which is the mechanism that does auto-assign future workspaces created by covered users/groups — that's a separate, distinct feature (option B correctly hints at it but frames it as a dependency rather than a wholly different mechanism, which is also not how it works: default domain is configured independently). Option D invents a made-up item-count threshold that doesn't exist in Fabric's domain assignment model."
+      "explanation": "Option A invents a continuous group-membership-tracking mechanism that doesn't exist — \"by workspace admin\" assignment runs once, against the group's membership at that moment, not on an ongoing basis. Option B confuses this method with default domain — a separate feature that auto-assigns future workspaces (matching capacity/admin criteria). Option D invents a made-up item-count threshold that doesn't exist in Fabric's domain assignment model."
     },
     {
       "id": "practice-questions-01-implement-manage-q004",
@@ -130,11 +130,11 @@
         "A": "Yes, as long as the server is reachable from the Fabric service's IP range",
         "B": "Yes, but only with a service principal, not OAuth2",
         "C": "No — Fabric only supports GitHub Enterprise's cloud offering",
-        "D": "Yes, if the workspace is on a Premium Per User (PPU) capacity"
+        "D": "No — GitHub Enterprise Server support requires a separate, additionally licensed Fabric Git connector that isn't enabled by default"
       },
       "correctAnswer": "C",
       "shortAnswer": "Fabric Git integration supports GitHub Enterprise cloud (`.com`/`ghe.com`) only. A self-hosted GitHub Enterprise Server instance is explicitly unsupported, regardless of public accessibility, network configuration, or authentication method.",
-      "explanation": "Options A and B both imagine a network- or auth-based workaround that doesn't exist — the limitation is about the product offering itself (cloud vs. self-hosted), not reachability or credentials. Option D invents a licensing tier requirement that has nothing to do with Git provider support."
+      "explanation": "Options A and B both imagine a network- or auth-based workaround that doesn't exist — the limitation is about the product offering itself (cloud vs. self-hosted), not reachability or credentials. Option D gets the right verdict (No) for the wrong reason — it invents a paid connector that doesn't exist; the limitation isn't a licensing gate, it's that self-hosted GitHub Enterprise Server simply isn't a supported Git provider offering in Fabric at all."
     },
     {
       "id": "practice-questions-01-implement-manage-q008",
@@ -369,12 +369,12 @@
       "choices": {
         "A": "Yes, using Dataflow Gen2's built-in \"On refresh complete\" trigger",
         "B": "Yes, but only if the notebook is in the same workspace",
-        "C": "Yes, via a Dataflow Gen2 output destination set to \"Notebook\"",
+        "C": "No — Dataflow Gen2 requires an Activator rule watching its refresh status to trigger any downstream item, notebooks included",
         "D": "No — Dataflow Gen2 can't trigger or orchestrate other items on its own"
       },
       "correctAnswer": "D",
       "shortAnswer": "This is one of the most common exam distractor shapes: Dataflow Gen2 can be scheduled itself, but it has no native mechanism to trigger or orchestrate any other item. Only a pipeline provides that coordination layer — the correct architecture is a pipeline with a Dataflow Gen2 activity followed by a Notebook activity.",
-      "explanation": "Options A and C both invent Dataflow Gen2 features (a completion trigger, a \"Notebook\" output destination) that don't exist — Dataflow Gen2's destinations are data sinks (Lakehouse, Warehouse, and similar), not other orchestration items. Option B is a plausible-sounding qualifier on a capability that doesn't exist in the first place, regardless of workspace boundaries."
+      "explanation": "Option A invents a completion trigger that doesn't exist. Option C also lands on the right verdict (No) but for an invented reason — Activator rules watch data conditions and events, not a Dataflow Gen2's own refresh completion status, so this isn't a real workaround either; the actual missing piece is a pipeline. Option B is a plausible-sounding qualifier on a capability that doesn't exist in the first place, regardless of workspace boundaries."
     },
     {
       "id": "practice-questions-01-implement-manage-q023",
@@ -497,7 +497,7 @@
       "choices": {
         "A": "This is incorrect — `overwrite` always replaces the whole table regardless of `replaceWhere`, wiping out every other day's data",
         "B": "This is incorrect — `replaceWhere` requires a `MERGE INTO` to take effect; plain `overwrite` ignores it",
-        "C": "This is correct",
+        "C": "This is correct — `replaceWhere` scopes the overwrite to the day's partition, so a re-run after a failure reproduces the same end state",
         "D": "This is correct, but only because Delta automatically deduplicates append-mode writes underneath `overwrite`"
       },
       "correctAnswer": "C",
@@ -514,7 +514,7 @@
         "A": "The statement succeeds — `ALTER TABLE ADD` fully supports adding `IDENTITY` columns to existing Fabric Warehouse tables",
         "B": "The statement succeeds, but only populates `StoreKey` for rows inserted after the `ALTER TABLE` runs, leaving existing rows `NULL`",
         "C": "The statement fails because `IDENTITY` requires an explicit custom seed and increment to be specified",
-        "D": "The statement fails"
+        "D": "The statement fails — Fabric Warehouse's Preview `IDENTITY` can't be retrofitted via `ALTER TABLE`; it must be declared at `CREATE TABLE` time"
       },
       "correctAnswer": "D",
       "shortAnswer": "Fabric Warehouse's Preview `IDENTITY` support can't be added to an existing table via `ALTER TABLE`; rebuild the table with `CTAS`/`SELECT...INTO` including `IDENTITY` at creation, or generate a `ROW_NUMBER()`-based key instead. `IDENTITY` in Fabric Warehouse is documented Preview functionality with real limitations, one of which is that it must be defined at `CREATE TABLE` time — it cannot be retrofitted onto an existing table via `ALTER TABLE`. The fix is a CTAS/`SELECT...INTO` rebuild with `IDENTITY` declared up front, or falling back to the GA-safe `ROW_NUMBER()` + max-key-offset pattern.",
@@ -556,7 +556,7 @@
       "id": "practice-questions-02-ingest-transform-q007",
       "domain": "ingest-transform",
       "title": "A Streaming Bronze Layer That's Already Deduplicating",
-      "difficulty": "easy",
+      "difficulty": "medium",
       "question": "A developer, worried about downstream duplicate rows, adds `.dropDuplicates([\"event_id\"])` directly to a new IoT pipeline's bronze streaming write, before landing in `bronze.raw_events`. The team's requirement is that bronze stay a complete, replayable record of every event exactly as received, so a downstream bug fix can reprocess from raw. What's wrong with deduping at this layer, and where should the fix belong instead?",
       "choices": {
         "A": "Nothing — dedup at bronze only lowers storage cost and has no effect on replayability",
@@ -572,7 +572,7 @@
       "id": "practice-questions-02-ingest-transform-q008",
       "domain": "ingest-transform",
       "title": "An Inventory App Needing Both OLTP and Analytics",
-      "difficulty": "easy",
+      "difficulty": "medium",
       "question": "A team is building a new inventory-management application that needs strict foreign-key-enforced transactional writes at high concurrency, plus a requirement that the warehousing team build Power BI reports over the same data within minutes of a change — without standing up a separate ETL pipeline. Which Fabric data store fits?",
       "choices": {
         "A": "Lakehouse, because its SQL analytics endpoint can serve Power BI reports",
@@ -591,9 +591,9 @@
       "difficulty": "medium",
       "question": "A team lands raw sensor data in an Eventhouse and needs to decide which language surface to use for both continuous transformation and any downstream reshaping of that same data, without introducing a second data store. Per the Domain 2 decision spine (data store determines native transform surface), which combination is correct?",
       "choices": {
-        "A": "KQL for both transformation (update policy/materialized view) and the streaming destination role",
+        "A": "KQL for both continuous transformation (update policy/materialized view) and any downstream reshaping of that same data",
         "B": "PySpark for transformation, T-SQL for streaming ingestion",
-        "C": "T-SQL for transformation, since every Fabric data store exposes full DML through its SQL analytics endpoint",
+        "C": "T-SQL for transformation, since every Fabric data store — including Eventhouse — exposes full DML through its SQL analytics endpoint",
         "D": "Dataflow Gen2 for transformation, since it has the broadest connector library"
       },
       "correctAnswer": "A",
@@ -700,7 +700,7 @@
       "id": "practice-questions-02-ingest-transform-q016",
       "domain": "ingest-transform",
       "title": "A Warehouse-Resident MERGE Requirement",
-      "difficulty": "easy",
+      "difficulty": "medium",
       "question": "A team's star schema already lives entirely inside a Fabric Warehouse, and the nightly load upserts dimension rows using `MERGE`. The team has no Spark or Power Query experience. Which transform tool is the obvious fit?",
       "choices": {
         "A": "Dataflow Gen2, since it's the lowest-code option available",
@@ -763,18 +763,18 @@
     {
       "id": "practice-questions-02-ingest-transform-q020",
       "domain": "ingest-transform",
-      "title": "Using NEXT VALUE FOR in a Fabric Warehouse Load",
-      "difficulty": "hard",
-      "question": "A developer, porting a load script from an on-premises SQL Server warehouse, writes:\n\n```sql\nCREATE SEQUENCE dbo.RegionKeySeq START WITH 1 INCREMENT BY 1;\n\nINSERT INTO dim.Region (RegionKey, RegionName)\nSELECT NEXT VALUE FOR dbo.RegionKeySeq, RegionName\nFROM #StagingRegions;\n```\n\nWhat happens when this runs against a Fabric Warehouse, and what's the correct fix?",
+      "title": "Consolidating Many Small SaaS Extracts Without a Data Engineer",
+      "difficulty": "medium",
+      "question": "A marketing operations team pulls daily extracts from 40 different SaaS ad and CRM platforms, each landing under a few hundred MB, and needs to combine, clean, and reshape them before they reach a lakehouse. The team has no Spark or T-SQL experience and wants every transformation step to stay visually inspectable so a non-engineer can audit exactly what changed. Which transform tool fits, and why do the alternatives fall short?",
       "choices": {
-        "A": "It runs successfully — `SEQUENCE` objects work identically to SQL Server",
-        "B": "`CREATE SEQUENCE` succeeds, but `NEXT VALUE FOR` always returns `NULL` in Fabric Warehouse",
-        "C": "It runs successfully, but only inside a `#temp` table context",
-        "D": "`CREATE SEQUENCE` fails"
+        "A": "Notebook (PySpark), since Spark's programmatic connectors can reach more SaaS sources than any low-code tool's connector library",
+        "B": "T-SQL, since the extracts can be staged into a Warehouse table and reshaped there with `MERGE` once landed",
+        "C": "KQL, since Eventhouse's update policies can ingest and reshape data from any external source, including SaaS APIs",
+        "D": "Dataflow Gen2, since its 150+ connector library and visual, low-code interface match both the team's skillset and the many-small-source profile"
       },
       "correctAnswer": "D",
-      "shortAnswer": "`SEQUENCE` objects aren't supported in Fabric Warehouse; use a `ROW_NUMBER()` + max-key-offset pattern to generate the surrogate key instead. `SEQUENCE` objects are explicitly listed as an unsupported table feature in Fabric Warehouse — the `CREATE SEQUENCE` statement itself fails, before `NEXT VALUE FOR` is ever reached. The documented, GA-safe replacement is a `ROW_NUMBER()`-based surrogate key generated with an offset from the current max key.",
-      "explanation": "Option A assumes full SQL Server parity that doesn't exist for this feature. Option B invents a silent-`NULL` failure mode that doesn't match reality — the object creation itself fails, not a downstream value lookup. Option C invents a `#temp`-table-scoped exception to the `SEQUENCE` restriction that isn't documented anywhere."
+      "shortAnswer": "No single extract is large enough to justify Spark's scale-out machinery, and the team has neither the Spark nor the T-SQL skills the other two options assume. Dataflow Gen2's 150+ connector library covers the long tail of SaaS sources directly, and its low-code, step-by-step Power Query authoring is exactly what \"visually inspectable so a non-engineer can audit\" calls for — the same breadth-of-small-sources-plus-self-service signal that makes Dataflow Gen2 the right tool over Spark's raw processing power.",
+      "explanation": "Option A correctly notes Spark's flexibility but ignores that the team has no Spark experience and that no single source is large enough to need Spark's scale-out at all. Option B invents a warehouse-resident data location the scenario never describes — the extracts land as SaaS pulls, not existing warehouse tables, and the team has no T-SQL skills either. Option C misapplies KQL, whose transformation surface is scoped to Eventhouse-resident, time-series-shaped data, not general SaaS batch consolidation into a lakehouse."
     },
     {
       "id": "practice-questions-02-ingest-transform-q021",
@@ -783,9 +783,9 @@
       "difficulty": "medium",
       "question": "A KQL update policy's function is defined as:\n\n```kusto\n.create function ParseOrders() {\n    database(\"SalesDB\").RawOrders\n    | extend Parsed = parse_json(Payload)\n    | project OrderId = tostring(Parsed.orderId), Amount = todouble(Parsed.amount)\n}\n```\n\nWhen this function is attached as an update policy's `Query` on a target table, what happens?",
       "choices": {
-        "A": "Validation fails",
+        "A": "Validation fails — update-policy queries must reference the `Source` table unqualified, not through a `database()`-qualified path",
         "B": "It works as expected — qualifying the source table with `database()` makes the reference more explicit and reliable",
-        "C": "It works, but only for the first ingested batch",
+        "C": "It works, but only for the first ingested batch, since Fabric caches the resolved source-table reference for later update-policy runs",
         "D": "It works, but doubles the ingestion latency because of the extra database lookup"
       },
       "correctAnswer": "A",
@@ -828,7 +828,7 @@
       "id": "practice-questions-02-ingest-transform-q024",
       "domain": "ingest-transform",
       "title": "An Ops Team Assumes Aggregation Needs Spark",
-      "difficulty": "easy",
+      "difficulty": "medium",
       "question": "A three-person ops team wants to ingest server heartbeat events, count heartbeats per host in a 5-minute tumbling window, and land the result in a lakehouse for a monthly capacity report. There's no sub-second query requirement, and the team assumes the windowed count forces them into a Spark notebook, since they have no Spark experience and were hoping to avoid one. Which engine minimizes engineering effort, and why is the team's assumption wrong?",
       "choices": {
         "A": "Spark Structured Streaming — the assumption is correct; windowed aggregation always requires custom code",
@@ -1052,7 +1052,7 @@
       "id": "practice-questions-03-monitor-optimize-q010",
       "domain": "monitor-optimize",
       "title": "When You Can't Get the Firewall Rule Approved",
-      "difficulty": "easy",
+      "difficulty": "medium",
       "question": "A Dataflow Gen2 using an on-premises gateway writes one query to a Lakehouse successfully, but a second query that references the first query's staged output fails with a TCP-level network error. The team traces the cause to a blocked outbound port on the gateway server, but the network team refuses to open it, calling it \"just a workaround.\" What are the two documented ways around this without opening the port, and why does only the second query fail?",
       "choices": {
         "A": "Combine the two queries into one, or disable staging — writing uses HTTPS (443), but reading staged data back needs TDS on port 1433",
@@ -1307,18 +1307,18 @@
     {
       "id": "practice-questions-03-monitor-optimize-q026",
       "domain": "monitor-optimize",
-      "title": "Maxing Out DIUs Without Any Speedup",
+      "title": "A Copy Activity That Won't Land in the Warehouse",
       "difficulty": "medium",
-      "question": "A Copy activity moving a 5 TB on-premises SQL Server table into a Fabric Warehouse has its DIUs manually set to 256 (the maximum) and degree of copy parallelism set to 32, but throughput hasn't improved over the Auto defaults. The source table has no Partition option configured. What's the most likely explanation?",
+      "question": "A Copy activity moving data from an Azure SQL Database into a Fabric Warehouse fails immediately with an unsupported-write-path error, even though the exact same source connector copies into a Lakehouse without any trouble. Staging is currently disabled on the Copy activity, and the team's first instinct is to raise DIUs from Auto to the 256 maximum. What's the actual cause, and what's the fix?",
       "choices": {
-        "A": "256 DIUs already exceeds what a single Copy activity can use effectively — lower it back to Auto",
-        "B": "The source read itself is still single-threaded because no Partition option is configured on the source",
-        "C": "Fabric Warehouse sinks cap effective copy throughput regardless of DIU or parallelism settings, by design",
-        "D": "Staging wasn't enabled on the Copy activity, which silently overrides both DIU and parallelism settings"
+        "A": "Raise DIUs from Auto to the 256 maximum — a Warehouse sink needs more allocated compute to accept the write than a Lakehouse sink does",
+        "B": "Enable staging on the Copy activity — a Fabric Warehouse sink doesn't accept every source type through a direct high-throughput write path the way a Lakehouse sink does",
+        "C": "Switch the sink's Write behavior from Insert to Upsert — Warehouse sinks reject a direct-path write unless conflict resolution is made explicit",
+        "D": "Configure a Partition option on the source — the same fix that resolves a single-threaded relational read applies here since the sink is a Warehouse"
       },
       "correctAnswer": "B",
-      "shortAnswer": "Parallelism settings have nothing to parallelize until the source read is split. Degree of copy parallelism and DIUs are downstream of the source read itself — without a Partition option (Physical partitions of table, or Dynamic range) configured on the source, the read runs through a single connection regardless of how high DIUs or parallelism are set, since there's nothing yet to parallelize.",
-      "explanation": "Option A doubles down on a setting that isn't the actual bottleneck. Option C invents a Warehouse-sink throughput cap that isn't documented. Option D invents a silent override relationship between staging and DIU/parallelism settings that doesn't exist — staging is required for Warehouse sinks regardless, and doesn't govern source-read parallelism."
+      "shortAnswer": "Staging is documented as *required*, not optional, when the Copy activity's sink is a Fabric Warehouse — the Warehouse doesn't accept every source type through a direct high-throughput write path, so a Copy activity into it fails outright without staging turned on, regardless of DIU or parallelism settings. That's a different mechanism entirely from a single-threaded source read: this failure is about the sink's write path, not the source's read parallelism.",
+      "explanation": "Option A raises compute that was never the bottleneck — DIUs govern copy throughput once a write path exists, they don't create one. Option C invents a Write-behavior/staging relationship that isn't documented; Insert vs. Upsert governs conflict handling, not whether the write path is supported at all. Option D reaches for the fix that resolves a *different*, unrelated problem — a single-threaded source read from a missing Partition option — which has nothing to do with why a Warehouse-sink write fails without staging."
     },
     {
       "id": "practice-questions-03-monitor-optimize-q027",

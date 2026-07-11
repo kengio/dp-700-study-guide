@@ -195,7 +195,7 @@ D. Configure built-in retry with a longer interval so the parameter has time to 
 
 ## Question 10: When You Can't Get the Firewall Rule Approved
 
-**Question** *(Easy)*:
+**Question** *(Medium)*:
 
 A Dataflow Gen2 using an on-premises gateway writes one query to a Lakehouse successfully, but a second query that references the first query's staged output fails with a TCP-level network error. The team traces the cause to a blocked outbound port on the gateway server, but the network team refuses to open it, calling it "just a workaround." What are the two documented ways around this without opening the port, and why does only the second query fail?
 
@@ -513,23 +513,23 @@ D. Materialized view for the parsing, since it can run continuously; update poli
 
 ---
 
-## Question 26: Maxing Out DIUs Without Any Speedup
+## Question 26: A Copy Activity That Won't Land in the Warehouse
 
 **Question** *(Medium)*:
 
-A Copy activity moving a 5 TB on-premises SQL Server table into a Fabric Warehouse has its DIUs manually set to 256 (the maximum) and degree of copy parallelism set to 32, but throughput hasn't improved over the Auto defaults. The source table has no Partition option configured. What's the most likely explanation?
+A Copy activity moving data from an Azure SQL Database into a Fabric Warehouse fails immediately with an unsupported-write-path error, even though the exact same source connector copies into a Lakehouse without any trouble. Staging is currently disabled on the Copy activity, and the team's first instinct is to raise DIUs from Auto to the 256 maximum. What's the actual cause, and what's the fix?
 
-A. 256 DIUs already exceeds what a single Copy activity can use effectively — lower it back to Auto  
-B. The source read itself is still single-threaded because no Partition option is configured on the source  
-C. Fabric Warehouse sinks cap effective copy throughput regardless of DIU or parallelism settings, by design  
-D. Staging wasn't enabled on the Copy activity, which silently overrides both DIU and parallelism settings  
+A. Raise DIUs from Auto to the 256 maximum — a Warehouse sink needs more allocated compute to accept the write than a Lakehouse sink does  
+B. Enable staging on the Copy activity — a Fabric Warehouse sink doesn't accept every source type through a direct high-throughput write path the way a Lakehouse sink does  
+C. Switch the sink's Write behavior from Insert to Upsert — Warehouse sinks reject a direct-path write unless conflict resolution is made explicit  
+D. Configure a Partition option on the source — the same fix that resolves a single-threaded relational read applies here since the sink is a Warehouse  
 
 > [!success]- Answer
-> **B. The source read itself is still single-threaded because no Partition option is configured on the source**
+> **B. Enable staging on the Copy activity — a Fabric Warehouse sink doesn't accept every source type through a direct high-throughput write path the way a Lakehouse sink does**
 >
-> Parallelism settings have nothing to parallelize until the source read is split. Degree of copy parallelism and DIUs are downstream of the source read itself — without a Partition option (Physical partitions of table, or Dynamic range) configured on the source, the read runs through a single connection regardless of how high DIUs or parallelism are set, since there's nothing yet to parallelize.
+> Staging is documented as *required*, not optional, when the Copy activity's sink is a Fabric Warehouse — the Warehouse doesn't accept every source type through a direct high-throughput write path, so a Copy activity into it fails outright without staging turned on, regardless of DIU or parallelism settings. That's a different mechanism entirely from a single-threaded source read: this failure is about the sink's write path, not the source's read parallelism.
 >
-> Option A doubles down on a setting that isn't the actual bottleneck. Option C invents a Warehouse-sink throughput cap that isn't documented. Option D invents a silent override relationship between staging and DIU/parallelism settings that doesn't exist — staging is required for Warehouse sinks regardless, and doesn't govern source-read parallelism.
+> Option A raises compute that was never the bottleneck — DIUs govern copy throughput once a write path exists, they don't create one. Option C invents a Write-behavior/staging relationship that isn't documented; Insert vs. Upsert governs conflict handling, not whether the write path is supported at all. Option D reaches for the fix that resolves a *different*, unrelated problem — a single-threaded source read from a missing Partition option — which has nothing to do with why a Warehouse-sink write fails without staging.
 
 ---
 

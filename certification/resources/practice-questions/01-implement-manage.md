@@ -69,7 +69,7 @@ D. It's assigned to the domain only after the workspace reaches 100 items
 >
 > The "by workspace admin" bulk-assignment method is a one-time operation against existing workspaces — it excludes "My workspaces" and doesn't track ongoing group membership for future workspace creation.
 >
-> Option A confuses this method with **default domain**, which is the mechanism that does auto-assign future workspaces created by covered users/groups — that's a separate, distinct feature (option B correctly hints at it but frames it as a dependency rather than a wholly different mechanism, which is also not how it works: default domain is configured independently). Option D invents a made-up item-count threshold that doesn't exist in Fabric's domain assignment model.
+> Option A invents a continuous group-membership-tracking mechanism that doesn't exist — "by workspace admin" assignment runs once, against the group's membership at that moment, not on an ongoing basis. Option B confuses this method with default domain — a separate feature that auto-assigns future workspaces (matching capacity/admin criteria). Option D invents a made-up item-count threshold that doesn't exist in Fabric's domain assignment model.
 
 ---
 
@@ -142,14 +142,14 @@ A company runs a self-hosted GitHub Enterprise Server behind a private network, 
 A. Yes, as long as the server is reachable from the Fabric service's IP range  
 B. Yes, but only with a service principal, not OAuth2  
 C. No — Fabric only supports GitHub Enterprise's cloud offering  
-D. Yes, if the workspace is on a Premium Per User (PPU) capacity  
+D. No — GitHub Enterprise Server support requires a separate, additionally licensed Fabric Git connector that isn't enabled by default  
 
 > [!success]- Answer
 > **C. No — Fabric only supports GitHub Enterprise's cloud offering**
 >
 > Fabric Git integration supports GitHub Enterprise cloud (`.com`/`ghe.com`) only. A self-hosted GitHub Enterprise Server instance is explicitly unsupported, regardless of public accessibility, network configuration, or authentication method.
 >
-> Options A and B both imagine a network- or auth-based workaround that doesn't exist — the limitation is about the product offering itself (cloud vs. self-hosted), not reachability or credentials. Option D invents a licensing tier requirement that has nothing to do with Git provider support.
+> Options A and B both imagine a network- or auth-based workaround that doesn't exist — the limitation is about the product offering itself (cloud vs. self-hosted), not reachability or credentials. Option D gets the right verdict (No) for the wrong reason — it invents a paid connector that doesn't exist; the limitation isn't a licensing gate, it's that self-hosted GitHub Enterprise Server simply isn't a supported Git provider offering in Fabric at all.
 
 ---
 
@@ -441,7 +441,7 @@ A team wants a Dataflow Gen2 item to automatically trigger a Notebook run immedi
 
 A. Yes, using Dataflow Gen2's built-in "On refresh complete" trigger  
 B. Yes, but only if the notebook is in the same workspace  
-C. Yes, via a Dataflow Gen2 output destination set to "Notebook"  
+C. No — Dataflow Gen2 requires an Activator rule watching its refresh status to trigger any downstream item, notebooks included  
 D. No — Dataflow Gen2 can't trigger or orchestrate other items on its own  
 
 > [!success]- Answer
@@ -449,7 +449,7 @@ D. No — Dataflow Gen2 can't trigger or orchestrate other items on its own
 >
 > This is one of the most common exam distractor shapes: Dataflow Gen2 can be scheduled itself, but it has no native mechanism to trigger or orchestrate any other item. Only a pipeline provides that coordination layer — the correct architecture is a pipeline with a Dataflow Gen2 activity followed by a Notebook activity.
 >
-> Options A and C both invent Dataflow Gen2 features (a completion trigger, a "Notebook" output destination) that don't exist — Dataflow Gen2's destinations are data sinks (Lakehouse, Warehouse, and similar), not other orchestration items. Option B is a plausible-sounding qualifier on a capability that doesn't exist in the first place, regardless of workspace boundaries.
+> Option A invents a completion trigger that doesn't exist. Option C also lands on the right verdict (No) but for an invented reason — Activator rules watch data conditions and events, not a Dataflow Gen2's own refresh completion status, so this isn't a real workaround either; the actual missing piece is a pipeline. Option B is a plausible-sounding qualifier on a capability that doesn't exist in the first place, regardless of workspace boundaries.
 
 ---
 
