@@ -90,15 +90,15 @@ D. There's no automatic shutdown for either pool type — the environment stays 
 
 A workspace item shows a Git status of **Conflict** — it was modified in the workspace and in Git since the last sync. The team decides the Git version is correct and wants to discard the workspace's local changes the fastest way, without creating a new branch or opening a pull request. Which resolution path fits?
 
-A. Use the UI's revert (or "keep Git version") action directly on the conflicted item  
+A. Use the UI's **Accept incoming changes** action directly on the conflicted item  
 B. Disconnect and reconnect Git integration for the workspace, which automatically resolves pending conflicts in Git's favor  
 C. Branch out to a new workspace, commit the local changes there, and open a pull request to reconcile  
 D. Delete the conflicted item and re-create it, since Conflict status has no other resolution path  
 
 > [!success]- Answer
-> **A. Use the UI's revert (or "keep Git version") action directly on the conflicted item**
+> **A. Use the UI's Accept incoming changes action directly on the conflicted item**
 >
-> A Git status of Conflict has three documented resolution paths: accept/keep a version directly in the UI, revert, or resolve the conflict in Git itself. When the team simply wants Git's version to win with no reconciliation needed, the UI's revert/keep-Git-version action is the fastest of the three — no branch or PR required.
+> A Git status of Conflict has three documented resolution paths: pick a version directly in the UI (**Accept incoming changes** to take Git's version, or **Keep current content** to keep the workspace's), revert to a previous synced state, or resolve the conflict in Git itself. When the team simply wants Git's version to win with no reconciliation needed, the UI's **Accept incoming changes** action is the fastest of the three — no branch or PR required.
 >
 > Option B invents a disconnect/reconnect mechanism that doesn't resolve conflicts at all. Option C describes the branch-and-PR path, which is the right tool when both versions need reconciling and review — not the fastest option when Git's version should simply win. Option D is a disproportionate, unnecessary fix for a status with three lighter-weight, documented resolution paths.
 
@@ -540,7 +540,7 @@ D. It succeeds immediately, since OneLake availability only affects read access,
 
 ## Question 30: A Hopping Window Directly in Eventstream *(Easy)*
 
-A team needs a rolling 10-minute average updated every 2 minutes (a hopping window), and wants to build it entirely with Eventstream's no-code **Group by** operator, without writing any KQL or Spark code. Is this achievable directly in the Group by operator's UI?
+A team needs a rolling 15-minute average updated every 5 minutes (a hopping window), and wants to build it entirely with Eventstream's no-code **Group by** operator, without writing any KQL or Spark code. Is this achievable directly in the Group by operator's UI?
 
 A. No — Group by only supports tumbling windows; hopping requires a downstream Spark or KQL step  
 B. Yes, but only for aggregation windows measured in whole hours, never in minutes at all  
@@ -648,21 +648,21 @@ D. The scheduled submission queues (FIFO, 24h expiry); the interactive session f
 
 ---
 
-## Question 36: Looking for a Two-Week-Old Ingestion Failure Record *(Easy)*
+## Question 36: A Longer-Term View of Ingestion Failure Trends *(Easy)*
 
-A team investigates an Eventhouse ingestion failure that happened two weeks ago, but `.show ingestion failures` returns no matching record, even though the ingestion definitely failed at the time. What's the most likely explanation?
+A team needs to analyze Eventhouse ingestion failure trends — by table and error code — across a 90-day compliance review window. Someone proposes just widening the time filter in a `.show ingestion failures` KQL query. Why won't that get them there, and what should they reach for instead?
 
-A. The command requires workspace monitoring to be enabled to return any historical results at all  
-B. The command only returns failures from the current calendar day, regardless of how far back the failure occurred  
-C. `.show ingestion failures` records only retain for 14 days; anything older has aged out of that window  
-D. `FailureKind = Permanent` records are purged immediately, while only `Transient` records are retained for any length of time  
+A. It will work fine — `.show ingestion failures` has no retention limit; only its default query window is short  
+B. No — the 14-day cap applies no matter the time filter; workspace monitoring's Ingestion results logs cover longer-range trends instead  
+C. Nothing in Fabric retains ingestion failure history longer than 14 days; the team has to reconstruct it from source-system logs instead  
+D. Raise the source table's batching latency policy — that setting also controls how long failure records stay queryable  
 
 > [!success]- Answer
-> **C. `.show ingestion failures` records only retain for 14 days; anything older has aged out of that window**
+> **B. No — the 14-day cap applies no matter the time filter; workspace monitoring's Ingestion results logs cover longer-range trends instead**
 >
-> `.show ingestion failures` retains its records for 14 days — a two-week-old failure sits right at (or just past) that boundary, which explains why the command comes back empty even though the failure genuinely happened. Longer-term investigation needs metrics or diagnostic logs alongside this command, since it doesn't cover the full retention picture on its own.
+> `.show ingestion failures` retains its records for 14 days regardless of how wide the query's own time filter is set — widening the filter doesn't reach back further than the command's actual retention. Workspace monitoring's Ingestion results logs table family, living in the auto-provisioned monitoring Eventhouse, is the durable, KQL-queryable alternative built for exactly this kind of longer-range, cross-table trend analysis — the 14-day cap doesn't apply to it.
 >
-> Option A invents a workspace-monitoring dependency that `.show ingestion failures` doesn't have; it's a command-level, always-available diagnostic. Option B invents a same-day-only restriction that's stricter than the documented 14-day window. Option D invents a `FailureKind`-based purge asymmetry that doesn't exist — retention is time-based, not classification-based.
+> Option A wrongly claims `.show ingestion failures` has no retention limit; the 14-day cap is real and command-level, not just a default query window. Option C overstates the limitation — workspace monitoring exists precisely to extend past the 14-day ceiling. Option D invents a batching-latency-controls-retention link that doesn't exist; batching latency only affects commit timing, not diagnostic retention.
 
 ---
 
@@ -835,7 +835,7 @@ D. Yes — every alert must originate from a standalone Activator item first; in
 
 **Scenario**
 
-Meridian Health Network is a regional hospital group modernizing its analytics estate on Microsoft Fabric. Its ICU patient monitors stream vital-sign telemetry — heart rate, SpO2, blood pressure — continuously from bedside devices. Separately, a legacy on-premises SQL Server database backs the group's electronic health record (EHR) system, holding patient encounters and billing data, reachable only through an on-premises data gateway. A third-party insurance clearinghouse also delivers daily claims-status CSV batches over SFTP into an Azure Blob Storage container.
+Meridian Health Network is a regional hospital group modernizing its analytics estate on Microsoft Fabric. Its ICU patient monitors stream vital-sign telemetry — heart rate, SpO2, blood pressure — continuously from bedside devices. Separately, an on-premises SQL Server 2025 database backs the group's electronic health record (EHR) system, holding patient encounters and billing data, reachable only through an on-premises data gateway. A third-party insurance clearinghouse also delivers daily claims-status CSV batches over SFTP into an Azure Blob Storage container.
 
 The analytics team consists of two T-SQL-strong BI developers, one PySpark-comfortable data engineer, and a compliance officer who does not hold a Microsoft 365 E5 license. Clinical data is treated as highly sensitive: Cardiology analysts should see only cardiology-department patient records, and a Warehouse holding billing data is promoted through a deployment pipeline across Development, Test, and Production stages. The billing Warehouse feeds a paginated report that finance uses for month-end reconciliation; the team already configured a data source rule so the Production-stage semantic model automatically points at the Production database after every deployment, and they now want the paginated report's own connection string to do the same, automatically, with no manual reconfiguration after each deployment.
 
@@ -886,12 +886,12 @@ The compliance officer asks whether Meridian's on-premises EHR SQL Server databa
 A. No — database mirroring only supports Fabric-native and Azure-hosted sources; an on-premises SQL Server database needs a shortcut or pipeline copy instead  
 B. Yes, and updates publish instantaneously, with zero measurable replication lag, unlike Azure-hosted mirroring sources  
 C. Yes, but only through metadata mirroring, since on-premises sources are treated as catalog-only for mirroring purposes  
-D. Yes — SQL Server is on the current database mirroring source list; changes can publish as fast as every ~15 seconds, which is "near-real-time," not instantaneous  
+D. Yes — SQL Server 2025+ is on the current database mirroring source list; changes can publish as fast as every ~15 seconds, which is "near-real-time," not instantaneous  
 
 > [!success]- Answer
-> **D. Yes — SQL Server is on the current database mirroring source list; changes can publish as fast as every ~15 seconds, which is "near-real-time," not instantaneous**
+> **D. Yes — SQL Server 2025+ is on the current database mirroring source list; changes can publish as fast as every ~15 seconds, which is "near-real-time," not instantaneous**
 >
-> SQL Server is one of the documented database mirroring sources (alongside Azure SQL Database, Azure SQL Managed Instance, Cosmos DB, PostgreSQL, MySQL-preview, Snowflake, Oracle, SAP, BigQuery-preview, and Fabric SQL database), and this includes on-premises SQL Server instances reachable via gateway. Its replication mechanism is log-based, publishing changes as fast as roughly every 15 seconds — genuinely near-real-time, but not truly instantaneous.
+> SQL Server (2025 and later) is one of the documented database mirroring sources (alongside Azure SQL Database, Azure SQL Managed Instance, Cosmos DB, PostgreSQL, MySQL-preview, Snowflake, Oracle, SAP, BigQuery-preview, and Fabric SQL database), and this includes on-premises SQL Server 2025+ instances reachable via gateway — an older, pre-2025 SQL Server instance isn't on the supported source list. Its replication mechanism is log-based, publishing changes as fast as roughly every 15 seconds — genuinely near-real-time, but not truly instantaneous.
 >
 > Option A wrongly restricts mirroring to Fabric-native and Azure-hosted sources only, excluding a source type that's actually supported. Option B overstates the latency as zero/instantaneous, contradicting the documented ~15-second cadence that applies uniformly across supported sources. Option C misapplies metadata mirroring, which is reserved for catalog-based systems like Unity Catalog and Dremio — a SQL Server database gets full database mirroring, not a catalog-only sync.
 
