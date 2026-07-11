@@ -133,19 +133,19 @@ For programmatic access, Fabric exposes **Spark monitoring APIs** at two levels:
 > [!note] Mental model
 > Monitor hub and Recent Runs are the **flight board** — status and timing at a glance. The application detail page's Logs/Diagnostics tabs are the **black box recorder** — what actually happened inside a specific flight. The monitoring APIs are the **maintenance crew's terminal** — the same data, but scriptable for automated dashboards or alerting pipelines that don't live inside the Fabric portal.
 
-**Practice Question 2** *(Medium)*
+**Practice Question 2** *(Hard)*
 
-A notebook run failed inside a Spark job. The team needs the exact driver-process log output to diagnose the failure, and wants to build an automated nightly report that pulls this information without opening the Fabric portal. Which two capabilities together satisfy both needs?
+A nightly pipeline triggers a notebook activity that writes new rows to a lakehouse table feeding a Direct Lake Power BI report. This week, Monitor hub shows the notebook activity completing successfully every night, but the report has shown the same three-day-old numbers for three consecutive days, with no error surfaced anywhere in the pipeline run or the semantic model's refresh history. The team wants to (1) confirm the new data actually reached the table, (2) explain how the report can be stale despite a "successful" notebook run, and (3) be paged automatically if this exact gap recurs. What's the correct sequence of surfaces and fix?
 
-A. The Monitor hub's Activities table for the log output, and CSV export for automation  
-B. Dataflow Gen2's detailed logs download for diagnosis, and the Capacity Metrics app for automation  
-C. The Spark application detail page's **Logs** tab (Driver logs) for diagnosis, and the **Driver Log** monitoring API for automation  
-D. The notebook's Item snapshot for the log output, and Real-Time hub for automation  
+A. Monitor hub's success status already confirms the write landed; the report is stale because the Delta transaction log is corrupted — restore the table to a previous version with `RESTORE`  
+B. The notebook's "success" status already guarantees the report reflects current data; the real cause is Direct Lake being disabled tenant-wide — switch the model to Import mode  
+C. Check the Spark application's **Data** tab to confirm the write actually landed, then the semantic model's refresh history **Direct Lake** tab to confirm framing hasn't run since — trigger a manual refresh or verify automatic updates is enabled, then set an Activator alert on the semantic model's refresh/framing failure event for future recurrences  
+D. Open the Capacity Metrics app's Compute page to check for throttling, since a "successful" run paired with stale downstream data always indicates capacity contention  
 
 > [!success]- Answer
-> **C. The Spark application detail page's Logs tab (Driver logs) for diagnosis, and the Driver Log monitoring API for automation**
+> **C. Check the Spark application's Data tab to confirm the write actually landed, then the semantic model's refresh history Direct Lake tab to confirm framing hasn't run since — trigger a manual refresh or verify automatic updates is enabled, then set an Activator alert on the semantic model's refresh/framing failure event for future recurrences**
 >
-> The Logs tab surfaces full Livy/Prelaunch/Driver logs interactively for a human diagnosing a failure; the Driver Log API returns the same underlying data programmatically, making it the right building block for an unattended nightly job. Monitor hub's Activities table shows status/timing, not log content. Dataflow Gen2's detailed logs (B) are unrelated to Spark. Item snapshots capture code/config, not runtime log output.
+> Monitor hub's "succeeded" status only reflects the notebook activity's own execution — it says nothing about whether the downstream semantic model has reframed since the write. The Spark application detail page's **Data** tab confirms the write actually reached the table; the semantic model's refresh history **Direct Lake** tab (see [02-Semantic Model Refresh](./02-semantic-model-refresh.md#what-framing-means-and-when-reframing-happens)) confirms whether framing has run since; and Activator (see [03-Activator & Alerts](./03-activator-alerts.md)) is the tool for turning "reframing hasn't run in N hours" into a proactive alert instead of a report user noticing stale numbers. A's `RESTORE` targets data corruption, which doesn't match a symptom with no error anywhere. B wrongly assumes notebook success implies model freshness and proposes an unnecessary architectural change. D targets capacity-wide slowness, not a specific staleness symptom with no other performance complaints reported.
 
 ## Eventstream Monitoring
 
@@ -164,7 +164,7 @@ Eventhouse monitoring rides on the same **workspace monitoring** mechanism as pi
 | :--- | :--- |
 | **Metrics** | Numeric performance counters for the eventhouse |
 | **Command logs** | Management commands executed against the eventhouse |
-| **Data operation logs** | Data-management operations (e.g., merges, extents) |
+| **Data operation logs** | Data-management operations (e.g., merges, extents — Eventhouse's immutable storage shards) |
 | **Ingestion results logs** | Per-ingestion outcome — success/failure detail for both queued and streaming ingestion |
 | **Query logs** | Queries executed against the eventhouse's KQL databases |
 

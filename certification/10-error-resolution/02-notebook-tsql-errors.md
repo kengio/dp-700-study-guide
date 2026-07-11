@@ -195,9 +195,23 @@ Under the target `ERRORFILE` directory, Fabric creates a `_rejectedrows` child f
 
 `MAXERRORS` caps how many rejected rows are tolerated before the whole `COPY INTO` fails (default **0** — any rejected row fails the load unless `MAXERRORS` is raised). If `ERRORFILE` points at the full path of a *different* storage account than the source, `ERRORFILE_CREDENTIAL` authenticates to it (only Shared Access Signature is supported in Fabric); otherwise the same `CREDENTIAL` used for the source applies. When using a firewall-protected storage account for the error file, `MAXERRORS` must also be specified.
 
+**Practice Question 3** *(Hard)*
+
+A nightly `COPY INTO` loads a 2 GB Parquet file into a Warehouse table. The statement specifies `MAXERRORS = 100` and a configured `ERRORFILE`, and only 12 rows in the file have a genuine data-type mismatch — well under the tolerated error count. The load still fails outright. What explains the failure, and what's the fix?
+
+A. `MAXERRORS`/`ERRORFILE` don't apply to Parquet data-type conversion errors — they only honor CSV/JSONL loads; pre-clean the source or split the load into CSV/JSONL  
+B. `MAXERRORS` silently defaults to 0 unless set at the session level, not the statement level — re-run with `SET MAXERRORS = 100` first  
+C. `ERRORFILE` is pointed at a firewall-protected storage account without `ERRORFILE_CREDENTIAL` set, so the whole load aborts  
+D. Snapshot isolation rolled back the `COPY INTO` because a concurrent transaction touched the same table  
+
+> [!success]- Answer
+> **A. MAXERRORS/ERRORFILE don't apply to Parquet data-type conversion errors — they only honor CSV/JSONL loads; pre-clean the source or split the load into CSV/JSONL**
+>
+> `ERRORFILE`/`MAXERRORS` apply only to CSV and JSONL loads in Fabric Data Warehouse — Parquet data-type conversion errors always fail the whole `COPY INTO`, ignoring `MAXERRORS` entirely, which is exactly why a generous `MAXERRORS = 100` didn't save this load. B is wrong because `MAXERRORS` is a statement-level `WITH` option, not a session setting, and it was already set correctly. C describes a real `ERRORFILE_CREDENTIAL` requirement, but nothing in the scenario points at a separate firewalled storage account. D's snapshot-isolation conflict throws error 24556/24706, a distinct failure mode from a data-type-driven `COPY INTO` rejection.
+
 ## Query Insights for Diagnosis
 
-Beyond ad hoc error messages, the Warehouse-side **query insights** views (queryable via T-SQL against `queryinsights.exec_requests_history` and related DMVs) surface historical query text, duration, and resource consumption without needing to reproduce a failure live — useful for diagnosing an intermittent `tempdb` exhaustion or a query that degrades gradually rather than failing outright. Pair query insights with `sys.dm_tran_locks` when a symptom looks like blocking rather than an outright error — see [11-Performance Optimization](../11-performance-optimization/performance-optimization.md) for query-tuning depth beyond error diagnosis.
+Beyond ad hoc error messages, the Warehouse-side **query insights** views (queryable via T-SQL against `queryinsights.exec_requests_history` and related DMVs) surface historical query text, duration, and resource consumption without needing to reproduce a failure live — useful for diagnosing an intermittent `tempdb` exhaustion or a query that degrades gradually rather than failing outright. Pair query insights with `sys.dm_tran_locks` when a symptom looks like blocking rather than an outright error — see [11-Performance Optimization: Query Insights](../11-performance-optimization/02-warehouse-optimization.md#query-insights) for query-tuning depth beyond error diagnosis.
 
 ## Use Cases
 

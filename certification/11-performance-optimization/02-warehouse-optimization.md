@@ -222,6 +222,20 @@ D. Foreign keys only enforce integrity when result-set caching is enabled
 >
 > Fabric Warehouse does support foreign keys (ruling out A), but exclusively as `NOT ENFORCED` — there's no enforced variant to fall back to. The constraint still helps the optimizer and BI tools, it just doesn't block bad writes. Constraints must be added via `ALTER TABLE` regardless of enforcement (C is a red herring — inline creation isn't even allowed). Result-set caching (D) is unrelated to constraint enforcement.
 
+**Practice Question 3** *(Hard)*
+
+A reporting query joins a 500-million-row fact table to a dimension table across a `NOT ENFORCED` foreign key the data team declared purely for BI-tool convenience. The query also selects `GETDATE()` for a "data as of" column and returns roughly 40,000 rows. After each night's large load, the query's first run every morning is consistently the slowest run of the day — and across every run, `result_cache_hit` is never anything but `0`. Which two separate root causes are both actually in play?
+
+A. The `NOT ENFORCED` foreign key is invalid because the dimension table has duplicate keys, and `GETDATE()` disqualifies the query from statistics creation  
+B. Synchronous automatic statistics creation on cold columns after the nightly load explains the slow first run, and both the `GETDATE()` reference and the 40,000-row result (over the 10,000-row cache threshold) independently disqualify result-set caching  
+C. The foreign key relationship is producing an inefficient join plan because `NOT ENFORCED` constraints are never used by the optimizer, and result-set caching is disabled tenant-wide  
+D. In-memory caching was evicted by the nightly load, which explains the slow first run, and the 40,000-row result alone explains the missing cache hit — `GETDATE()` is unrelated to caching  
+
+> [!success]- Answer
+> **B. Synchronous automatic statistics creation on cold columns after the nightly load explains the slow first run, and both the GETDATE() reference and the 40,000-row result (over the 10,000-row cache threshold) independently disqualify result-set caching**
+>
+> Two independent mechanisms are at work here. First, the nightly load changes data the optimizer needs fresh statistics for, so the first query each morning synchronously pays the one-time cost of statistics (re)creation on cold columns before it can execute efficiently — expected behavior, not a bug. Second, result-set caching has *two* separate disqualifiers present at once — a non-deterministic `GETDATE()` reference and an estimated result size over the 10,000-row threshold — either one alone would be enough to explain `result_cache_hit = 0` on every run, so removing only one of them wouldn't fix caching. A is wrong: `NOT ENFORCED` foreign keys are never validated for uniqueness or referential integrity by the engine, so there's no mechanism that would even detect "invalid because of duplicates," and `GETDATE()` disqualifies caching, not statistics creation. C is wrong: declared `NOT ENFORCED` relationships **are** used by the optimizer for cardinality and join-elimination hints, they're just not enforced at write time — and while result-set caching genuinely is disabled tenant-wide as a known issue, this question is testing the two *documented* disqualifiers a query like this would trip regardless. D ignores that `GETDATE()` is itself an independent, documented disqualifier, not just row count.
+
 ## Use Cases
 
 - Deciding whether a slow, frequently-run query needs manual statistics or is already covered by automatic/proactive refresh

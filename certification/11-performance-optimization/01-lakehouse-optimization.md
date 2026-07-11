@@ -201,6 +201,20 @@ D. The oversized 30 GB files, not deletion vectors, are driving MERGE latency
 >
 > Deletion vectors are on by default on Runtime 2.0 (ruling out A), and they aren't incompatible with V-Order (ruling out C). Z-Order (B) helps selective multi-column filtering, not MERGE latency driven by oversized files. The real issue is file size: the 30 GB files are far above the adaptive target file size range (128 MB–1 GB) — roughly 30–240× too large — so even though deletion vectors avoid a full rewrite for each tiny MERGE, any operation that eventually touches or rewrites those files (including a deletion-vector purge once the 5% threshold is crossed) does dramatically more I/O than necessary. Run `OPTIMIZE` to bring the files into the adaptive size range.
 
+**Practice Question 3** *(Easy)*
+
+A lakehouse table needs its small files compacted, and the team also wants Direct Lake queries against it to benefit from V-Order's read-time encoding — both in one pass, in a single statement. Which command does this?
+
+A. `VACUUM dbo.table_name RETAIN 168 HOURS`  
+B. `OPTIMIZE dbo.table_name ZORDER BY (customer_id)`  
+C. `OPTIMIZE dbo.table_name VORDER`  
+D. `ALTER TABLE dbo.table_name SET TBLPROPERTIES("delta.parquet.vorder.enabled" = "true")`  
+
+> [!success]- Answer
+> **C. OPTIMIZE dbo.table_name VORDER**
+>
+> `OPTIMIZE ... VORDER` runs bin-compaction and applies V-Order's read-optimizing encoding in the same rewrite — exactly what the question asks for. `VACUUM` (A) only removes old files past the retention threshold; it doesn't compact anything or touch encoding. `ZORDER BY` (B) improves multi-column filter selectivity but doesn't apply V-Order unless `VORDER` is also specified in the same statement. Setting the table property (D) makes V-Order a durable default for *future* writes, but doesn't rewrite existing files — nothing gets compacted or re-encoded until the next `OPTIMIZE` or full rewrite runs.
+
 ## Use Cases
 
 - Deciding whether a lakehouse table should run with V-Order on (read-heavy Direct Lake/SQL endpoint reporting) or off (write-heavy nightly ingestion)

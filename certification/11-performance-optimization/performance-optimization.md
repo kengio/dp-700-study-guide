@@ -99,6 +99,7 @@ flowchart TD
 ## Related Resources
 
 - [09-Monitoring & Alerting](../09-monitoring-alerting/monitoring-alerting.md)
+- [09-Monitoring & Alerting: The Domain 3 Triage Spine](../09-monitoring-alerting/monitoring-alerting.md) — symptom-to-lever cross-reference spanning this section (see "The Domain 3 Triage Spine" table near the top of the file)
 - [10-Error Resolution](../10-error-resolution/error-resolution.md)
 - [Official: Cross-workload table maintenance and optimization](https://learn.microsoft.com/en-us/fabric/fundamentals/table-maintenance-optimization)
 - [Official: Optimize Delta Lake tables with V-Order in Fabric](https://learn.microsoft.com/en-us/fabric/data-engineering/delta-optimization-and-v-order)

@@ -95,6 +95,7 @@ flowchart TD
 ## Related Resources
 
 - [09-Monitoring & Alerting](../09-monitoring-alerting/monitoring-alerting.md)
+- [09-Monitoring & Alerting: The Domain 3 Triage Spine](../09-monitoring-alerting/monitoring-alerting.md) — symptom-to-diagnosis cross-reference spanning this section (see "The Domain 3 Triage Spine" table near the top of the file)
 - [11-Performance Optimization](../11-performance-optimization/performance-optimization.md)
 - [Official: Troubleshoot pipelines for Data Factory in Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/data-factory/pipeline-troubleshoot-guide)
 - [Official: Troubleshooting guide for Spark jobs in Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/data-engineering/troubleshoot-spark)

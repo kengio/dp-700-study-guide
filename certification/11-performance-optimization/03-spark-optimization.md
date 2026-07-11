@@ -153,7 +153,7 @@ High concurrency mode lets compatible Spark workloads share one running Spark se
 
 - Session sharing requires: single-user boundary, same default Lakehouse, same Spark compute settings
 - **Session start can be up to 36x faster** for custom pools running in high concurrency mode, because subsequent workloads join an already-running session instead of provisioning a new one
-- Each workload gets its own REPL core with isolated execution state; executors are allocated via **FAIR scheduling** across REPL cores to reduce starvation
+- Each workload gets its own REPL core (a per-notebook code interpreter) with isolated execution state; executors are allocated via **FAIR scheduling** across REPL cores to reduce starvation
 - Default sharing limit: **5 notebooks per session**; tunable up to **50** via `spark.highConcurrency.max` on the shared Environment
 - Only the initiating notebook/pipeline activity is billed for Spark compute — subsequent shared sessions aren't billed separately
 
