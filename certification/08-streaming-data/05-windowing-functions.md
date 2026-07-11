@@ -164,20 +164,6 @@ A query can use a 5-minute tumbling window with a 1-minute trigger — the windo
 > [!warning] Common Mistake
 > Assuming a shorter trigger interval changes the *window* size, or that a window definition controls how *often* results are emitted. A 5-minute tumbling window with a `processingTime="30 seconds"` trigger still groups by 5-minute buckets — it just checks for and emits updated (partial, in-progress) results for the current open window every 30 seconds, rather than only once the full 5 minutes have elapsed.
 
-**Practice Question 3** *(Easy)*
-
-A fraud-detection team wants a 5-minute rolling transaction count per account, recalculated every minute so a threshold-based alert can react quickly to a sudden spike, without waiting for a full 5-minute tumbling window to close. Which window type fits?
-
-A. Tumbling — 5-minute windows  
-B. Hopping — 5-minute window size, 1-minute hop  
-C. Session — 5-minute inactivity gap  
-D. Snapshot — group by exact timestamp  
-
-> [!success]- Answer
-> **B. Hopping — 5-minute window size, 1-minute hop**
->
-> "Rolling N-minute window, recalculated every M minutes" (M smaller than N) is the textbook hopping-window definition — the window size (5 minutes) stays fixed, but a new, overlapping window result is emitted every hop interval (1 minute), giving faster reaction time than waiting for a tumbling window to fully close.
-
 ## Late Data and Watermarks
 
 Every windowing mechanism has to answer the same question: **how late can an event arrive and still be counted in the correct window?**
@@ -191,7 +177,7 @@ Every windowing mechanism has to answer the same question: **how late can an eve
 > [!warning] Common Mistake
 > Assuming a watermark **rejects** late data outright. A watermark doesn't cause an error or drop the event from the stream entirely — it simply means the *window's state* may already have been finalized and cleared by the time the late event arrives, so that specific window's aggregate silently won't reflect it. The event itself isn't lost from the source; it's just excluded from an already-closed aggregation window. This is the same mechanic covered for dedup in [05-Loading Patterns: Streaming Loading Pattern](../05-loading-patterns/03-streaming-loading-pattern.md), applied here to windowed aggregation instead of `dropDuplicates`.
 
-**Practice Question 4** *(Hard)*
+**Practice Question 3** *(Hard)*
 
 A Spark job computes 5-minute tumbling window counts with `.withWatermark("eventTime", "5 minutes")`. A batch of events arrives with `eventTime` values 6 minutes behind the latest `eventTime` seen so far. What's the most accurate description of what happens to them?
 

@@ -163,20 +163,6 @@ df.show()
 
 This is the same OneLake path pattern used for any other Fabric item's Delta tables — Eventhouse data isn't a special case for Spark once OneLake availability exposes it, which is exactly the point of the feature: one storage format, queryable identically from every Fabric compute engine.
 
-**Practice Question 4** *(Easy)*
-
-A data engineer wants to join Eventhouse-ingested telemetry with a lakehouse dimension table inside a single Spark notebook, without exporting or re-ingesting the telemetry anywhere. What has to be true first?
-
-A. The telemetry must be re-ingested into the lakehouse via a pipeline  
-B. OneLake availability must be enabled on the Eventhouse table (or database) so its Delta representation is queryable via a OneLake path from Spark  
-C. This isn't possible — Eventhouse data can only be queried with KQL  
-D. A materialized view must be created first  
-
-> [!success]- Answer
-> **B. OneLake availability must be enabled on the Eventhouse table (or database) so its Delta representation is queryable via a OneLake path from Spark**
->
-> OneLake availability is exactly the mechanism that makes Eventhouse data joinable from Spark without a separate export/ingest pipeline — once enabled, `spark.read.format("delta").load(<OneLake path>)` reads it like any other Delta table. Re-ingesting would duplicate data and defeat the purpose of OneLake's single-copy model; a materialized view is a KQL-side concept and has no bearing on Spark's ability to read the underlying Delta files.
-
 ## Use Cases
 
 - Streaming ingestion for many small, sporadic per-tenant tables where batching wastes latency budget
@@ -207,7 +193,7 @@ D. A materialized view must be created first
 > [!tip] Exam Tips
 >
 > - Streaming ingestion = near-real-time, small/frequent writes across many tables; queued ingestion = default, higher throughput, blob-staged batches
-> - Query acceleration is ==generally available== (GA since May 2025) and closes the performance gap between shortcuts and native tables — but accelerated shortcuts still can't host materialized views or update policies
+> - Query acceleration is ==generally available== and closes the performance gap between shortcuts and native tables — but accelerated shortcuts still can't host materialized views or update policies
 > - Update policies and materialized views require native tables — this is the same underlying constraint tested from two different angles (KQL transformation mechanics in Section 07, streaming architecture in Section 08)
 > - OneLake availability's adaptive batching can delay data appearing in OneLake by design (up to 3 hours default) — `TargetLatencyInMinutes` tunes this down to a 5-minute floor
 > - OneLake availability blocks table rename, column-type changes, row-level security, and delete/truncate/purge while it's enabled

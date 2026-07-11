@@ -202,29 +202,35 @@ SELECT * FROM control.WatermarkTable WHERE SourceTableName = 'fact.Sales';
 BEGIN TRAN;
 
 -- Step 1: close out current rows whose tracked attributes changed
-DECLARE @ClosedKeys TABLE (CustomerBusinessKey VARCHAR(20));
+CREATE TABLE #ClosedKeys (CustomerBusinessKey VARCHAR(20));
 
 UPDATE dim.Customer
 SET IsCurrent = 0, EndDate = CAST(SYSUTCDATETIME() AS date)
-OUTPUT deleted.CustomerBusinessKey INTO @ClosedKeys
+OUTPUT deleted.CustomerBusinessKey INTO #ClosedKeys
 FROM dim.Customer AS tgt
 JOIN #StagingCustomer AS src
     ON tgt.CustomerBusinessKey = src.CustomerBusinessKey
    AND tgt.IsCurrent = 1
 WHERE tgt.Address <> src.Address OR tgt.Segment <> src.Segment;
 
--- Step 2: insert new current-version rows for closed keys AND brand-new keys
+-- Step 2: insert new current-version rows for closed keys AND brand-new keys,
+-- using a ROW_NUMBER()-based surrogate key offset from the current max
+-- (SEQUENCE objects aren't supported in Fabric Warehouse)
+DECLARE @MaxCustomerKey BIGINT = ISNULL((SELECT MAX(CustomerKey) FROM dim.Customer), 0);
+
 INSERT INTO dim.Customer (CustomerKey, CustomerBusinessKey, Address, Segment, EffectiveDate, EndDate, IsCurrent)
 SELECT
-    NEXT VALUE FOR seq.CustomerKey,
+    @MaxCustomerKey + ROW_NUMBER() OVER (ORDER BY src.CustomerBusinessKey) AS CustomerKey,
     src.CustomerBusinessKey, src.Address, src.Segment,
     CAST(SYSUTCDATETIME() AS date), NULL, 1
 FROM #StagingCustomer AS src
-WHERE src.CustomerBusinessKey IN (SELECT CustomerBusinessKey FROM @ClosedKeys)
+WHERE src.CustomerBusinessKey IN (SELECT CustomerBusinessKey FROM #ClosedKeys)
    OR NOT EXISTS (
         SELECT 1 FROM dim.Customer AS tgt
         WHERE tgt.CustomerBusinessKey = src.CustomerBusinessKey AND tgt.IsCurrent = 1
    );
+
+DROP TABLE #ClosedKeys;
 
 COMMIT;
 
@@ -239,7 +245,10 @@ HAVING COUNT(*) > 1;  -- must return 0 rows
 ```
 
 > [!note]
-> This is functionally identical to the `MERGE`-then-`INSERT` two-step pattern in [05-Loading Patterns: Dimensional Model Loading](../../../05-loading-patterns/02-dimensional-model-loading.md) — the difference is a plain `UPDATE...FROM` for the close step instead of a `MERGE` with a `WHEN MATCHED AND (...)` condition. Both are valid; pick whichever your team's SQL style prefers.
+> This is functionally identical to the `MERGE`-then-`INSERT` two-step pattern in [05-Loading Patterns: Dimensional Model Loading](../../../05-loading-patterns/02-dimensional-model-loading.md) — the difference is a plain `UPDATE...FROM` for the close step instead of a `MERGE` with a `WHEN MATCHED AND (...)` condition. Both are valid; pick whichever your team's SQL style prefers. A `#temp` table is used for the `OUTPUT INTO` target instead of a table variable (`DECLARE @x TABLE`) — table variables carry unverified support risk in Fabric Warehouse, while session-scoped `#temp` tables are docs-confirmed supported.
+
+> [!warning] Common Mistake
+> Reaching for `NEXT VALUE FOR` against a `SEQUENCE` object to generate a surrogate key. **`SEQUENCE` objects are not supported in Fabric Warehouse** — they're explicitly listed as an unsupported table feature (verified against [Tables in Fabric Data Warehouse](https://learn.microsoft.com/en-us/fabric/data-warehouse/tables), Limitations section). Use the `ROW_NUMBER()` + max-key-offset pattern shown above instead.
 
 ---
 

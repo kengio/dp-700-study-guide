@@ -142,20 +142,6 @@ A common, exam-relevant pattern: Dataflow Gen2 consolidates many small, varied s
 > [!warning] Common Mistake
 > Treating the transform-tool choice as a single, pipeline-wide decision. The exam sometimes describes a multi-stage scenario (e.g., "ingest from 40 SaaS sources, then apply custom ML scoring, then load into a warehouse for BI") and expects you to recognize that **different stages call for different tools** — Dataflow Gen2 for stage one, notebook for stage two, T-SQL for stage three — rather than forcing one tool to do everything.
 
-**Practice Question 4** *(Medium)*
-
-A pipeline ingests data from 30 small REST API sources with Dataflow Gen2, then a downstream notebook applies a proprietary Python-based scoring model, and finally a warehouse stored procedure runs `MERGE` to update a gold-layer dimension. Is this multi-tool design appropriate, or should it be consolidated into a single tool?
-
-A. It should be consolidated into a single notebook, since Spark can technically replace both Dataflow Gen2 and T-SQL  
-B. It should be consolidated into T-SQL only, since `MERGE` can express everything  
-C. The multi-tool design is appropriate — each stage plays to a different tool's strength: Dataflow Gen2 for many low-code sources, notebook for custom ML scoring, T-SQL for warehouse-resident `MERGE` upserts  
-D. It should be consolidated into Dataflow Gen2 only, since it can call external APIs for scoring  
-
-> [!success]- Answer
-> **C. The multi-tool design is appropriate — each stage plays to a different tool's strength: Dataflow Gen2 for many low-code sources, notebook for custom ML scoring, T-SQL for warehouse-resident `MERGE` upserts**
->
-> This is a textbook example of matching each *stage* of a pipeline to its best-fit tool rather than forcing one tool to do the whole job. Consolidating into Spark alone (option A) is technically possible but discards T-SQL's native `MERGE` support and the BI team's existing SQL tooling; consolidating into T-SQL alone (option B) has no path to run a proprietary Python ML model; consolidating into Dataflow Gen2 alone (option D) has no capacity to run custom ML scoring logic.
-
 ## Distractor Patterns to Recognize
 
 | Scenario phrase | Trap | Correct read |

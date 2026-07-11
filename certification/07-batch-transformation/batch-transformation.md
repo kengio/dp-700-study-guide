@@ -35,7 +35,7 @@ mindmap
     T-SQL Transformations
       MERGE is GA in Fabric Warehouse
       Session-scoped distributed #temp tables supported
-      No IDENTITY column - use ROW_NUMBER() for surrogate keys
+      No IDENTITY column - use ROW_NUMBER for surrogate keys
       Three-part names for cross-database queries
     KQL Transformations
       summarize/extend/project for shaping
@@ -43,8 +43,8 @@ mindmap
       Update policies = transform-on-ingest automation
       Materialized views = always-fresh aggregation, GA feature
     Data Quality Patterns
-      dropDuplicates vs ROW_NUMBER()=1 vs arg_max()
-      na.fill vs COALESCE/ISNULL vs coalesce()
+      dropDuplicates vs ROW_NUMBER filter vs arg_max dedup
+      na.fill vs COALESCE/ISNULL vs coalesce fill
       Late-arriving handled via watermark + SCD Type 1/2
       Denormalize = join-and-flatten in all three languages
 ```

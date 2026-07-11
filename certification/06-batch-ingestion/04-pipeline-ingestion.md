@@ -68,20 +68,6 @@ Database-family sinks expose a **Write behavior** setting with an explicit `Upse
 
 Lakehouse and Warehouse table sinks, Dataverse, and several other database-family connectors expose equivalent upsert-style write behavior; pure file-based sinks (ADLS Gen2, S3, Blob Storage) do not, since there's no row-matching key to upsert against a folder of files.
 
-**Practice Question 1** *(Easy)*
-
-A pipeline's Copy activity writes changed customer records from a source system into an Azure SQL Database sink table, and the requirement is that existing customer rows be updated in place while new customers are inserted — no duplicate rows should ever be created for the same customer ID. Which sink **Write behavior** setting satisfies this, and what additional setting should be configured alongside it?
-
-A. `Insert`, with no additional configuration needed  
-B. `Upsert`, with **Key columns** set to the customer ID column (or relying on the table's primary key if it's already the customer ID)  
-C. `Stored procedure`, since only stored procedures can update existing rows  
-D. `Auto create table`, since it recreates the table on every run  
-
-> [!success]- Answer
-> **B. `Upsert`, with Key columns set to the customer ID column (or relying on the table's primary key if it's already the customer ID)**
->
-> `Upsert` is exactly the write behavior built for "insert new, update existing, keyed on a business identifier" — the scenario's core requirement. `Insert` alone would duplicate every existing customer row on every run. A stored procedure *could* implement the same logic, but it's more setup than needed when `Upsert` with key columns does it natively. `Auto create table` only controls whether the destination table is created if missing — it has nothing to do with row-level write behavior.
-
 ---
 
 ## Staging
@@ -131,7 +117,7 @@ Copy activity can tolerate certain row- and file-level failures without aborting
 > [!note] Mental model
 > Fault tolerance is a **shipping manifest with a "damaged goods" bin**: a handful of malformed items get pulled aside and logged instead of stopping the entire truck. It's not a substitute for fixing a systematically broken source feed — if most rows are landing in the "skipped" bin, that's a data-quality problem, not something fault tolerance is meant to paper over.
 
-**Practice Question 2** *(Medium)*
+**Practice Question 1** *(Medium)*
 
 A Copy activity loads 2 million rows from a CSV source into a Warehouse table. During a run, 40 rows fail because their date column contains an unparseable string, while the other 1,999,960 rows are well-formed. The pipeline has **Fault tolerance / Skip incompatible rows** enabled, but **Enable logging** and **Data consistency verification** are both off. What happens, and what's the risk?
 
@@ -154,7 +140,7 @@ D. Skip incompatible rows only applies to binary copies, so this setting has no 
 | What Copy job adds over Copy activity | Detail |
 | :--- | :--- |
 | **Incremental copy — watermark-based** | Native tracking on `ROWVERSION`, datetime, date, integer, or string-interpreted-as-datetime columns; Copy job manages the "last successful run" state automatically |
-| **Incremental copy — CDC-based** | When CDC is enabled on the source and supported by the connector, replicates inserts, updates, **and deletes** — the same capability the watermark pattern's modified-date approach can't provide on its own |
+| **Incremental copy — CDC-based** | ==Preview== — when CDC is enabled on the source and supported by the connector, replicates inserts, updates, **and deletes** — the same capability the watermark pattern's modified-date approach can't provide on its own |
 | **Update methods** | `Append` (default, keeps full history), `Merge` (upsert on a key column, defaults to the primary key), `Overwrite` (replace), or `SCD Type 2` (==Preview== — versioned rows with effective dating; deletes become soft deletes under CDC replication) |
 | **Automatic table creation + truncation** | Can create destination tables from source schema, and optionally truncate the destination before the first full load |
 | **Audit columns** | Optionally appends lineage metadata to every row: extraction time, source path, workspace/job/run IDs, incremental window bounds |
@@ -168,7 +154,7 @@ D. Skip incompatible rows only applies to binary copies, so this setting has no 
 > [!warning] Common Mistake
 > Assuming Copy job is strictly "Copy activity, but easier" and therefore always the right default. Copy job has no pipeline-level transformation or control-flow surface — no conditional branching, no chaining with notebooks or stored procedures in the same item. When the scenario needs orchestration beyond "move this data, handle deletes, incremental please," that's a pipeline with Copy activity (or a broader orchestration pattern from [04-Orchestration](../04-orchestration/orchestration.md)), not Copy job.
 
-**Practice Question 2b** *(Medium)*
+**Practice Question 2** *(Medium)*
 
 A data engineer needs to ingest data from an on-premises SQL Server instance that already has CDC enabled on the source tables, into an Azure SQL Database. The requirement is a low-code, wizard-driven setup that performs an initial full load, then automatically switches to incremental loads based on CDC, on a recurring schedule — with no custom code or hand-built watermark logic. Which Fabric capability fits best?
 
@@ -181,6 +167,8 @@ D. A Dataflow Gen2 with a scheduled refresh
 > **B. Copy job, using CDC-based incremental copy over the on-premises gateway**
 >
 > Every signal points to Copy job: CDC already enabled on the source, a request for a low-code wizard experience, "initial full load then automatic incremental," and no appetite for hand-built watermark logic. Copy job connects through the on-premises data gateway, natively supports CDC-based incremental copy, and needs no custom control-table code. A hand-built watermark in a Copy activity would work but contradicts "no custom code." Mirroring targets continuous replication of a whole supported database into OneLake, not a scheduled load into Azure SQL Database. Dataflow Gen2 is a transformation-first, Power Query-based tool, not a CDC-aware incremental copy mechanism.
+>
+> Note: CDC-based incremental copy in Copy job is currently ==Preview== — confirm GA status before committing a production design to it.
 
 ---
 

@@ -179,7 +179,7 @@ DeviceTempByWindow
 // partition key and timestamp before it can compute session boundaries
 WebEvents
 | sort by UserId, EventTime asc
-| extend SessionId = row_window_session(EventTime, 30m, 30m, UserId)
+| extend SessionId = row_window_session(EventTime, 30m, 30m, UserId != prev(UserId))
 | summarize
     SessionStart = min(EventTime),
     SessionEnd = max(EventTime),

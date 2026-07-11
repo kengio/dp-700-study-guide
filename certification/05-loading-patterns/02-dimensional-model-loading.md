@@ -165,16 +165,32 @@ D. Spark automatically substitutes `ROW_NUMBER()` semantics on retry to guarante
 
 ### SCD Type 1: T-SQL `MERGE`
 
+A `MERGE` statement's `WHEN NOT MATCHED THEN INSERT ... VALUES` clause can only insert literal or source-column values per row — it can't compute a `ROW_NUMBER()` over the whole unmatched set, so a `ROW_NUMBER()`-based surrogate key can't be generated inline inside the `MERGE`. The SCD1 pattern splits into two steps instead: `MERGE` handles the update-in-place for matched rows, and a separate `ROW_NUMBER()`-keyed `INSERT..SELECT` handles brand-new rows.
+
 ```sql
+-- Step 1: update existing rows in place (SCD Type 1 overwrite semantics)
 MERGE dim.Product AS tgt
 USING #StagingProduct AS src
     ON tgt.ProductBusinessKey = src.ProductBusinessKey
 WHEN MATCHED THEN
-    UPDATE SET tgt.ProductName = src.ProductName, tgt.Category = src.Category
-WHEN NOT MATCHED THEN
-    INSERT (ProductKey, ProductBusinessKey, ProductName, Category)
-    VALUES (NEXT VALUE FOR seq.ProductKey, src.ProductBusinessKey, src.ProductName, src.Category);
+    UPDATE SET tgt.ProductName = src.ProductName, tgt.Category = src.Category;
+
+-- Step 2: insert brand-new rows with a ROW_NUMBER()-based surrogate key
+DECLARE @MaxProductKey BIGINT = ISNULL((SELECT MAX(ProductKey) FROM dim.Product), 0);
+
+INSERT INTO dim.Product (ProductKey, ProductBusinessKey, ProductName, Category)
+SELECT
+    @MaxProductKey + ROW_NUMBER() OVER (ORDER BY src.ProductBusinessKey) AS ProductKey,
+    src.ProductBusinessKey, src.ProductName, src.Category
+FROM #StagingProduct AS src
+WHERE NOT EXISTS (
+    SELECT 1 FROM dim.Product AS tgt
+    WHERE tgt.ProductBusinessKey = src.ProductBusinessKey
+);
 ```
+
+> [!warning] Common Mistake
+> Reaching for `NEXT VALUE FOR` against a `SEQUENCE` object to generate a surrogate key. **`SEQUENCE` objects are not supported in Fabric Warehouse** — they're explicitly listed as an unsupported table feature (verified against [Tables in Fabric Data Warehouse](https://learn.microsoft.com/en-us/fabric/data-warehouse/tables), Limitations section). Use the `ROW_NUMBER()` + max-key-offset pattern shown throughout this topic instead.
 
 ### SCD Type 1: PySpark Delta `MERGE INTO`
 
@@ -201,7 +217,7 @@ A single T-SQL `MERGE` statement can perform exactly one action — update, dele
 -- Step 1: Close out rows whose tracked attributes changed, inside an explicit transaction
 BEGIN TRAN;
 
-DECLARE @ClosedKeys TABLE (CustomerBusinessKey VARCHAR(20));
+CREATE TABLE #ClosedKeys (CustomerBusinessKey VARCHAR(20));
 
 MERGE dim.Customer AS tgt
 USING #StagingCustomer AS src
@@ -209,25 +225,31 @@ USING #StagingCustomer AS src
    AND tgt.IsCurrent = 1
 WHEN MATCHED AND (tgt.Address <> src.Address OR tgt.Segment <> src.Segment) THEN
     UPDATE SET tgt.IsCurrent = 0, tgt.EndDate = CAST(SYSUTCDATETIME() AS date)
-OUTPUT src.CustomerBusinessKey INTO @ClosedKeys;
+OUTPUT src.CustomerBusinessKey INTO #ClosedKeys;
 
--- Step 2: Insert current-version rows for brand-new keys AND for keys just closed above
+-- Step 2: Insert current-version rows for brand-new keys AND for keys just closed above,
+-- using a ROW_NUMBER()-based surrogate key offset from the current max (SEQUENCE objects
+-- aren't supported in Fabric Warehouse)
+DECLARE @MaxCustomerKey BIGINT = ISNULL((SELECT MAX(CustomerKey) FROM dim.Customer), 0);
+
 INSERT INTO dim.Customer (CustomerKey, CustomerBusinessKey, Address, Segment, EffectiveDate, EndDate, IsCurrent)
 SELECT
-    NEXT VALUE FOR seq.CustomerKey,
+    @MaxCustomerKey + ROW_NUMBER() OVER (ORDER BY src.CustomerBusinessKey) AS CustomerKey,
     src.CustomerBusinessKey, src.Address, src.Segment,
     CAST(SYSUTCDATETIME() AS date), NULL, 1
 FROM #StagingCustomer AS src
-WHERE src.CustomerBusinessKey IN (SELECT CustomerBusinessKey FROM @ClosedKeys)
+WHERE src.CustomerBusinessKey IN (SELECT CustomerBusinessKey FROM #ClosedKeys)
    OR NOT EXISTS (
         SELECT 1 FROM dim.Customer tgt
         WHERE tgt.CustomerBusinessKey = src.CustomerBusinessKey AND tgt.IsCurrent = 1
    );
 
+DROP TABLE #ClosedKeys;
+
 COMMIT;
 ```
 
-The `OUTPUT` clause on the closing `MERGE` captures exactly which business keys were changed, so the follow-up `INSERT` only creates new versions for rows that were actually closed (plus any genuinely new keys) — not for every staged row.
+The `OUTPUT` clause on the closing `MERGE` captures exactly which business keys were changed, so the follow-up `INSERT` only creates new versions for rows that were actually closed (plus any genuinely new keys) — not for every staged row. A `#temp` table is used instead of a table variable (`DECLARE @x TABLE`) for `OUTPUT INTO`'s target — table variables carry unverified support risk in Fabric Warehouse, while session-scoped `#temp` tables are docs-confirmed supported.
 
 ### SCD Type 2: PySpark Delta `MERGE INTO` (Single-`MERGE` Pattern)
 
@@ -291,8 +313,12 @@ A fact row sometimes arrives before its dimension row exists — a sale for a cu
 
 ```sql
 -- Insert an inferred stub for any fact business key with no matching current dimension row
+DECLARE @MaxCustomerKey BIGINT = ISNULL((SELECT MAX(CustomerKey) FROM dim.Customer), 0);
+
 INSERT INTO dim.Customer (CustomerKey, CustomerBusinessKey, CustomerName, Address, IsCurrent, IsInferred)
-SELECT NEXT VALUE FOR seq.CustomerKey, f.CustomerBusinessKey, NULL, NULL, 1, 1
+SELECT
+    @MaxCustomerKey + ROW_NUMBER() OVER (ORDER BY f.CustomerBusinessKey) AS CustomerKey,
+    f.CustomerBusinessKey, NULL, NULL, 1, 1
 FROM #StagingFactSales AS f
 WHERE NOT EXISTS (
     SELECT 1 FROM dim.Customer d

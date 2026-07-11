@@ -37,17 +37,17 @@ mindmap
     Spark Structured Streaming
       readStream/writeStream, checkpointLocation required
       outputMode append/complete/update - sink support varies
-      Triggers: default micro-batch, processingTime, availableNow, continuous (limited)
+      Triggers: default micro-batch, processingTime, availableNow, continuous - limited support
       Native Execution Engine does NOT support structured streaming - falls back to JVM
     KQL Real-Time
-      Streaming ingestion (near-real-time) vs queued ingestion (default, higher throughput)
+      Streaming ingestion = near-real-time vs queued ingestion = default, higher throughput
       Native tables vs OneLake shortcuts + query acceleration policy
       Update policies + materialized views = transform-on-ingest and continuous aggregation
       OneLake availability exposes Eventhouse data as Delta
     Windowing Functions
       Tumbling, hopping, sliding, session windows - same concepts, 3 syntaxes
-      Eventstream Group by (no-code) / KQL bin()+summarize / Spark window()
-      Session: KQL row_window_session() / Spark session_window()
+      Eventstream Group by no-code / KQL bin plus summarize / Spark window function
+      Session: KQL row_window_session / Spark session_window
       Watermarks bound late-data handling in Spark; Eventstream has late-arrival tolerance
 ```
 
