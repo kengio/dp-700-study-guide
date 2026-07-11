@@ -10,7 +10,7 @@ status: published
 
 # Practice Question Format Spec
 
-The exact markdown contract that `build.py` (ported in a later task, alongside the rest of `practice/`) parses. Stick to this and the converter produces clean JSON; deviate and you'll see warnings or skipped questions.
+The exact markdown contract that [`build.py`](./build.py) parses. Stick to this and the converter produces clean JSON; deviate and you'll see warnings or skipped questions.
 
 ## File-level structure
 
