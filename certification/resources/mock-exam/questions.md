@@ -340,7 +340,7 @@ D. The job fails to start, since Structured Streaming requires an explicit outpu
 
 ---
 
-## Question 19: A Star-Schema Load That Also Needs BI on the Same Tables *(Easy)*
+## Question 19: A Star-Schema Load That Also Needs BI on the Same Tables *(Medium)*
 
 A team of SQL Server-background developers needs to run `MERGE`-based load logic directly against curated star-schema tables, then have Power BI query those exact same tables afterward — no Spark, no separate BI-facing copy. One developer suggests a lakehouse, reasoning "it has a SQL analytics endpoint too, so the 'SQL' in the name means it can run `MERGE` just like a warehouse can." Is that reasoning correct, and which store actually fits?
 
@@ -634,13 +634,13 @@ D. Either a stateful or stateless condition works identically here, since both e
 
 A team has two separate alerting needs: (1) fire when a batch of computed values from a scheduled KQL query exceeds a threshold, and (2) fire on values as they arrive continuously in a raw eventstream, before anything lands downstream. Which Activator alert source fits each need, and what's the default check frequency for the first?
 
-A. KQL queryset alert (default 5-minute check) for the scheduled need; Eventstream subscription for the raw-arrival need  
-B. Eventstream subscription for both needs, since Eventstream can also run scheduled KQL queries directly  
+A. KQL queryset alert (default 5-minute check) for the scheduled need; an alert set on the eventstream from the eventstream editor for the raw-arrival need  
+B. An alert set on the eventstream from the eventstream editor for both needs, since Eventstream can also run scheduled KQL queries directly  
 C. KQL queryset alert for both needs, since Eventstream doesn't support Activator as a destination  
 D. KQL queryset alert (default 1-minute check) for the scheduled-query need; Real-Time dashboard tile for the continuous raw-arrival need  
 
 > [!success]- Answer
-> **A. KQL queryset alert (default 5-minute check) for the scheduled-query need; Eventstream subscription for the continuous raw-arrival need**
+> **A. KQL queryset alert (default 5-minute check) for the scheduled-query need; an alert set on the eventstream from the eventstream editor for the continuous raw-arrival need**
 >
 > Activator's alert sources map to different points in the data lifecycle. KQL querysets support **Set Alert** against a query's results, checked on a schedule with a default frequency of **5 minutes** — the fit for a periodic, computed-threshold check. Eventstreams are the primary continuous streaming source, with alert authoring embedded directly in the Eventstream editor's operator chain — the fit for raw, continuously-arriving events before they land anywhere. The two sources serve genuinely different needs and aren't interchangeable.
 >

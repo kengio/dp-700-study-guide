@@ -127,6 +127,12 @@ Re-study is warranted, but only in the sections your misses actually cluster in 
 
 ### 13+ misses: full domain re-study plan
 
+> [!note] Check the sub-band before you commit to a full re-study
+> Not every 13+ result means starting from zero:
+>
+> - **13–20 misses, clustered in one domain** — this is still a targeted gap, just a bigger one. Use the **6–12 misses** re-read map above, but work through the whole domain's topic files (not just the sections tied to your specific misses) since a cluster this size usually means the gaps run wider than the individual questions missed.
+> - **20+ misses, or misses spread across all three domains** — this is a genuine foundational gap. Follow the full plan below.
+
 This score means foundational gaps, not just edge-case gaps. Work through the guide's full study path before re-attempting:
 
 1. Re-read every topic file in the domain(s) with the most misses, start to finish, in folder order (e.g., `01-fabric-workspace-settings/` through `04-orchestration/` for Domain 1)

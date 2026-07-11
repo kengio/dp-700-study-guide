@@ -31,7 +31,7 @@ tags:
 | 1000  | 50 / 50        | Perfect |
 | 800+  | 40+ / 50       | Strong pass |
 | 700   | ~35 / 50       | Passing (minimum) |
-| 600   | ~30 / 50       | Near miss — review weak areas |
+| 600   | ~30 / 50       | Near miss — targeted re-study via the debrief map |
 | <600  | <30 / 50       | More study needed |
 
 **Passing score**: 700 out of 1000. The 35/50 rule-of-thumb assumes an even, linear mapping across all 50 questions — the real exam's scoring model weights questions and applies psychometric adjustments Microsoft doesn't publish, so treat ~35/50 as a directional signal, not a guarantee. A 33–34/50 result on this mock isn't necessarily a fail on the real thing, and a 36/50 isn't necessarily a pass — use the debrief's domain breakdown, not just the raw score, to judge readiness.
@@ -48,7 +48,7 @@ tags:
 | **Case study** | Cross-domain (Fabrikam Freight fleet analytics) | 5 | — |
 | **Total** | | **50** | **100%** |
 
-Difficulty spread across all 50 questions: **12 Easy / 25 Medium / 13 Hard**, tagged inline on every question so you can gauge which misses matter most — a missed Easy question is a bigger readiness signal than a missed Hard one.
+Difficulty spread across all 50 questions: **11 Easy / 26 Medium / 13 Hard**, tagged inline on every question so you can gauge which misses matter most — a missed Easy question is a bigger readiness signal than a missed Hard one.
 
 ---
 
