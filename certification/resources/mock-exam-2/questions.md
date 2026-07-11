@@ -1,0 +1,936 @@
+---
+title: "DP-700 Mock Exam 2 — Questions"
+type: practice-questions
+tags:
+  - dp-700
+  - mock-exam
+---
+
+# DP-700 Mock Exam 2 — Questions
+
+Complete all 50 questions (45 standalone + 5-question case study) before checking answers. Time limit: 100 minutes.
+
+---
+
+<!-- DOMAIN 1: Implement and Manage an Analytics Solution (~15 questions) -->
+
+## Question 1: Save vs. Publish on a Spark Environment *(Medium)*
+
+A developer edits an environment's Spark compute settings and clicks **Save**, then closes the browser without clicking **Publish**. In the same session, they also upload a new file to the environment's **Resources**. A notebook already attached to this environment is run immediately afterward. What does that notebook's session see?
+
+A. Compute settings stay staged until Publish, but the uploaded Resources file is live immediately  
+B. Neither the compute settings nor the uploaded Resources file take effect until Publish is clicked  
+C. Both take effect immediately, since Save always applies environment changes instantly  
+D. Compute settings apply immediately after Save, but the Resources file needs Publish first  
+
+> [!success]- Answer
+> **A. Compute settings stay staged until Publish, but the uploaded Resources file is live immediately**
+>
+> An environment bundles Spark compute (including runtime) plus libraries and resources. **Save** stages changes to compute and libraries without applying them to any already-attached notebook; **Publish** is the action that actually applies staged changes. Resources, however, are always live — an uploaded file is available immediately regardless of Publish state.
+>
+> Option B wrongly extends the staged-until-Publish behavior to Resources, which don't follow that rule. Option C wrongly claims Save applies everything instantly, collapsing the entire Save/Publish distinction. Option D gets the two backward: it's the compute settings that wait for Publish, not the Resources file.
+
+---
+
+## Question 2: A Domain Admin Reaching Into Another Domain *(Easy)*
+
+A user is the domain admin for the "Cardiology" domain. They want to also change a delegated setting on the unrelated "Radiology" domain, reasoning that "domain admin" is a tenant-wide role. Can they do this?
+
+A. Yes — domain admin is effectively a tenant-wide role, able to manage any domain in the tenant, similar to Fabric admin  
+B. No — a domain admin can only manage domain(s) they're assigned to; another domain needs its own admin or a Fabric admin  
+C. Yes, but only for read-only visibility into the other domain's settings, never for making changes  
+D. No — domain admins can't manage domain settings at all; only Fabric admins can manage any domain  
+
+> [!success]- Answer
+> **B. No — a domain admin can only manage domain(s) they're assigned to; another domain needs its own admin or a Fabric admin**
+>
+> Domain admin is a per-domain role, not a tenant-wide one — full control over their own domain, no say over anyone else's. Reaching into "Radiology" requires either being assigned as that domain's own admin, or holding the tenant-wide Fabric admin role instead.
+>
+> Option A wrongly promotes domain admin to a tenant-wide role, which only Fabric admin actually is. Option C invents a read-only cross-domain visibility tier that isn't part of the role model. Option D understates domain admin's real capability — they fully manage their own domain's settings, just not another domain's.
+
+---
+
+## Question 3: Disabling OneLake File Explorer for the Whole Org *(Medium)*
+
+A tenant admin wants to prevent every user in the organization from using OneLake file explorer, regardless of what any individual workspace's own OneLake settings allow. Is there a single, centralized way to do this?
+
+A. No — file explorer availability is controlled entirely per-workspace; there's no tenant-wide switch at all  
+B. Yes, but only by manually revoking every user's external app access setting, in each workspace, one at a time  
+C. Yes — a separate tenant-level setting disables the file explorer app org-wide, independent of workspace settings  
+D. Yes, but only by disabling OneLake entirely at the tenant level, which also blocks all shortcuts and every API  
+
+> [!success]- Answer
+> **C. Yes — a separate tenant-level setting disables the file explorer app org-wide, independent of workspace settings**
+>
+> "External app access" (a workspace-level OneLake setting) and "file explorer availability" (a tenant-level toggle) are two different controls. A tenant admin can disable the OneLake file explorer app centrally, org-wide, without touching any workspace's own external app access setting at all.
+>
+> Option A denies the tenant-level toggle exists, when it does. Option B invents a painful per-workspace workaround for a problem the tenant-level setting already solves in one step. Option D overstates the blast radius — disabling file explorer doesn't disable OneLake itself, shortcuts, or the OneLake APIs.
+
+---
+
+## Question 4: How Long an Airflow Starter Pool Stays Warm *(Easy)*
+
+A developer uses Apache Airflow job's starter pool for occasional, ad hoc DAG testing, then steps away for a long lunch. When they return, the environment has auto-deprovisioned. After how long does an idle starter pool shut down, and does a custom pool behave the same way?
+
+A. 60 minutes; a custom pool faces the same automatic shutdown after the same idle period  
+B. 5 minutes; a custom pool extends this to 60 minutes but still auto-shuts down eventually  
+C. 20 minutes; a custom pool is always-on and configurable instead, with no such automatic shutdown  
+D. There's no automatic shutdown for either pool type — the environment stays provisioned until manually stopped  
+
+> [!success]- Answer
+> **C. 20 minutes; a custom pool is always-on and configurable instead, with no such automatic shutdown**
+>
+> Apache Airflow job's starter pool runs on a Large node and auto-deprovisions after 20 minutes of inactivity — a documented convenience for the dev-suggested, instant-start experience. A custom pool trades that convenience for an always-on, configurable environment (node size, autoscale, extra nodes) with no comparable idle-shutdown behavior.
+>
+> Option A gets the starter pool's idle window wrong and wrongly extends the same shutdown behavior to custom pools. Option B invents a shorter starter-pool window and a custom-pool shutdown that doesn't exist. Option C denies the starter pool's real, documented auto-shutdown behavior entirely.
+
+---
+
+## Question 5: Discarding Local Changes on a Conflicted Item *(Medium)*
+
+A workspace item shows a Git status of **Conflict** — it was modified in the workspace and in Git since the last sync. The team decides the Git version is correct and wants to discard the workspace's local changes the fastest way, without creating a new branch or opening a pull request. Which resolution path fits?
+
+A. Use the UI's **Accept incoming changes** action directly on the conflicted item  
+B. Disconnect and reconnect Git integration for the workspace, which automatically resolves pending conflicts in Git's favor  
+C. Branch out to a new workspace, commit the local changes there, and open a pull request to reconcile  
+D. Delete the conflicted item and re-create it, since Conflict status has no other resolution path  
+
+> [!success]- Answer
+> **A. Use the UI's Accept incoming changes action directly on the conflicted item**
+>
+> A Git status of Conflict has three documented resolution paths: pick a version directly in the UI (**Accept incoming changes** to take Git's version, or **Keep current content** to keep the workspace's), revert to a previous synced state, or resolve the conflict in Git itself. When the team simply wants Git's version to win with no reconciliation needed, the UI's **Accept incoming changes** action is the fastest of the three — no branch or PR required.
+>
+> Option B is a blunt all-items overwrite — disconnecting and reconnecting picks one sync direction for every item, not a targeted per-item resolution, and is slower than Accept incoming changes. Option C describes the branch-and-PR path, which is the right tool when both versions need reconciling and review — not the fastest option when Git's version should simply win. Option D is a disproportionate, unnecessary fix for a status with three lighter-weight, documented resolution paths.
+
+---
+
+## Question 6: A Commit Blocked by a Missing Item-Level Grant *(Medium)*
+
+A user with the workspace **Contributor** role has write access to every item in the workspace except one Lakehouse, and tries to commit all pending workspace changes — including that Lakehouse — to Git in a single action. What happens?
+
+A. The commit succeeds for every item except that one, and Fabric queues an automatic retry once write access is later granted  
+B. The commit is blocked (or that item excluded), since committing needs write access on every item, not just the Contributor role  
+C. The commit fails entirely and the user's own Contributor role is revoked until the missing write access is resolved  
+D. The commit succeeds fully, since holding the workspace Contributor role alone is sufficient regardless of item-level access  
+
+> [!success]- Answer
+> **B. The commit is blocked (or that item excluded), since committing needs write access on every item, not just the Contributor role**
+>
+> Commit and update both require Contributor role **or higher, with write access on every item involved** — the workspace role alone isn't sufficient. Missing write access on even one item in the batch is what stops that item (or the whole commit, depending on how it's issued) from going through.
+>
+> Option A invents an automatic-retry mechanism that doesn't exist. Option C wildly overstates the consequence — a missing item-level grant doesn't revoke the user's workspace role. Option D wrongly treats the workspace role as the only gate, ignoring the item-level write-access requirement layered on top of it.
+
+---
+
+## Question 7: Loading Static Reference Data Into a Database Project *(Medium)*
+
+A team's Git-connected SQL database project needs a small set of always-present reference/lookup rows (e.g., country codes) to exist every time the project deploys into a fresh environment. Database projects only track schema, not data. What mechanism should they use?
+
+A. Pre/post-deployment scripts, since database projects track schema only — data needs this separate mechanism  
+B. A deployment rule, since deployment rules can carry static row-level data between stages  
+C. Nothing extra is needed — SqlPackage publish automatically detects and copies small reference tables  
+D. Commit the reference data as a Git-tracked CSV file inside the project's folder, and it deploys automatically alongside the schema  
+
+> [!success]- Answer
+> **A. Pre/post-deployment scripts, since database projects track schema only — data needs this separate mechanism**
+>
+> Database projects declare schema (`.sql` files, one per object) — they never track row data, no matter how small or static. Pre/post-deployment scripts are the documented, supported mechanism for seeding this kind of always-present reference data every time the project deploys.
+>
+> Option B misapplies deployment rules, which swap configuration (a connection, a parameter, a default lakehouse) between stages, not row-level data. Option C invents a row-count-based auto-detection feature that SqlPackage doesn't have. Option D invents an automatic CSV-to-data pipeline that database projects don't have.
+
+---
+
+## Question 8: One Permission Layer Isn't Enough to Deploy *(Hard)*
+
+A user holds the workspace **Contributor** role in the Test-stage workspace of a deployment pipeline but does **not** hold **Pipeline Admin** permission on the pipeline itself. Can they trigger a deployment from Test to Production?
+
+A. Yes, but only if they're also the pipeline's original creator, regardless of their current Pipeline Admin status  
+B. No — only a tenant-level Fabric admin can ever trigger any deployment, regardless of workspace role or Pipeline Admin status  
+C. No — deployment needs both layers together: Pipeline Admin, plus the right workspace role on the deployed content  
+D. Yes — workspace Contributor access on the Test-stage workspace alone is enough to trigger the deployment  
+
+> [!success]- Answer
+> **C. No — deployment needs both layers together: Pipeline Admin, plus the right workspace role on the deployed content**
+>
+> Deployment pipelines are governed by two independent permission layers: Pipeline Admin (sharing/management of the pipeline item itself) and the workspace role on the stages' content. Both are required together for most deployment actions — a Contributor without Pipeline Admin can't trigger the deployment, no matter how solid their workspace access is.
+>
+> Option A invents a creator-based exemption that doesn't override the actual Pipeline Admin requirement. Option B overcorrects — Fabric admin isn't required; any user holding both Pipeline Admin and the right workspace role can deploy. Option C treats workspace role as the sole gate, ignoring the separate pipeline-level permission entirely.
+
+---
+
+## Question 9: What a Power BI App Actually Grants *(Medium)*
+
+A workspace Admin publishes a semantic model to a broad audience through a Power BI app. Does publishing the app grant those audience members workspace or item access to the underlying semantic model?
+
+A. No — an app distributes curated content to its audience, without granting any workspace or item access  
+B. Yes, but only Read item permission on the specific semantic model, never any broader workspace access  
+C. Yes, but only for users who already hold some kind of workspace role in that workspace beforehand  
+D. Yes — publishing an app to an audience automatically grants that whole audience Viewer-level workspace access  
+
+> [!success]- Answer
+> **A. No — an app distributes curated content to its audience, without granting any workspace or item access**
+>
+> Apps distribute packaged content to a defined audience without ever granting workspace or item access to anything outside the app — a distribution layer that's deliberately separate from directly sharing an item, which does grant item permission.
+>
+> Option B invents an automatic item-level Read grant that publishing an app doesn't create. Option C invents a prerequisite (already holding some role) that has nothing to do with how app distribution works. Option D invents an automatic Viewer-level workspace grant that doesn't exist.
+
+---
+
+## Question 10: CLS Against a SQL-Authenticated Connection *(Easy)*
+
+A team wants to apply column-level security to a table that's queried through a SQL-authenticated connection string rather than a Microsoft Entra identity. Is this supported in Fabric Warehouse?
+
+A. Yes — CLS grants apply exactly the same way, regardless of which authentication method the connection uses  
+B. No — CLS is documented as Microsoft Entra authentication only; SQL authentication isn't a supported path  
+C. Yes, but only once the SQL login is also mapped to a corresponding Microsoft Entra ID account first  
+D. No — CLS isn't supported anywhere in Fabric Warehouse, regardless of authentication method used  
+
+> [!success]- Answer
+> **B. No — CLS is documented as Microsoft Entra authentication only; SQL authentication isn't a supported path**
+>
+> CLS uses the standard T-SQL `GRANT SELECT ON table(columns)` syntax, but it's explicitly documented as supporting Microsoft Entra authentication only — a SQL-authenticated connection simply isn't a path CLS enforces against.
+>
+> Option A wrongly claims CLS is authentication-method-agnostic. Option C invents a mapping workaround that isn't documented as a supported path around the Entra-only restriction. Option D overcorrects — CLS is fully supported in Fabric Warehouse, just not for SQL-authenticated connections specifically.
+
+---
+
+## Question 11: A Contributor Under a Restrictive OneLake Security Role *(Hard)*
+
+A Lakehouse table has a restrictive OneLake security role, `RegionEUOnly`, applied to a workspace **Contributor**, intended to limit them to EU-region rows only. When that Contributor queries the table via Spark, what do they actually see?
+
+A. Access that depends on whichever was configured more recently, the workspace role or the OneLake security role  
+B. Nothing at all, since a conflicting Read restriction blocks every kind of access until it's manually resolved  
+C. The full table — their implicit Write overrides the role's Read restriction; only a Viewer is meaningfully restricted  
+D. Only what the restrictive security role allows, since OneLake security always takes precedence over workspace roles  
+
+> [!success]- Answer
+> **C. The full table — their implicit Write overrides the role's Read restriction; only a Viewer is meaningfully restricted**
+>
+> Admin, Member, and Contributor all carry an implicit Write permission that overrides any OneLake security Read restriction — a scoped-down role like `RegionEUOnly` has no real bite against them. Only a Viewer, who lacks that implicit Write, is meaningfully restricted by a OneLake security role.
+>
+> Option A invents a configuration-recency tiebreaker that doesn't exist; the rule is role-based, not time-based. Option B invents a hard-blocking conflict that isn't how these two mechanisms interact. Option D gets the precedence backward — implicit workspace-role Write beats a restrictive OneLake security Read, not the other way around.
+
+---
+
+## Question 12: Adding a Mask to an Already-Populated Column *(Medium)*
+
+A `PatientPhone` column already has live data in it, and the team now wants to add a dynamic data masking rule to it after the fact — not at table-creation time. What T-SQL syntax applies a mask to an existing column, and how would they later remove it?
+
+A. `ALTER TABLE ... ALTER COLUMN ... ADD MASKED WITH (FUNCTION = '...')` to add the mask; `DROP MASKED` to remove it  
+B. `CREATE MASKING POLICY` bound to the column, mirroring how `CREATE SECURITY POLICY` works for row-level security  
+C. The column must be dropped and recreated with `MASKED WITH` specified at creation — masks can't be added to an existing column  
+D. `ALTER TABLE ... ADD MASK (FUNCTION = '...')`, with no separate syntax to remove it later — masks can only be replaced  
+
+> [!success]- Answer
+> **A. `ALTER TABLE ... ALTER COLUMN ... ADD MASKED WITH (FUNCTION = '...')` to add the mask; `DROP MASKED` to remove it**
+>
+> Masks apply either at `CREATE TABLE` time (`MASKED WITH (FUNCTION = '...')`) or afterward on an existing column via `ALTER TABLE ... ALTER COLUMN ... ADD MASKED WITH (...)` — no drop-and-recreate needed. `DROP MASKED` removes a mask the same way.
+>
+> Option B invents a `CREATE MASKING POLICY` construct that doesn't exist — DDM uses `MASKED WITH`/`ALTER COLUMN`, not a standalone policy object like RLS does. Option C invents an unnecessary drop-and-recreate requirement; `ALTER TABLE` handles this directly. Option D invents both wrong syntax and a nonexistent replace-only restriction — `DROP MASKED` is the documented removal syntax.
+
+---
+
+## Question 13: Trying to Endorse a Report as Master Data *(Medium)*
+
+A tenant-admin-authorized reviewer with write permission on a Power BI Report tries to endorse it as **Master data**, the same way they've previously endorsed a Lakehouse. What happens?
+
+A. It fails — the Master data badge is restricted to items that actually contain data, and a Report isn't one  
+B. It succeeds, but the badge automatically downgrades to Certified once applied to a non-data item like a report  
+C. It fails, but only because they aren't on the authorized-reviewers list; item type has no bearing on eligibility  
+D. It succeeds, since write permission plus authorized-reviewer status is the only requirement, regardless of item type  
+
+> [!success]- Answer
+> **A. It fails — the Master data badge is restricted to items that actually contain data, and a Report isn't one**
+>
+> Master data carries an extra restriction beyond Certified's authorization gate: it's scoped to items that actually contain data — Lakehouses, semantic models, and similar. A Report isn't a data item, so Master data simply isn't available for it, even for an otherwise fully authorized reviewer. Promoted and Certified remain applicable to the Report itself.
+>
+> Option B invents an automatic-downgrade behavior that isn't documented; the endorsement simply isn't available, it doesn't silently substitute a different tier. Option C correctly identifies that authorization isn't the blocker here, but wrongly claims item type is irrelevant — it's the actual reason this specific attempt fails. Option D ignores the item-type restriction entirely.
+
+---
+
+## Question 14: What Actually Fires a OneLake Event Trigger *(Medium)*
+
+A team configures a OneLake event trigger for a pipeline. Under the hood, which Fabric mechanism actually implements this event-based trigger, and what item does it rely on for the external event source?
+
+A. The pipeline's own built-in trigger engine handles it, with no dependency on any other Fabric item  
+B. Data Activator implements it — the actual trigger artifact is a Reflex item, backed by an eventstream  
+C. Eventstream implements it directly, generating a temporary Activator rule for each trigger evaluation  
+D. A dedicated "Storage Trigger" item type implements it, unrelated to Data Activator or any eventstream  
+
+> [!success]- Answer
+> **B. Data Activator implements it — the actual trigger artifact is a Reflex item, backed by an eventstream**
+>
+> Event-based triggers (OneLake, Azure Blob, Fabric, and workspace events) are implemented under the hood via Data Activator — the actual trigger artifact created is a Reflex item, and for external event sources like OneLake, Fabric auto-creates an eventstream to feed it.
+>
+> Option A invents a native pipeline trigger engine with no dependency, contradicting the documented Data Activator/Reflex/eventstream implementation. Option C reverses the relationship — Eventstream feeds Activator, it doesn't generate temporary Activator rules itself. Option D invents a standalone item type that doesn't exist.
+
+---
+
+## Question 15: One Failed Sibling Blocks the Shared Downstream Activity *(Hard)*
+
+A pipeline has three activities — A, B, and C — each connected to a single downstream activity D via an **Upon Success** path. Activity A succeeds, activity B succeeds, but activity C fails. Does D run?
+
+A. Yes — D runs as long as at least one of the feeding activities (A or B) satisfied its Upon Success condition  
+B. Yes — D runs regardless of C's outcome, since Upon Success paths only evaluate the immediately preceding activity, not siblings  
+C. No — all activities feeding the same outcome path must satisfy that condition for the downstream activity to fire; C's failure means D doesn't run  
+D. No — D never runs when more than two activities feed into it, regardless of their individual outcomes  
+
+> [!success]- Answer
+> **C. No — all activities feeding the same outcome path must satisfy that condition for the downstream activity to fire; C's failure means D doesn't run**
+>
+> Activities connect via four outcome paths (Upon Success, Upon Failure, Upon Completion, Upon Skip). When multiple activities feed the same downstream activity on the same path, **all** of them must satisfy that condition for the downstream activity to fire — A and B succeeding isn't enough on its own; C's failure means D doesn't run.
+>
+> Option A wrongly treats an "any one satisfies" logic as sufficient, when the actual rule requires all feeding activities to satisfy the condition. Option B invents a scoping limitation (evaluating only the immediately preceding activity) that isn't how multi-activity outcome paths work. Option D invents an arbitrary activity-count restriction with no basis in how outcome paths are evaluated.
+
+---
+
+<!-- DOMAIN 2: Ingest and Transform Data (~15 questions) -->
+
+## Question 16: A Hard Delete a Modified-Date Watermark Can't See *(Medium)*
+
+A team's incremental load uses a `LastModifiedUtc` column to detect changed rows. A source record is hard-deleted directly from the source database, with no soft-delete flag or tombstone row left behind. Will the next incremental run detect this deletion, and if not, what alternative change-detection approach would?
+
+A. Yes — the next run's watermark comparison will naturally notice the row is missing and flag it deleted  
+B. Yes, but only if the watermark column is indexed, since indexing enables delete-tracking automatically  
+C. No — a modified-date column misses hard deletes; a CDC-fed or mirroring-fed feed would catch it  
+D. No — hard deletes can never be captured by any Fabric ingestion mechanism, regardless of method used  
+
+> [!success]- Answer
+> **C. No — a modified-date column misses hard deletes; a CDC-fed or mirroring-fed feed would catch it**
+>
+> Modified-date columns are the simplest change-detection option, but they miss hard deletes entirely — there's no updated timestamp on a row that no longer exists to signal anything changed. CDC-fed and mirroring-fed feeds, by contrast, capture deletes as part of their change stream, at the cost of more setup.
+>
+> Option A invents a watermark-based delete-detection mechanism that doesn't exist — a watermark only ever compares "what's newer than X," which a deleted row can never satisfy. Option B invents an indexing-based delete-tracking capability that has nothing to do with how indexes work. Option C overstates the limitation — hard deletes are capturable, just not via a modified-date column specifically.
+
+---
+
+## Question 17: Trying to MERGE Through an Eventhouse's T-SQL Surface *(Easy)*
+
+A team wants to run `MERGE`-based upserts against Eventhouse data using its T-SQL analytics endpoint, the same way they would against a Fabric Warehouse. Is this possible?
+
+A. Yes — Eventhouse's T-SQL analytics endpoint supports full DML, including MERGE, exactly like a Warehouse  
+B. No — Eventhouse doesn't expose any T-SQL surface at all, only a KQL query surface  
+C. No — Eventhouse's T-SQL endpoint, like a Lakehouse's, is read-only; writes go through KQL ingestion only  
+D. Yes, but only for tables ingested through streaming ingestion, not queued ingestion  
+
+> [!success]- Answer
+> **C. No — Eventhouse's T-SQL endpoint, like a Lakehouse's, is read-only; writes go through KQL ingestion only**
+>
+> Eventhouse exposes a T-SQL analytics endpoint for read access, but — exactly like a Lakehouse's SQL analytics endpoint — it's read-only. A `MERGE`-based write against it would fail; Eventhouse data is written only through KQL's native ingestion paths (streaming/queued ingestion, update policies).
+>
+> Option A wrongly extends full T-SQL DML support to Eventhouse, which only Warehouse and Fabric SQL database's primary surfaces have. Option B overcorrects — Eventhouse does expose a T-SQL analytics endpoint, it's just read-only, not absent. Option C invents an ingestion-type-based exception to the read-only rule that doesn't exist.
+
+---
+
+## Question 18: Deleting a Shortcut, Not the Data *(Easy)*
+
+A developer deletes a OneLake shortcut that pointed to a Lakehouse table in a different workspace. What happens to the underlying target data?
+
+A. The target table is deleted only if no other shortcuts also reference it  
+B. Nothing — shortcuts behave like symbolic links; deleting one never deletes the target data  
+C. The target table becomes orphaned and read-only until manually re-linked  
+D. The target table is also deleted, since deleting a shortcut cascades to its target by default  
+
+> [!success]- Answer
+> **B. Nothing — shortcuts behave like symbolic links; deleting one never deletes the target data**
+>
+> Shortcuts behave like symbolic links in OneLake — they're pointers, not copies. Deleting a shortcut removes only the pointer; the target data it referenced is completely unaffected. (The reverse direction carries risk instead: moving or deleting the *target* can break shortcuts that point to it.)
+>
+> Option A invents a reference-counting mechanism that doesn't exist for shortcut deletion. Option C invents an orphaning/read-only side effect that has nothing to do with how shortcut deletion actually works. Option D invents a cascading-delete behavior that would make shortcuts dangerously destructive, which they're specifically designed not to be.
+
+---
+
+## Question 19: Is a Warehouse a Valid Internal Shortcut Target? *(Medium)*
+
+A team wants to create a shortcut from a Lakehouse pointing directly at a Fabric Warehouse in a different workspace — both are Fabric-internal items, with no external cloud storage involved. Is this a valid internal shortcut target?
+
+A. No — only Lakehouse, KQL database, and mirrored database are valid internal targets; Warehouse needs an external shortcut  
+B. No — shortcuts can only target items inside the same workspace, regardless of internal or external classification  
+C. Yes — Warehouse is on the internal-shortcut-target list, alongside Lakehouse and other Fabric item types  
+D. Yes, but only once the Warehouse's SQL analytics endpoint is explicitly enabled for cross-workspace shortcut access  
+
+> [!success]- Answer
+> **C. Yes — Warehouse is on the internal-shortcut-target list, alongside Lakehouse and other Fabric item types**
+>
+> Internal shortcut targets cover a specific, documented list of Fabric-native items: KQL database, lakehouse, mirrored Azure Databricks catalog, mirrored database, semantic model, SQL database, and warehouse. A cross-workspace Warehouse target fits squarely on that list — no external-style shortcut is needed.
+>
+> Option A wrongly excludes Warehouse from the internal target list. Option B invents a same-workspace-only restriction; shortcuts routinely cross workspace boundaries as long as the target item type is supported. Option D invents an enablement toggle that doesn't gate internal shortcut creation.
+
+---
+
+## Question 20: Exposing a Unity Catalog's Tables Without Copying Storage *(Medium)*
+
+A team wants to expose an Azure Databricks Unity Catalog's tables inside Fabric without duplicating any underlying storage. Which mirroring flavor fits, and what does it actually do under the hood?
+
+A. Database mirroring — it continuously replicates the catalog's tables into OneLake as Delta tables, refreshed roughly every 15 seconds  
+B. Open mirroring — the Unity Catalog writes its own change data into a OneLake landing zone via the published open mirroring spec  
+C. This isn't achievable — Unity Catalog isn't a supported mirroring source of any flavor  
+D. Metadata mirroring — it syncs only catalog structure and relies on shortcuts to reference the source data in place, with no data movement at all  
+
+> [!success]- Answer
+> **D. Metadata mirroring — it syncs only catalog structure and relies on shortcuts to reference the source data in place, with no data movement at all**
+>
+> Metadata mirroring (currently Azure Databricks Unity Catalog and Dremio-preview) syncs only catalog structure — table/schema definitions — and relies on shortcuts underneath to reference the actual source data where it already lives. No data is copied or duplicated at all, which is exactly the "no storage duplication" requirement here.
+>
+> Option A misapplies database mirroring, which does continuously replicate full table data into OneLake — the opposite of what's being asked for. Option B misapplies open mirroring, a mechanism for a custom application to write its own change data, not how Unity Catalog integration works. Option C is wrong — Unity Catalog is exactly the kind of catalog-based source metadata mirroring supports.
+
+---
+
+## Question 21: A Homegrown App With No Built-In Mirroring Connector *(Medium)*
+
+A custom in-house application has no Fabric mirroring connector built for it, but the team wants it to continuously publish its own change data directly into a OneLake landing zone, following Fabric's mirroring specification. Which mirroring flavor fits, and what does it require?
+
+A. Open mirroring — any application can write change data into a landing zone, per the open mirroring spec  
+B. Database mirroring, configured with a custom connection string pointing at the application's own internal data store  
+C. This isn't achievable at all without Microsoft first building a dedicated connector for the application  
+D. Metadata mirroring, since any source without a native connector automatically falls back to catalog-only syncing  
+
+> [!success]- Answer
+> **A. Open mirroring — any application can write change data into a landing zone, per the open mirroring spec**
+>
+> Open mirroring exists precisely for this case: any application or provider — including a homegrown, in-house one — can write its own change data into a OneLake landing zone via a public API or portal-issued URL, as long as it follows the published open mirroring specification. No Microsoft-built connector is required.
+>
+> Option B misapplies database mirroring, which only works against Fabric's specific supported source list, not an arbitrary custom application. Option C denies the entire point of open mirroring, which was built to remove exactly that dependency on a Microsoft-built connector. Option D invents a fallback behavior that doesn't exist — metadata mirroring is scoped to specific catalog-based systems, not a generic fallback.
+
+---
+
+## Question 22: Copying a Folder of Mixed File Types Byte-for-Byte *(Easy)*
+
+A team copies a folder containing images, PDFs, and video files from Blob Storage into a Lakehouse `Files` folder, wanting an exact byte-for-byte copy with no schema interpretation of any kind. Which Copy activity mode fits?
+
+A. Binary copy — it preserves files byte-for-byte with no format or type awareness at all  
+B. Neither copy mode applies to unstructured file types like images and video; only tabular sources are supported  
+C. Binary copy, but only once staging is also separately enabled for the transfer  
+D. Tabular copy, since it's the default mode for any Copy activity regardless of the source file type  
+
+> [!success]- Answer
+> **A. Binary copy — it preserves files byte-for-byte with no format or type awareness at all**
+>
+> Binary copy preserves files exactly as they are, byte-for-byte, with no format or type awareness at all — the right fit for unstructured files like images, PDFs, and video where no schema conversion is needed or wanted. Tabular copy, by contrast, converts between source and destination schemas through an interim data-type system, which only makes sense for structured/tabular data.
+>
+> Option B wrongly claims unstructured files aren't supported at all; binary copy handles them directly. Option C invents a staging prerequisite that binary copy doesn't require. Option D wrongly claims tabular copy is the default for any source type — mixed unstructured files need binary copy specifically.
+
+---
+
+## Question 23: A SQL-Skilled Team With a High-Volume Custom Transform *(Hard)*
+
+A T-SQL-only team's curated data already lives in a Fabric Warehouse. They now need to apply a custom fuzzy-deduplication algorithm — with no built-in T-SQL equivalent — against 500 GB of data arriving daily. One team member argues for staying in T-SQL "since that's what the team knows and the data's already there." Is that the right call?
+
+A. Yes, but only once the fuzzy-deduplication logic is rewritten as a T-SQL scalar user-defined function  
+B. No — Dataflow Gen2 is the correct tool instead, since its transformation library can express any custom algorithm  
+C. No — volume and custom logic outrank skillset comfort here; a notebook (PySpark) is correct despite the unfamiliar language  
+D. Yes — T-SQL is the natural fit whenever data already lives in a Warehouse, regardless of transformation complexity  
+
+> [!success]- Answer
+> **C. No — volume and custom logic outrank skillset comfort here; a notebook (PySpark) is correct despite the unfamiliar language**
+>
+> A tool being *capable* of a task doesn't make it the *best* answer — and here, T-SQL isn't even capable in the first place. Custom logic with no built-in equivalent (fuzzy matching, in this case) combined with genuinely large daily volume is exactly the signal that outranks a team's skillset comfort or where the data currently happens to live. A notebook is the correct fit, even though it means the team has to work outside T-SQL.
+>
+> Option A invents a scalar-UDF workaround that doesn't solve the underlying expressiveness gap and would perform poorly at 500 GB/day row-by-row. Option B misapplies Dataflow Gen2, whose transformation library — however broad — still has no built-in equivalent for arbitrary custom fuzzy-matching logic. Option D over-weights "the data's already there" and ignores that T-SQL simply has no way to express the required logic at all.
+
+---
+
+## Question 24: Dropping Rows Based on a Minimum Non-Null Count *(Hard)*
+
+A developer wants to drop a row only when at least 3 of 5 specific columns are null — not when any single one of those columns is null. Which `na.drop()` configuration is correct?
+
+A. `df.na.drop(how="any", subset=[...])` — drops a row once at least 3 of the listed columns are null  
+B. `df.na.drop(thresh=2, subset=[...])` — thresh sets the maximum number of nulls tolerated before a row is dropped  
+C. `df.na.drop(how="all", subset=[...])` — drops a row once 3 or more of the listed columns are null  
+D. `df.na.drop(thresh=3, subset=[...])` — thresh sets the minimum non-null values required to keep the row  
+
+> [!success]- Answer
+> **D. `df.na.drop(thresh=3, subset=[...])` — thresh sets the minimum non-null values required to keep the row**
+>
+> `thresh=` sets the minimum count of *non-null* values a row must have (across the columns named in `subset=`) to be kept — so `thresh=3` across 5 columns keeps a row only if at least 3 of those 5 are non-null, meaning a row is dropped exactly when 3 or more are null. `subset=` independently controls which columns are even considered.
+>
+> Option A misapplies `how="any"`, which drops a row if *any single* listed column is null — a much stricter rule than "3 of 5," with no threshold concept at all. Option B gets `thresh`'s meaning backward — it's a minimum non-null count to keep a row, not a maximum-nulls-tolerated cap. Option C misapplies `how="all"`, which only drops a row when *every* listed column is null, not merely 3 of them.
+
+---
+
+## Question 25: Case-Sensitive Matching, By Design and Forever *(Medium)*
+
+A team queries a new Fabric Warehouse table with `WHERE CustomerName = 'smith'`, expecting it to match a stored value of `'Smith'` case-insensitively, based on their on-premises SQL Server experience. What should they expect in Fabric Warehouse, and can this be changed later if it causes problems?
+
+A. The match fails — the default collation is case-sensitive, fixed permanently at creation, and can't be changed  
+B. The match succeeds — Fabric Warehouse's default collation is case-insensitive, matching on-premises SQL Server's usual default  
+C. The match fails today, but the team can run `ALTER DATABASE ... COLLATE` anytime to switch to case-insensitive  
+D. The match fails, but only because `CustomerName` needs an explicit `COLLATE` clause on this one query specifically  
+
+> [!success]- Answer
+> **A. The match fails — the default collation is case-sensitive, fixed permanently at creation, and can't be changed**
+>
+> Fabric Warehouse's default collation is `Latin1_General_100_BIN2_UTF8` — case-sensitive by design, unlike many on-premises SQL Server defaults. It's fixed permanently at warehouse creation; there's no supported way to change a warehouse's collation after the fact, so `'smith'` never matches a stored `'Smith'` without an explicit case-insensitive comparison written into the query.
+>
+> Option B wrongly assumes case-insensitivity carries over from on-premises SQL Server defaults. Option C invents an `ALTER DATABASE ... COLLATE` escape hatch that doesn't exist for an already-created warehouse. Option D correctly notes the query fails but wrongly claims the database-level default is case-insensitive — it's the opposite, and it's permanent.
+
+---
+
+## Question 26: An Update Policy Reaching Across Databases *(Medium)*
+
+A team tries to create an update policy where the source table lives in the `ClinicalDB` KQL database and the target table lives in a separate KQL database, `AnalyticsDB`, within the same Eventhouse compute. Is this a supported configuration?
+
+A. Yes — update policies can reference a source table in any database in the same Eventhouse, via `database()`-qualified names  
+B. No — source and target must live in the same database with a matching schema; cross-database policies aren't supported  
+C. Yes, but only once both databases share the same retention and caching policy settings  
+D. No — source and target must actually be in different databases, specifically to avoid a circular-reference risk  
+
+> [!success]- Answer
+> **B. No — source and target must live in the same database with a matching schema; cross-database policies aren't supported**
+>
+> Update policies scope to a single database: the source and target table must live in the same database, with a matching schema between them. A cross-database configuration like `ClinicalDB` → `AnalyticsDB` isn't a supported shape for an update policy, regardless of how the source is referenced.
+>
+> Option A invents cross-database support gated behind `database()`-qualified references — update policy queries actually must reference the source table *unqualified*, and the cross-database configuration itself still isn't supported. Option C invents a retention/caching-policy-matching precondition that has nothing to do with the actual same-database scoping rule. Option D inverts the rule entirely — same-database is required, not different-database.
+
+---
+
+## Question 27: Missing the Initial CDC Snapshot in Eventstream *(Hard)*
+
+A team adds a new CDC source to an existing eventstream and publishes it immediately. Downstream, they notice the initial snapshot's historical rows never arrive at the Lakehouse destination, even though new ongoing changes going forward do arrive correctly. What's the likely cause, and what should they have done differently when adding the source?
+
+A. The Lakehouse destination silently drops any batch larger than 1 MB, and this snapshot exceeded that size limit  
+B. CDC sources never include an initial snapshot in Fabric Eventstream at all — only ongoing changes are captured  
+C. The destination needs its own completely separate historical backfill job; Eventstream can't deliver snapshot data  
+D. Ingestion outran routing setup — the fix: uncheck **Activate ingestion**, publish, then reactivate using a **Custom time**  
+
+> [!success]- Answer
+> **D. Ingestion outran routing setup — the fix: uncheck Activate ingestion, publish, then reactivate using a Custom time**
+>
+> This is a documented timing gap: ingestion can begin before routing to the destination is fully wired up, and a CDC source's initial snapshot — which typically arrives in a burst right at connection time — is especially likely to be missed as a result. The fix is to uncheck Activate ingestion when adding the source, publish the eventstream first, and then manually activate ingestion using a Custom time set early enough to recapture the snapshot window.
+>
+> Option A invents a 1 MB batch-size drop that isn't the documented cause here — the 1 MB limit is a per-message cap, unrelated to this timing issue. Option B is factually wrong; DeltaFlow-enabled CDC connectors specifically shape initial snapshot data too. Option C overstates the problem as unsolvable, when the documented fix resolves it without any separate backfill job.
+
+---
+
+## Question 28: Removing checkpointLocation "Just for Testing" *(Medium)*
+
+A developer removes the `checkpointLocation` option from a production streaming write to speed up local testing, intending to add it back before shipping — but the change accidentally ships to production. The job runs fine for weeks until a cluster restart happens mid-stream. What breaks, and why is `checkpointLocation` mandatory in the first place?
+
+A. `checkpointLocation` only matters for aggregating queries; a simple append-mode write has no consequence  
+B. Without it, Spark has no durable record of offsets or batch IDs, so after the restart it can't resume safely  
+C. The job fails to even start without `checkpointLocation`, so this scenario couldn't happen in production  
+D. Nothing breaks — `checkpointLocation` only affects exactly-once guarantees, not the job's ability to restart  
+
+> [!success]- Answer
+> **B. Without it, Spark has no durable record of offsets or batch IDs, so after the restart it can't resume safely**
+>
+> `checkpointLocation` is what makes restart-after-failure safe: it durably tracks processed offsets and committed batch IDs so a restarted query knows exactly where it left off. Without it, a mid-stream restart has no such record — the job either reprocesses data that was already written (duplicating it) or loses track of its position entirely, exactly the failure mode `checkpointLocation` exists to prevent.
+>
+> Option A wrongly claims append-only queries are exempt; restart safety matters for any production streaming write, aggregating or not. Option C invents a hard startup failure that doesn't happen — Structured Streaming doesn't require `checkpointLocation` to *start*, which is exactly how this mistake can silently ship. Option D wrongly narrows checkpointing's role to exactly-once semantics alone; restart safety is the more fundamental reason it's mandatory.
+
+---
+
+## Question 29: Renaming a Table While OneLake Availability Is On *(Hard)*
+
+A team enables OneLake availability on an Eventhouse table to expose it to Spark and Power BI Direct Lake. They then try to rename the table while OneLake availability remains enabled. What happens?
+
+A. It succeeds, but Spark and Direct Lake keep referencing the table under its old name until a manual refresh runs  
+B. It's blocked — OneLake availability also blocks column-type changes, RLS, and delete/truncate/purge  
+C. It succeeds, but only after a mandatory 24-hour cooldown from when OneLake availability was first enabled  
+D. It succeeds immediately, since OneLake availability only affects read access, not schema operations  
+
+> [!success]- Answer
+> **B. It's blocked — OneLake availability also blocks column-type changes, RLS, and delete/truncate/purge**
+>
+> OneLake availability comes with a documented list of blocked operations while it's active: table rename, column-type changes, row-level security, and delete/truncate/purge. A rename attempt on a table with OneLake availability enabled is blocked outright, not merely delayed or degraded.
+>
+> Option A invents a stale-reference workaround; the rename doesn't succeed at all, so there's no old-name reference to worry about. Option C invents a 24-hour cooldown mechanism that isn't documented. Option D wrongly assumes OneLake availability only touches read access — it also restricts specific schema/lifecycle operations, rename included.
+
+---
+
+## Question 30: A Hopping Window Directly in Eventstream *(Easy)*
+
+A team needs a rolling 15-minute average updated every 5 minutes (a hopping window), and wants to build it entirely with Eventstream's no-code **Group by** operator, without writing any KQL or Spark code. Is this achievable directly in the Group by operator's UI?
+
+A. No — Group by only supports tumbling windows; hopping requires a downstream Spark or KQL step  
+B. Yes, but only for aggregation windows measured in whole hours, never in minutes at all  
+C. No — hopping windows aren't achievable anywhere in Fabric without writing custom code  
+D. Yes — Group by natively supports tumbling, hopping, sliding, and session windows, unlike KQL  
+
+> [!success]- Answer
+> **D. Yes — Group by natively supports tumbling, hopping, sliding, and session windows, unlike KQL**
+>
+> Eventstream's Group by operator natively supports all four common window types — tumbling, hopping, sliding, and session — as drag-and-drop UI options, no code required. This is notably more complete than KQL, which has no dedicated hopping or sliding function and has to approximate them by composing `bin()` at multiple offsets.
+>
+> Option A wrongly restricts Group by to tumbling windows only, when hopping is one of its native options. Option B invents a whole-hours-only restriction that doesn't exist. Option C overlooks that Eventstream's own no-code UI already provides this — no custom code is needed at all.
+
+---
+
+<!-- DOMAIN 3: Monitor and Optimize an Analytics Solution (~15 questions) -->
+
+## Question 31: Pipeline History Older Than Monitor Hub Retains *(Medium)*
+
+An admin needs pipeline run details from 45 days ago for a compliance audit, but Monitor hub's retention window has already aged that run out. What should the team have set up in advance to retain this history, and what does it provide?
+
+A. Workspace monitoring — a dedicated Eventhouse retaining log-level detail via KQL, well beyond Monitor hub's cap  
+B. Dataflow Gen2's OneLake-persisted refresh history, since it covers every item type, not just dataflows  
+C. Nothing could have been done — no Fabric surface retains history beyond Monitor hub's own window  
+D. The Capacity Metrics app, since it retains historical run data indefinitely at the capacity level  
+
+> [!success]- Answer
+> **A. Workspace monitoring — a dedicated Eventhouse retaining log-level detail via KQL, well beyond Monitor hub's cap**
+>
+> Monitor hub is a tenant-wide first stop, but its retention window means it isn't a durable log on its own. Workspace monitoring — a dedicated, KQL-queryable Eventhouse a team can enable in advance — fills exactly this gap, retaining log-level detail far beyond Monitor hub's 30-day cap.
+>
+> Option B misapplies Dataflow Gen2's own OneLake-persisted refresh history, which is scoped to dataflow refreshes specifically, not pipeline runs. Option C overstates the limitation; workspace monitoring exists precisely to solve this. Option D misapplies the Capacity Metrics app, which tracks CU utilization and throttling across a capacity, not per-item run history.
+
+---
+
+## Question 32: A Pro-Licensed Workspace's Refresh Schedule Ceiling *(Easy)*
+
+A Pro-licensed workspace tries to configure a semantic model's scheduled refresh to run every 2 hours (12 times a day). Is this within the Pro license's scheduled refresh limit?
+
+A. No — Pro allows only one scheduled refresh per day, no matter what interval is requested  
+B. Yes — Pro allows up to 48 scheduled refreshes daily, the same ceiling as PPU and Premium/Fabric capacity  
+C. Yes, but only once the workspace is also connected to Git integration, which raises the Pro limit  
+D. No — Pro allows only 8/day; 12/day exceeds it. PPU and Premium/Fabric capacity allow 48/day  
+
+> [!success]- Answer
+> **D. No — Pro allows only 8/day; 12/day exceeds it. PPU and Premium/Fabric capacity allow 48/day**
+>
+> Scheduled refresh limits are license-tier-specific: Pro caps out at 8 scheduled refreshes per day, while PPU and Premium/Fabric capacity allow up to 48/day. A 2-hour interval (12 refreshes/day) fits comfortably within the higher tier but exceeds Pro's ceiling.
+>
+> Option A understates Pro's actual limit, which is 8/day, not 1/day. Option B wrongly extends the higher 48/day ceiling to Pro. Option C invents a Git-integration-based limit increase that doesn't exist — scheduled refresh limits are governed by license tier, not Git connectivity.
+
+---
+
+## Question 33: What an Activator Rule's Action Can Actually Run *(Easy)*
+
+A team wants an Activator rule to automatically run a Copy job when a condition fires, rather than just sending a notification. Is this a supported Activator action?
+
+A. No — running any Fabric item as an action requires routing it through Power Automate as a go-between  
+B. Yes, but only for a pipeline or notebook — Copy job isn't one of the runnable action types  
+C. No — Activator actions are limited strictly to email, Teams, and Power Automate notifications  
+D. Yes (preview) — actions can run a pipeline, notebook, dataflow, UDF, or copy job, or publish a business event  
+
+> [!success]- Answer
+> **D. Yes (preview) — actions can run a pipeline, notebook, dataflow, UDF, or copy job, or publish a business event**
+>
+> Activator's action list goes well beyond notifications: email, Teams, and Power Automate sit alongside actions that directly run a Fabric pipeline, notebook, Spark job definition, dataflow, User Data Function, or copy job (preview), or publish a business event (also preview).
+>
+> Option A invents an unnecessary Power Automate intermediary — Activator can run these Fabric items directly as an action. Option B wrongly excludes copy job specifically, when it's explicitly on the list (preview). Option C understates the action list to notification-only actions, ignoring the documented Fabric-item-execution actions.
+
+---
+
+## Question 34: Hitting Dataflow Gen2's 24-Hour Refresh Ceiling *(Medium)*
+
+A Dataflow Gen2 in a CI/CD-connected workspace has already refreshed 300 times in the past 24 hours when a new manual refresh is triggered. What happens, and would the outcome differ in a non-CI/CD-connected workspace?
+
+A. The new refresh runs normally — the 300/24h figure is only a soft advisory limit, not an enforced ceiling  
+B. The new refresh is blocked — 300/24h is the ceiling for CI/CD-connected workspaces; a non-CI/CD-connected workspace's ceiling is lower, at 150/24h  
+C. The new refresh is queued and automatically runs once the 24-hour window rolls over, rather than being rejected outright  
+D. The new refresh is blocked in both CI/CD and non-CI/CD workspaces alike, since 300/24h is a fixed platform-wide limit with no variation  
+
+> [!success]- Answer
+> **B. The new refresh is blocked — 300/24h is the ceiling for CI/CD-connected workspaces; a non-CI/CD-connected workspace's ceiling is lower, at 150/24h**
+>
+> Dataflow Gen2 refresh limits differ by workspace connectivity: 300 refreshes per 24 hours for CI/CD-connected workspaces, and a lower 150/24h ceiling for non-CI/CD-connected ones. Having already hit 300 in a CI/CD-connected workspace means the new manual refresh is blocked until the rolling window opens capacity back up.
+>
+> Option A wrongly treats the limit as an unenforced advisory when it's a hard, enforced ceiling. Option C invents an automatic-queueing behavior for a blocked refresh that isn't how this limit is enforced. Option D wrongly flattens the two different ceilings into one fixed number, ignoring the documented CI/CD vs. non-CI/CD split.
+
+---
+
+## Question 35: A Scheduled Job vs. an Interactive Session at Full Capacity *(Hard)*
+
+A capacity is already fully utilized when a scheduled pipeline submits a notebook activity. Separately, a user tries to start an interactive notebook session against the same, fully-utilized capacity. What should each expect?
+
+A. Both fail immediately with `TooManyRequestsForCapacity` (HTTP 430); neither one ever queues  
+B. Both queue identically, FIFO, each expiring after 24 hours if capacity never frees up  
+C. The interactive session queues quietly in the background, and the scheduled submission instead fails immediately  
+D. The scheduled submission queues (FIFO, 24h expiry); the interactive session fails immediately instead, since it can't queue  
+
+> [!success]- Answer
+> **D. The scheduled submission queues (FIFO, 24h expiry); the interactive session fails immediately instead, since it can't queue**
+>
+> Fabric's Spark admission model is core-based and treats the two trigger types differently: scheduled and pipeline-triggered jobs queue FIFO when capacity is exhausted, with queued jobs expiring after 24 hours if capacity never opens up. Interactive sessions, by contrast, don't queue at all — a session request against a fully-utilized capacity fails immediately with `TooManyRequestsForCapacity` (HTTP 430).
+>
+> Option A wrongly applies the interactive-session failure behavior to both trigger types, when scheduled/pipeline jobs actually queue instead of failing immediately. Option B wrongly extends queueing to interactive sessions, which specifically don't queue. Option C swaps the two behaviors entirely — it's the interactive session that fails immediately, and the scheduled job that queues.
+
+---
+
+## Question 36: A Longer-Term View of Ingestion Failure Trends *(Easy)*
+
+A team needs to analyze Eventhouse ingestion failure trends — by table and error code — across a 90-day compliance review window. Someone proposes just widening the time filter in a `.show ingestion failures` KQL query. Why won't that get them there, and what should they reach for instead?
+
+A. It will work fine — `.show ingestion failures` has no retention limit; only its default query window is short  
+B. No — the 14-day cap applies no matter the time filter; workspace monitoring's Ingestion results logs cover longer-range trends instead  
+C. Nothing in Fabric retains ingestion failure history longer than 14 days; the team has to reconstruct it from source-system logs instead  
+D. Raise the source table's batching latency policy — that setting also controls how long failure records stay queryable  
+
+> [!success]- Answer
+> **B. No — the 14-day cap applies no matter the time filter; workspace monitoring's Ingestion results logs cover longer-range trends instead**
+>
+> `.show ingestion failures` retains its records for 14 days regardless of how wide the query's own time filter is set — widening the filter doesn't reach back further than the command's actual retention. Workspace monitoring's Ingestion results logs table family, living in the auto-provisioned monitoring Eventhouse, is the durable, KQL-queryable alternative built for exactly this kind of longer-range, cross-table trend analysis — the 14-day cap doesn't apply to it.
+>
+> Option A wrongly claims `.show ingestion failures` has no retention limit; the 14-day cap is real and command-level, not just a default query window. Option C overstates the limitation — workspace monitoring exists precisely to extend past the 14-day ceiling. Option D invents a batching-latency-controls-retention link that doesn't exist; batching latency only affects commit timing, not diagnostic retention.
+
+---
+
+## Question 37: Reading a Shortcut Failure's HTTP Status Code *(Medium)*
+
+A team's shortcut queries fail with three different HTTP status codes across three separate incidents this month: one `401`, one `403`, and one `404`. What does each of these specifically indicate?
+
+A. `401` = authenticated but not authorized; `403` = the target was moved or deleted; `404` = no valid authentication  
+B. `401` = no valid authentication; `403` = authenticated but not authorized; `404` = the target was moved, renamed, or deleted  
+C. All three indicate the same underlying condition — a generic access-denied error — just surfaced differently  
+D. `401` = the target was moved or deleted; `403` = no valid authentication; `404` = authenticated but not authorized  
+
+> [!success]- Answer
+> **B. `401` = no valid authentication; `403` = authenticated but not authorized; `404` = the target was moved, renamed, or deleted**
+>
+> These three codes map to distinct causes, not interchangeable "access denied" variants: `401` means authentication itself failed (no valid credential presented), `403` means authentication succeeded but the identity isn't authorized for the resource, and `404` means the target itself is gone — moved, renamed, or deleted.
+>
+> Option A and D both scramble this mapping, assigning each code to the wrong cause. Option C denies that the three codes carry distinct diagnostic meaning at all, which contradicts the documented, distinct fixes each one points to (renew credentials, request access, or find the target's new location, respectively).
+
+---
+
+## Question 38: Sizing Auto Compaction for a Small Table vs. a Huge One *(Medium)*
+
+A newly created 2 GB lakehouse table and a mature 50 TB lakehouse table both use auto compaction with adaptive target file size. What target file size should each aim for, and why aren't they the same?
+
+A. Target file size is only configurable manually — Fabric has no adaptive, size-based scaling behavior  
+B. The 2 GB table targets ~128 MB, the 50 TB table up to 1 GB — target size scales with table size  
+C. The 2 GB table targets 1 GB files; the 50 TB table targets 128 MB files, for more parallelism at scale  
+D. Both target the same fixed 1 GB, since adaptive target file size is a constant regardless of table size  
+
+> [!success]- Answer
+> **B. The 2 GB table targets ~128 MB, the 50 TB table up to 1 GB — target size scales with table size**
+>
+> Adaptive target file size isn't a fixed constant — it scales with table size, starting around 128 MB for tables under 10 GB and scaling up to 1 GB for tables over 10 TB. A small, fresh 2 GB table and a mature 50 TB table land in very different places on that curve by design, tuned toward reasonable file counts at each scale.
+>
+> Option A denies that adaptive, size-based scaling exists at all, when it's the whole point of "adaptive" target file size. Option C inverts the relationship — it's the larger table that trends toward the larger 1 GB target, not the smaller one. Option D wrongly treats the target as a fixed 1 GB constant, ignoring the size-based scaling.
+
+---
+
+## Question 39: Multi-Column Statistics in Fabric Warehouse *(Hard)*
+
+A performance engineer wants to create a multi-column statistics object across `(Region, ProductCategory)` to help the optimizer with a specific query pattern in Fabric Warehouse. Is this supported?
+
+A. Yes, but only for columns that are also part of a `NOT ENFORCED` primary key  
+B. No — Fabric Warehouse doesn't support manual statistics of any kind; only automatic statistics exist  
+C. Yes — `CREATE STATISTICS` accepts any number of columns in Fabric Warehouse, identical to on-premises SQL Server  
+D. No — manual `CREATE STATISTICS` in Fabric Warehouse is single-column only, with no multi-column support  
+
+> [!success]- Answer
+> **D. No — manual CREATE STATISTICS in Fabric Warehouse is single-column only, with no multi-column support**
+>
+> Manual statistics in Fabric Warehouse are documented as single-column only — there's no multi-column statistics capability to target a specific combination like `(Region, ProductCategory)` in one object. The engine's automatic statistics (histogram, average column length, cardinality) run alongside manual single-column statistics, but neither covers multi-column combinations.
+>
+> Option A invents a primary-key-membership precondition that has nothing to do with the actual single-column restriction. Option B overcorrects — manual statistics absolutely exist in Fabric Warehouse, just scoped to single columns. Option C wrongly imports on-premises SQL Server's multi-column statistics support, which Fabric Warehouse doesn't carry over.
+
+---
+
+## Question 40: A Cursor-Based Load That Takes Six Hours *(Medium)*
+
+A migration script inserts 2 million rows into a Fabric Warehouse fact table using a cursor-based loop — one `INSERT` per row — and takes over 6 hours to finish. What's the correct, scalable fix?
+
+A. Wrap the existing cursor loop in an explicit transaction to reduce per-row commit overhead, keeping the row-by-row structure  
+B. Increase the warehouse's compute allocation, since the bottleneck is compute, not the loading pattern itself  
+C. Switch to a `MERGE` statement instead of `INSERT`, using a WHEN NOT MATCHED clause only, keeping the same per-row execution  
+D. CTAS (or a set-based bulk `INSERT ... SELECT`) — row-by-row `INSERT` patterns don't scale in a distributed warehouse engine  
+
+> [!success]- Answer
+> **D. CTAS (or a set-based bulk INSERT ... SELECT) — row-by-row INSERT patterns don't scale in a distributed warehouse engine**
+>
+> Row-by-row `INSERT` loops are a documented anti-pattern in a distributed warehouse engine — each individual `INSERT` pays coordination overhead that a set-based operation avoids entirely. CTAS (or a set-based `INSERT ... SELECT`) is the preferred bulk transform-and-load pattern, processing all 2 million rows as one set-based operation instead of 2 million individual round trips.
+>
+> Option A keeps the fundamentally unscalable row-by-row structure intact, only trimming per-row commit overhead — a marginal improvement, not a real fix. Option B misdiagnoses the bottleneck as compute capacity rather than the loading pattern itself. Option C still executes per-row (just via `MERGE` instead of `INSERT`), so it inherits the same scalability problem the fix needs to eliminate.
+
+---
+
+## Question 41: Caching Repeated Shortcut Reads Without Any Setup *(Easy)*
+
+A team wants to know whether they need to manually enable a caching layer for repeated OneLake/ADLS Gen2 shortcut reads within a single Spark session, or whether this already happens automatically. What should they be told?
+
+A. Caching happens automatically, but only for internal Lakehouse tables — ADLS Gen2 shortcut reads are excluded  
+B. No caching of shortcut reads exists in Spark sessions at all; every read goes back to the source  
+C. Intelligent cache is on by default at 50% of node cache size, no manual enablement needed  
+D. Caching is available, but only after manually enabling a Spark config setting at the start of every session  
+
+> [!success]- Answer
+> **C. Intelligent cache is on by default at 50% of node cache size, no manual enablement needed**
+>
+> Intelligent cache ships on by default, using 50% of node cache size to transparently cache OneLake and ADLS Gen2 shortcut reads within a Spark session, delivering up to 60% faster repeat reads — with no configuration step required, the same "already on, don't worry about enabling it" pattern as Adaptive Query Execution.
+>
+> Option A invents an internal-only restriction; intelligent cache explicitly covers OneLake and ADLS Gen2 shortcut reads, not just native Lakehouse tables. Option B denies a real, default-on feature. Option D invents a manual enablement step for something that's already on by default.
+
+---
+
+## Question 42: Two Cost Models for Two Different Eventhouse Mechanisms *(Medium)*
+
+A team is choosing between a materialized view and an update policy for a high-volume Eventhouse table, caring primarily about steady-state compute cost rather than latency. Which mechanism carries a continuous background compute cost regardless of query frequency, and which folds its cost into the ingestion path itself?
+
+A. Both mechanisms have identical cost profiles — the choice between them is purely about latency, never cost  
+B. Materialized views carry a continuous background CU cost, best for repeated-read aggregations; update policies fold their cost into the ingestion path, running once per event  
+C. Update policies carry a continuous background CU cost, since they must constantly re-evaluate the source table; materialized views only cost compute at query time  
+D. Neither mechanism has an ongoing compute cost; both are billed only for the storage of their target table  
+
+> [!success]- Answer
+> **B. Materialized views carry a continuous background CU cost, best for repeated-read aggregations; update policies fold their cost into the ingestion path, running once per event**
+>
+> The two mechanisms have genuinely different cost profiles. Materialized views pay a continuous background compute cost to stay always-fresh, which is the right tradeoff when many dashboards would otherwise repeat the same aggregation on every read. Update policies instead fold a small, predictable cost into the ingestion path itself, running once per incoming event — cheaper for simple per-event transforms with no ongoing aggregation state to maintain.
+>
+> Option A denies a real, documented cost-model difference between the two mechanisms. Option C swaps the two cost models entirely — it's materialized views that carry the continuous background cost, not update policies. Option D wrongly claims neither has an ongoing compute cost, which contradicts materialized views' entire cost profile.
+
+---
+
+## Question 43: Manually Overriding DIUs "Just to Be Safe" *(Medium)*
+
+A team manually sets a Copy activity's Data Integration Units (DIUs) to 4 — well below the maximum of 256 — believing this guarantees more predictable performance than leaving it on the default. What's the documented guidance on DIU and copy-parallelism settings?
+
+A. DIUs have no default at all — a value must be set manually before any Copy activity can run  
+B. Degree of copy parallelism is fixed by the sink type and can't be tuned independently of DIUs  
+C. Both default to Auto, which usually gives the best throughput; manual override should be a targeted exception  
+D. Manually fixing DIUs to a low value is the documented best practice for predictable performance  
+
+> [!success]- Answer
+> **C. Both default to Auto, which usually gives the best throughput; manual override should be a targeted exception**
+>
+> Both DIUs and degree of copy parallelism default to Auto, and the service's own auto-tuning usually delivers the best throughput without any manual intervention. Manually pinning DIUs to a low, fixed value doesn't buy predictability so much as it caps throughput below what Auto would otherwise deliver — manual overrides are meant to be a targeted exception for a specific, understood scenario, not a default habit.
+>
+> Option A invents a no-default requirement that isn't true — Auto is the actual default for both settings. Option B invents a sink-fixed parallelism constraint; degree of copy parallelism is its own independently configurable setting, also defaulting to Auto. Option D wrongly frames manual low-DIU pinning as a best practice, when Auto is the documented default recommendation.
+
+---
+
+## Question 44: A Dataflow Getting Slower With No Error in Sight *(Hard)*
+
+A Dataflow Gen2 refresh completes successfully every night, but the team notices it's grown steadily slower over several months, with no error ever appearing in refresh history. A colleague suspects lost query folding partway through the M query. Should the team expect an error message confirming this in refresh history?
+
+A. No — query folding loss is a performance symptom (silently slower), not a refresh failure; it never produces an error message, so refresh history won't show one  
+B. Yes — a lost-folding condition always surfaces as a distinct `FoldingLost` warning entry in refresh history, even on a fully successful refresh  
+C. No — but only because refresh history only records failures, not warnings of any kind; a successful refresh with degraded folding is otherwise undetectable  
+D. Yes, but only if detailed logs are downloaded and manually inspected for a folding-specific error code  
+
+> [!success]- Answer
+> **A. No — query folding loss is a performance symptom (silently slower), not a refresh failure; it never produces an error message, so refresh history won't show one**
+>
+> Losing query folding doesn't fail the refresh — it just makes it much slower, silently, with no error or warning anywhere in refresh history or detailed logs. The team's colleague is right about the suspected cause, but wrong to expect a confirming error message; the fix is redesigning the M query to preserve folding (filter/select before custom logic), diagnosed by performance trend, not by searching for a message that was never going to appear.
+>
+> Option B invents a `FoldingLost` warning entry that doesn't exist in Fabric's refresh history. Option C reaches the right verdict (no error shown) for a wrong, overly broad reason — refresh history's failure-only scope isn't why folding loss specifically stays invisible; it stays invisible because it isn't a failure or a warning condition at all. Option D invents a folding-specific error code inside detailed logs that doesn't exist either.
+
+---
+
+## Question 45: Setting an Alert Without Opening Activator First *(Medium)*
+
+A team wants to set an alert on a KQL queryset's query results. Must they first create a standalone Activator item and configure the alert there, before it can be tied back to the queryset?
+
+A. No — alerts can be authored in-context directly from Eventstream, KQL querysets, dashboards, and Power BI visuals  
+B. Yes, but only for Eventstream sources; KQL querysets need the standalone-item workflow instead  
+C. No — KQL querysets can only alert via a separately configured Power Automate flow, bypassing Activator  
+D. Yes — every alert must originate from a standalone Activator item first; in-context buttons are just shortcuts to it  
+
+> [!success]- Answer
+> **A. No — alerts can be authored in-context directly from Eventstream, KQL querysets, dashboards, and Power BI visuals**
+>
+> Alert authoring is deliberately decentralized: Eventstream, KQL querysets, Real-Time dashboards, Power BI visuals, and Real-Time hub all offer an in-context "Set Alert" action, all ultimately backed by an Activator item behind the scenes — but the team never needs to open a standalone Activator item first to get there.
+>
+> Option B wrongly singles out KQL querysets as needing the standalone workflow, when they're explicitly one of the documented in-context sources. Option C invents a Power Automate-only path for KQL querysets that bypasses the actual, much simpler in-context alerting experience. Option D overstates the standalone-item requirement; while every alert is backed by Activator under the hood, the *authoring* experience doesn't require starting from a standalone item.
+
+---
+
+## Case Study: Meridian Health Network *(5 linked questions, ~10 minutes)*
+
+> [!info] Case-study format
+> The real DP-700 includes interactive case studies — a multi-paragraph scenario followed by linked questions. Read the whole scenario once, then answer Q46–Q50 in order. You can navigate within the case study, but cannot return to it after submission.
+
+**Scenario**
+
+Meridian Health Network is a regional hospital group modernizing its analytics estate on Microsoft Fabric. Its ICU patient monitors stream vital-sign telemetry — heart rate, SpO2, blood pressure — continuously from bedside devices. Separately, an on-premises SQL Server 2025 database backs the group's electronic health record (EHR) system, holding patient encounters and billing data, reachable only through an on-premises data gateway. A third-party insurance clearinghouse also delivers daily claims-status CSV batches over SFTP into an Azure Blob Storage container.
+
+The analytics team consists of two T-SQL-strong BI developers, one PySpark-comfortable data engineer, and a compliance officer who does not hold a Microsoft 365 E5 license. Clinical data is treated as highly sensitive: Cardiology analysts should see only cardiology-department patient records, and a Warehouse holding billing data is promoted through a deployment pipeline across Development, Test, and Production stages. The billing Warehouse feeds a paginated report that finance uses for month-end reconciliation; the team already configured a data source rule so the Production-stage semantic model automatically points at the Production database after every deployment, and they now want the paginated report's own connection string to do the same, automatically, with no manual reconfiguration after each deployment.
+
+The compliance officer periodically needs to review Fabric audit activity — item access changes, sharing changes — for internal investigations, sometimes reaching back several months. Meridian's data engineer is separately investigating why a specific pipeline-triggered notebook keeps failing intermittently, and wants raw, API-level Spark log output for the failed run rather than browsing the Monitor hub UI. Finally, a cardiology analyst was recently granted Execute permission on a notebook that reprocesses cardiology vitals data, so they could re-run it themselves when needed — but no separate Read or Write permission was granted alongside it.
+
+---
+
+### Question 46: A Deployment Rule for the Paginated Report *(Medium)*
+
+The team already configured a data source rule so the Production-stage semantic model automatically points at the Production database after every deployment. They now try to configure a **parameter** rule for the paginated report's connection string, expecting the same flexibility. What do they find?
+
+A. The parameter rule configures successfully, since any item with a data source rule also gets a parameter rule  
+B. Paginated report supports only a data source rule — a parameter rule isn't available for this item type  
+C. Neither rule type is available for a paginated report — deployment rules don't cover this item type  
+D. The parameter rule is available, but only once converted to a Power BI-hosted (non-Fabric) paginated report  
+
+> [!success]- Answer
+> **B. Paginated report supports only a data source rule — a parameter rule isn't available for this item type**
+>
+> Deployment rules are scoped narrowly, and the available rule *types* differ by item, not just whether an item supports rules at all. Dataflow Gen1 and semantic model both get data source **and** parameter rules; paginated report and mirrored database get a data source rule only; notebook gets only a default lakehouse rule. Meridian's paginated report can absolutely get a data source rule for its connection string — just not a parameter rule, which this specific item type doesn't support.
+>
+> Option A wrongly assumes rule-type support is uniform across every item that supports deployment rules at all — it isn't; each item type has its own specific subset. Option C is wrong — paginated report is on the narrow list of item types that do support a rule, just a data source rule. Option D invents a Power BI-hosted conversion requirement that has nothing to do with which rule types Fabric deployment pipelines support for a paginated report.
+
+---
+
+### Question 47: The Compliance Officer's Audit Log Window *(Hard)*
+
+The compliance officer, who does not hold an E5 license, needs to review Fabric audit activity from 200 days ago for an internal investigation. Is this data still available in the unified audit log by default?
+
+A. Yes — Fabric audit log retention is a flat 365 days for every user, regardless of license tier  
+B. No — audit logs are retained for only 30 days regardless of license; 200 days ago is far outside that window  
+C. Yes, since retention is governed by the item's own sensitivity label, not the reviewer's license tier  
+D. No — non-E5 default retention is 180 days, so 200 days is outside it. E5 users get 1 year, up to 10 with the add-on  
+
+> [!success]- Answer
+> **D. No — non-E5 default retention is 180 days, so 200 days is outside it. E5 users get 1 year, up to 10 with the add-on**
+>
+> Audit log retention is license-tier-specific: 180 days by default for non-E5 users, 1 year for E5-licensed users, and up to 10 years with the retention add-on. The compliance officer's own license — not the item's label, and not a flat organization-wide number — is what governs how far back they can search, and 200 days ago sits outside the 180-day non-E5 default.
+>
+> Option A invents a flat, license-agnostic 365-day retention that doesn't match the documented tiered model. Option B understates retention severely — even the shortest documented default (180 days for non-E5) is well beyond 30 days. Option C misattributes retention to the item's sensitivity label, when it's actually the reviewing user's own license tier that determines the default retention window.
+
+---
+
+### Question 48: Mirroring the On-Premises EHR Database *(Medium)*
+
+The compliance officer asks whether Meridian's on-premises EHR SQL Server database — reachable only via an on-premises gateway — can be continuously replicated into OneLake using database mirroring, the same way an Azure SQL Database would be. What's the answer, and how does its update latency compare to a truly instantaneous feed?
+
+A. No — database mirroring only supports Fabric-native and Azure-hosted sources; an on-premises SQL Server database needs a shortcut or pipeline copy instead  
+B. Yes, and updates publish instantaneously, with zero measurable replication lag, unlike Azure-hosted mirroring sources  
+C. Yes, but only through metadata mirroring, since on-premises sources are treated as catalog-only for mirroring purposes  
+D. Yes — SQL Server 2025+ is on the current database mirroring source list; changes can publish as fast as every ~15 seconds, which is "near-real-time," not instantaneous  
+
+> [!success]- Answer
+> **D. Yes — SQL Server 2025+ is on the current database mirroring source list; changes can publish as fast as every ~15 seconds, which is "near-real-time," not instantaneous**
+>
+> SQL Server (2025 and later) is one of the documented database mirroring sources (alongside Azure SQL Database, Azure SQL Managed Instance, Cosmos DB, PostgreSQL, MySQL-preview, Snowflake, Oracle, SAP, BigQuery-preview, and Fabric SQL database), and this includes on-premises SQL Server 2025+ instances reachable via gateway — an older, pre-2025 SQL Server instance isn't on the supported source list. Its replication mechanism is log-based, publishing changes as fast as roughly every 15 seconds — genuinely near-real-time, but not truly instantaneous.
+>
+> Option A wrongly restricts mirroring to Fabric-native and Azure-hosted sources only, excluding a source type that's actually supported. Option B overstates the latency as zero/instantaneous, contradicting the documented ~15-second cadence that applies uniformly across supported sources. Option C misapplies metadata mirroring, which is reserved for catalog-based systems like Unity Catalog and Dremio — a SQL Server database gets full database mirroring, not a catalog-only sync.
+
+---
+
+### Question 49: Getting Raw Spark Logs for a Failed Notebook Run *(Hard)*
+
+Meridian's data engineer wants raw, low-level Spark log output for a specific failed pipeline-triggered notebook run, accessible programmatically rather than through the Monitor hub portal UI. Which named log types should they look for at the Spark monitoring API layer?
+
+A. Livy Log, Driver Log, and Executor Log — the API layer beneath the portal's own Monitor hub and application-detail UI  
+B. `ItemJobEventLogs` — the single unified table holding raw Spark log output for every notebook run  
+C. Command logs and Query logs — two Spark-specific table families in workspace monitoring's KQL Eventhouse  
+D. Data insights and Runtime logs — the two monitoring surfaces for any Spark-triggered workload in Fabric  
+
+> [!success]- Answer
+> **A. Livy Log, Driver Log, and Executor Log — the API layer beneath the portal's own Monitor hub and application-detail UI**
+>
+> Spark monitoring in Fabric is layered: Monitor hub and the item's Recent runs give status, the application detail page's tabs give a portal-based deep dive, and beneath all of that sits a programmatic API layer exposing Livy Log, Driver Log, and Executor Log — plus Spark's own open-source metrics APIs — for exactly the kind of raw, API-level access the data engineer wants.
+>
+> Option B misapplies `ItemJobEventLogs`, which tracks job *events* (start/success/failure metadata) for alerting purposes, not raw Spark log content. Option C misapplies Command logs and Query logs, which are two of Eventhouse's five workspace-monitoring table families, unrelated to Spark application logs. Option D misapplies Data insights and Runtime logs, which are Eventstream's monitoring tabs, not Spark's.
+
+---
+
+### Question 50: Execute Permission Without Read or Write *(Hard)*
+
+A cardiology analyst is granted Execute permission on a notebook that reprocesses cardiology vitals data, so they can re-run it themselves — but no separate Read or Write permission was granted alongside it. Can they successfully run the notebook?
+
+A. Yes — Execute is a fully independent permission that only requires the notebook's underlying data sources to be accessible, regardless of Read/Write on the notebook item itself  
+B. No — Reshare, Execute, ViewOutput, and ViewLogs can't be granted standalone; they layer on top of Read or Write, so Execute alone isn't a valid, functional grant  
+C. Yes, but only interactively; a pipeline-triggered run of the same notebook would fail without Read or Write also granted  
+D. No, but only because the notebook processes clinical data specifically — Execute alone would be sufficient for a non-clinical notebook  
+
+> [!success]- Answer
+> **B. No — Reshare, Execute, ViewOutput, and ViewLogs can't be granted standalone; they layer on top of Read or Write, so Execute alone isn't a valid, functional grant**
+>
+> Reshare, Execute, ViewOutput, and ViewLogs are all documented as permissions that layer on top of Read or Write — none of the four can be granted standalone and actually function. Granting Execute alone on the notebook, with no accompanying Read or Write, doesn't give the cardiology analyst a working way to run it; Read or Write has to be granted alongside it.
+>
+> Option A wrongly treats Execute as fully independent of Read/Write on the item itself. Option C invents a trigger-type-based exception (interactive works, pipeline-triggered doesn't) that isn't how this permission-layering rule works. Option D invents a data-sensitivity-based exception; the Execute-must-layer-on-Read-or-Write rule applies uniformly, regardless of what the notebook processes.
+
+---
+
+**[← Back to Mock Exam 2](./mock-exam-2.md)**
