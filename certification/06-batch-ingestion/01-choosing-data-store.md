@@ -42,7 +42,7 @@ Every Fabric data store — lakehouse, warehouse, eventhouse, and SQL database �
 | **Latency profile** | Batch/interactive, minutes-scale for typical Spark jobs | Interactive OLAP queries, batch loads | ==Near real-time ingestion== — changes can appear in seconds | Low-latency OLTP transactions (milliseconds), typical of an app backend |
 | **Streaming ingestion fit** | Via Spark Structured Streaming (`readStream`/`writeStream`) | Not built for streaming ingestion — batch-oriented `COPY INTO`/pipeline loads | ==Purpose-built== — Eventstream, Kafka, SDKs land directly with update policies | Not a streaming ingestion target — OLTP writes are transactional, not stream-shaped |
 | **Consumer types** | Data engineers, data scientists (notebooks); T-SQL consumers via read-only endpoint | Data warehouse developers, BI analysts, SQL Server-tooling users | App developers, data scientists, KQL analysts; Power BI DirectQuery over KQL | App developers, database developers/admins; SQL Server-tooling users |
-| **Medallion role** | Classic bronze/silver/gold home — most engineering pipelines live here | Typically the curated gold layer, or an end-to-end SQL-only medallion for SQL-skilled teams | Specialized bronze/silver for high-volume streaming telemetry, often feeding a downstream gold via materialized views | Usually **outside** the medallion — an operational source feeding it, or a reverse-ETL sink receiving curated gold data |
+| **Medallion role** | Classic bronze/silver/gold home — most engineering pipelines live here | Typically the curated gold layer, or an end-to-end SQL-only medallion for SQL-skilled teams | Specialized bronze/silver for high-volume streaming telemetry, often feeding a downstream gold via materialized views | Usually **outside** the medallion — an operational source feeding it, or a reverse-ETL sink (serving cleaned data back to apps) receiving curated gold data |
 
 > [!note] Mental model — choosing a data store
 > Think of OneLake as **one shared floor**, and each data store as a **room built for a different kind of work** happening on that floor. The lakehouse is the workshop — Spark tools, raw materials, engineers building things by hand. The warehouse is the boardroom — polished, SQL-only, built for people who need clean answers fast. The eventhouse is the security control room — screens full of live feeds, built to react to things *as they happen*. Fabric SQL database is the front desk — where the business actually transacts, with a camera (mirroring) quietly streaming a copy of everything to the shared floor for everyone else to analyze. All four rooms open onto the same floor; nothing needs to be carried between them.
@@ -60,6 +60,22 @@ D. Fabric SQL database, because it supports T-SQL
 > **B. Warehouse, because it provides full T-SQL DML and matches the team's existing skillset**
 >
 > The scenario names two decisive signals: a T-SQL-skilled team and a requirement to run `INSERT`/`UPDATE`/`MERGE` directly against the data store. A lakehouse's SQL analytics endpoint is read-only, so a team needing DML would have to switch to Spark — friction the warehouse avoids entirely. Eventhouse's T-SQL endpoint is also read-only. Fabric SQL database supports full DML too, but it's built for OLTP application workloads, not star-schema BI staging — the warehouse is purpose-built for exactly this scenario.
+
+---
+
+## The Domain 2 Decision Spine: Store → Transform → Streaming
+
+The data store decision doesn't stand alone — it usually **determines** which transform tool and which streaming engine a workload ends up using, because each store exposes a different native language surface and a different (or absent) streaming role. Exam questions in Domain 2 frequently cross these three axes in a single scenario, expecting you to trace a store choice through to its transform tool ([07-Batch Transformation](../07-batch-transformation/01-choosing-transform-tool.md)) and its streaming fit ([08-Streaming Data](../08-streaming-data/01-choosing-streaming-engine.md)) rather than treating the three decisions as independent.
+
+| Data lands in… | Native transform surface | Streaming role | DML / endpoint |
+| :--- | :--- | :--- | :--- |
+| Lakehouse | PySpark / Spark SQL (notebook) | Spark Structured Streaming sink | SQL analytics endpoint ==read-only== |
+| Warehouse | T-SQL | not a streaming target | full T-SQL DML |
+| Eventhouse | KQL (update policy / materialized view, native tables only) | Eventstream destination + KQL query engine | T-SQL endpoint ==read-only== |
+| Fabric SQL DB | T-SQL (OLTP) | not a stream target; auto-mirrors to OneLake | full DML on primary surface |
+
+> [!note] Mental model — pick the store, the rest follows
+> Once you've named the data store, the transform tool and streaming engine are rarely a free choice — they're a consequence. Land data in a lakehouse and you're reaching for PySpark; land it in a warehouse and you're writing T-SQL; land it in an eventhouse and both transformation and streaming happen in KQL. Picking the store first, then reading its row across this table, resolves most "which tool should I use" questions that look like they need a second decision matrix.
 
 ---
 
@@ -128,6 +144,20 @@ An application team is building a new order-management system that needs:
 > [!warning] Common Mistake
 > Dismissing Fabric SQL database as "not a real Fabric data store" because it's an OLTP engine, not an analytics engine. The exam blueprint explicitly includes it in the data-store decision family — its distinguishing trait for DP-700 purposes is that it **auto-mirrors into OneLake**, making it a legitimate zero-ETL source for the rest of the medallion architecture, even though the engineering team never queries it directly for analytics.
 
+**Practice Question 3** *(Hard)*
+
+An IoT platform ingests 1,000,000 sensor readings per minute. The analytics team is SQL-only — no Spark, no KQL — and needs dashboards refreshed within about 5 seconds of an event arriving, using as little custom code as possible. Which Fabric data store fits, and how do the SQL-only analysts query it?
+
+A. Warehouse — the SQL-only team can query and load data with full T-SQL DML support  
+B. Eventhouse — the team queries it via the T-SQL analytics endpoint for near-real-time dashboards  
+C. Lakehouse — Spark Structured Streaming lands events, and analysts run T-SQL against the endpoint  
+D. Fabric SQL database — its OLTP engine ingests high-throughput writes with full T-SQL DML  
+
+> [!success]- Answer
+> **B. Eventhouse — the team queries it via the T-SQL analytics endpoint for near-real-time dashboards**
+>
+> At roughly 16,700 events/second with a ~5-second freshness target, eventhouse is the only store built for this ingestion-and-query profile — KQL-native ingestion delivers sub-second to seconds latency, matching the SLA with minimal engineering. The twist: the analysts are SQL-only, not KQL-fluent, but that doesn't rule out eventhouse — every eventhouse auto-provisions a SQL analytics endpoint, so the team queries it with familiar T-SQL, with the caveat that the endpoint is **read-only**. Warehouse (A) is SQL-native but isn't built for continuous high-volume streaming ingestion at this rate. Lakehouse with Spark Structured Streaming (C) could land the data, but its batch-oriented query path doesn't reliably hit a 5-second dashboard SLA, and it adds Spark code the "minimal code" requirement rules out. Fabric SQL database (D) is an OLTP engine not designed to ingest a continuous million-events-per-minute stream — its distinguishing trait is mirroring, not real-time streaming ingestion.
+
 ---
 
 ## Distractor Patterns to Recognize
@@ -145,7 +175,7 @@ An application team is building a new order-management system that needs:
 - A BI team consuming a curated gold layer purely with `SELECT` queries and Power BI — lakehouse's read-only endpoint is sufficient and avoids warehouse licensing/skillset overhead
 - A finance team needing multi-table `MERGE` transactions across a staging and target table as part of a nightly load — warehouse's full T-SQL DML
 - A security operations team analyzing log and telemetry streams with sub-second freshness requirements — eventhouse
-- An application team building a translytical app that needs both OLTP writes and near-real-time analytics on the same data without a pipeline — Fabric SQL database
+- An application team building a translytical (transactional + analytical combined) app that needs both OLTP writes and near-real-time analytics on the same data without a pipeline — Fabric SQL database
 
 ## Common Issues & Errors
 
@@ -183,6 +213,8 @@ An application team is building a new order-management system that needs:
 
 - [02-OneLake Shortcuts](./02-onelake-shortcuts.md)
 - [03-Mirroring](./03-mirroring.md)
+- [07-Batch Transformation: Choosing a Transform Tool](../07-batch-transformation/01-choosing-transform-tool.md)
+- [08-Streaming Data: Choosing a Streaming Engine](../08-streaming-data/01-choosing-streaming-engine.md)
 
 ## Official Documentation
 

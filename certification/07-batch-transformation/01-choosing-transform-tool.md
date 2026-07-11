@@ -238,6 +238,7 @@ The exam likes to pair two tools in the same question and ask which one applies 
 - [02-PySpark Transformations](./02-pyspark-transformations.md)
 - [03-T-SQL Transformations](./03-tsql-transformations.md)
 - [04-KQL Transformations](./04-kql-transformations.md)
+- [06-Batch Ingestion: Choosing a Data Store](../06-batch-ingestion/01-choosing-data-store.md)
 
 ## Official Documentation
 

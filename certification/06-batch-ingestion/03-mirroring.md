@@ -164,13 +164,16 @@ INNER JOIN MirroredCrmDb.dbo.Affiliation AS Affiliation
 
 ## Mirroring vs. Shortcuts vs. Pipeline Copy
 
-| Factor | Mirroring | Shortcuts | Pipeline Copy (activity/job) |
-| :--- | :--- | :--- | :--- |
-| **Data movement** | Continuous replication — data *is* copied, automatically and near-real-time | None — a live pointer to data that stays at its source | One-time or scheduled batch movement, on-demand |
-| **Setup effort** | Low — configure a connection, choose tables, done | Low — point-and-click target selection | Higher — design source/sink, mapping, schedule, error handling |
-| **Freshness** | Near-real-time (as fast as ~15 seconds for database mirroring) | Always current — it's the live source, not a copy | As fresh as the last scheduled/triggered run |
-| **Best fit** | An entire operational database needs to be continuously available for analytics | Data is already in a queryable format and doesn't need continuous sync guarantees beyond live access | Data needs transformation, format conversion, or movement between systems that mirroring/shortcuts don't reach |
-| **Data ownership/duplication** | Creates a governed duplicate in OneLake (subject to free-tier storage) | No duplication at all | Creates a duplicate, fully owned and often reshaped by the target |
+| Factor | Mirroring | Shortcuts | Copy Activity (pipeline) | ==Copy job (CDC, Preview)== |
+| :--- | :--- | :--- | :--- | :--- |
+| **Data movement** | Continuous replication — data *is* copied, automatically and near-real-time | None — a live pointer to data that stays at its source | One-time or scheduled batch movement, on-demand | Scheduled/triggered incremental copy of selected tables, CDC-based, including deletes |
+| **Setup effort** | Low — configure a connection, choose tables, done | Low — point-and-click target selection | Higher — design source/sink, mapping, schedule, error handling | Low-to-medium — wizard-driven, no hand-built watermark logic |
+| **Freshness** | Near-real-time (as fast as ~15 seconds for database mirroring) | Always current — it's the live source, not a copy | As fresh as the last scheduled/triggered run | As fresh as the last scheduled/triggered run, CDC-driven |
+| **Best fit** | An entire operational database needs to be continuously available for analytics | Data is already in a queryable format and doesn't need continuous sync guarantees beyond live access | Data needs transformation, format conversion, or full pipeline orchestration | Selected tables need incremental sync (including deletes) to a chosen destination, without a whole-database OneLake replica |
+| **Data ownership/duplication** | Creates a governed duplicate in OneLake (subject to free-tier storage) | No duplication at all | Creates a duplicate, fully owned and often reshaped by the target | Creates a duplicate at the chosen destination — not necessarily OneLake, and not a whole-database replica |
+
+> [!note] Mirroring vs. Copy job CDC
+> Mirroring is a **whole-database**, zero-ETL, near-real-time replica into OneLake. Copy job's CDC mode instead copies **selected tables** — deletes included — to a chosen destination on a schedule or trigger; it's an ETL job, not a whole-database OneLake replica. See [04-Pipeline Ingestion](./04-pipeline-ingestion.md) for Copy job's full CDC/incremental behavior.
 
 > [!note] Mental model — the decision funnel
 > Ask, in order: *(1) Is this an entire supported operational database that needs continuous sync?* → mirroring. *(2) Is the data already sitting somewhere query-compatible, with no transformation needed?* → shortcut. *(3) Does it need transformation, reshaping, or a source/target combination mirroring and shortcuts don't cover?* → pipeline copy (Copy activity or Copy job).

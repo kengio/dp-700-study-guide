@@ -108,6 +108,9 @@ There's one documented exception worth knowing cold for the exam: when users acc
 
 Shortcut caching reduces egress costs on cross-cloud reads by storing accessed files locally to the Fabric workspace, so repeat reads are served from cache instead of round-tripping to the remote provider.
 
+> [!note]
+> Shortcut caching ≠ query acceleration — that is an Eventhouse feature for accelerating KQL over shortcuts, see [04-KQL Real-Time](../08-streaming-data/04-kql-realtime.md).
+
 | Detail | Value |
 | :--- | :--- |
 | **Supported sources** | Google Cloud Storage (GCS), Amazon S3, S3-compatible, on-premises data gateway shortcuts (including on-prem S3 via Microsoft Entra service principal auth) |

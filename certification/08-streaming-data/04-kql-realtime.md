@@ -99,6 +99,9 @@ D. Query acceleration isn't applicable to dimension data, only to fact tables
 
 Query acceleration is powerful but not unconditional — several limitations shape when it's the right choice:
 
+> [!note]
+> Query acceleration ≠ shortcut caching — shortcut caching is a OneLake-wide feature for GCS/S3/S3-compatible/on-prem gateway shortcuts, see [06-Batch Ingestion: OneLake Shortcuts](../06-batch-ingestion/02-onelake-shortcuts.md).
+
 | Limitation | Detail |
 | :--- | :--- |
 | Column count | The accelerated external table can't exceed 900 columns |

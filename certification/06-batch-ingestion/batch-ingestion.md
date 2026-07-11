@@ -76,6 +76,7 @@ flowchart TD
 - **Shortcuts avoid a copy; mirroring avoids a pipeline** — both exist to eliminate ETL for a specific situation: shortcuts when data already lives somewhere queryable, mirroring when a source database needs to be continuously and automatically kept in sync with OneLake
 - **Mirroring storage is free up to a capacity-based limit** — one free terabyte of OneLake storage per purchased capacity unit (CU), covering the vast majority of mirrored workloads without incurring OneLake storage charges
 - **Copy job adds CDC-based incremental replication and SCD Type 2 on top of what Copy activity offers** — Copy activity is the general-purpose, pipeline-embedded data mover; Copy job is a simplified, standalone item purpose-built for bulk, incremental, and CDC-driven data movement without hand-building watermark logic
+- **The store choice cascades into transform tool and streaming engine** — see [The Domain 2 Decision Spine](01-choosing-data-store.md#the-domain-2-decision-spine-store-transform-streaming) for how lakehouse/warehouse/eventhouse/Fabric SQL database each determine their native transform surface and streaming role
 
 ## Related Resources
 
