@@ -13,7 +13,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 
 > [!abstract] TL;DR
 >
-> - 66 terms spanning all three exam domains — workspace/lifecycle/security/orchestration, loading/ingestion/transformation/streaming, and monitoring/errors/optimization
+> - 65 terms spanning all three exam domains — workspace/lifecycle/security/orchestration, loading/ingestion/transformation/streaming, and monitoring/errors/optimization
 > - Use as a lookup during study when a topic file references a term without re-explaining it
 > - Terms marked bold are the ones most frequently tested on the exam
 
@@ -22,7 +22,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## A
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **Activator** | Fabric's event-driven alerting item — evaluates events grouped into objects against stateless or stateful rule conditions, and fires actions (email, Teams, Power Automate, run item) when a condition is met. |
 | **Adaptive Query Execution (AQE)** | Spark runtime optimization on by default in every Fabric runtime — coalesces post-shuffle partitions, converts sort-merge joins to broadcast joins, and splits skewed joins mid-query. |
 | **Apache Airflow job** | Code-first Fabric orchestration item for Python DAGs, separate from pipelines and Dataflow Gen2; the subject of the July 21, 2026 blueprint's Domain 1 workspace-settings wording change. |
@@ -34,7 +34,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## B
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **Bin compaction** | The file-consolidation phase of Delta `OPTIMIZE` — run before Z-Order and V-Order when combined — that merges small files toward the adaptive target size. |
 | **Bursting** | Fabric capacity's ability to temporarily exceed purchased Spark VCores (up to 3×) when the capacity is otherwise idle. |
 
@@ -43,7 +43,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## C
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **Capacity Unit (CU)** | Fabric's compute-billing unit — 1 CU = 2 Spark VCores before any burst multiplier — and the basis for Capacity Metrics app throttling and CU-consumption reporting. |
 | **CDC (Change Data Capture)** | An incremental-sync mechanism, including deletes, used by Copy job's CDC mode — distinct from a one-time Copy activity batch load. |
 | **Copy job** | A preview pipeline item for scheduled/triggered incremental sync with CDC support, distinguished from the always-batch Copy activity. |
@@ -53,7 +53,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## D
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **DAG (Directed Acyclic Graph)** | The Python-authored workflow unit in an Apache Airflow job, stored as a `.py` file under the job's `dags` folder. |
 | **Data Integration Unit (DIU)** | The compute-power measure (CPU/memory/network) for a pipeline Copy activity, ranging 4–256 and defaulting to **Auto**. |
 | **Deletion Vector** | A lightweight row-level tombstone that lets Delta Lake mark rows deleted or updated without rewriting the whole Parquet file; on by default from Spark Runtime 2.0 (Delta 4.1). |
@@ -69,7 +69,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## E
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **Endorsement** | Fabric's item-trust signal with three tiers — Promoted (any write-permission holder), Certified, and Master data (the latter two require tenant-admin authorization). |
 | **Eventhouse** | Fabric's KQL-native real-time analytics store, purpose-built for streaming/time-series data with sub-second query latency. |
 | **Eventstream** | A no-code ingest/transform/route hub with 7 built-in operators that fans events out to one or more destinations — not itself a query engine. |
@@ -81,7 +81,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## F
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **Framing** | The metadata-only refresh operation for a Direct Lake semantic model — updates which Parquet file versions are visible in seconds, versus a full Import-refresh data copy. |
 
 ---
@@ -89,7 +89,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## G
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **Governance** | The umbrella term for Fabric's sensitivity labels, endorsement, and audit-log capabilities that control data classification, trust, and accountability — distinct from raw access control. |
 
 ---
@@ -97,7 +97,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## H
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **High concurrency** | A Spark session-sharing mode (default 5 notebooks/session, tunable to 50) that cuts session-start latency by up to 36× versus one session per notebook. |
 | **Hot window (Hot property)** | The Eventhouse query-acceleration setting controlling how many days of shortcut data stay cached at native-table speed. |
 
@@ -106,7 +106,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## I
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **Idempotency** | A load-design property where re-running the same job twice produces the same end state — the property most watermark/incremental-load exam traps test for. |
 | **Item permission** | A Fabric access grant (Read/ReadAll/Write/Reshare/Execute/...) layered independently on top of workspace role — removing one without the other leaves access intact. |
 
@@ -115,7 +115,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## K
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **KQL (Kusto Query Language)** | The native query language of Eventhouse/Azure Data Explorer, used for real-time analytics, update policies, and materialized views. |
 
 ---
@@ -123,7 +123,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## L
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **Lakehouse** | A Fabric data store combining file-based (Delta Lake) storage with a read-only SQL analytics endpoint — the default Spark read/write target. |
 
 ---
@@ -131,7 +131,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## M
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **Materialized View** | An Eventhouse object that continuously maintains an aggregated or deduplicated result over a source table, billed as ongoing background CU rather than per-ingested-batch. |
 | **Medallion architecture** | The bronze (raw) → silver (cleansed/deduplicated) → gold (aggregated) layering pattern applied to both batch and streaming loads in Fabric. |
 | **MERGE** | The T-SQL/Delta statement performing insert-or-update (upsert) in one pass; in Spark Structured Streaming it must run inside `foreachBatch`, since it isn't a native streaming sink write. |
@@ -142,7 +142,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## N
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **Native Execution Engine (NEE)** | A preview, vectorized C++ Spark execution path that accelerates compute-heavy Parquet/Delta joins/aggregations with automatic, silent JVM fallback — never active during Structured Streaming. |
 
 ---
@@ -150,7 +150,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## O
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **OneLake** | Fabric's single, tenant-wide data lake underlying every workspace and item — the common storage layer shortcuts, mirroring, and Direct Lake all read from. |
 | **OneLake security** | A deny-by-default, item-level row/column security layer enforced consistently for Spark and user-identity-mode SQL, but bypassed entirely by delegated-mode SQL. |
 | **OLS (Object-Level Security)** | A Warehouse/SQL-endpoint `GRANT`/`REVOKE`/`DENY` control that blocks access to whole tables or schemas. |
@@ -161,7 +161,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## P
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **Passthrough (shortcut)** | The default OneLake-to-OneLake shortcut authentication mode, where the calling user's own identity is evaluated at the target. |
 | **Power Query** | The low-code mashup engine behind Dataflow Gen2, whose failures surface as `DataFormat.Error`, `DataSource.Error`, or `Expression.Error`. |
 
@@ -170,7 +170,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## Q
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **Query acceleration** | An Eventhouse feature that caches and indexes shortcut data to near-native query speed — it never unlocks materialized views or update policies on that shortcut. |
 | **Query folding** | Power Query's pushdown of transformation steps to the source system; losing it degrades a Dataflow Gen2 refresh's performance without producing an error. |
 | **Queued ingestion** | Eventhouse's default, blob-staged ingestion path — higher throughput than streaming ingestion, at seconds-to-minutes latency instead of sub-second. |
@@ -180,7 +180,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## R
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **Rerun from failed activity** | A pipeline recovery action that re-executes only the failed activity and everything downstream of it, skipping already-succeeded work. |
 | **Row-Level Security (RLS)** | A filter-predicate mechanism that silently restricts which rows a principal sees; enforced identically for every principal in Fabric Warehouse T-SQL (no `CONTROL` bypass), unlike DDM or OneLake security. |
 
@@ -189,7 +189,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## S
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **SCD (Slowly Changing Dimension)** | A dimensional-modeling pattern for tracking attribute change — Type 1 overwrites in place (no history), Type 2 preserves history via new versioned rows. |
 | **Sensitivity label** | A Microsoft Purview classification that flows Fabric → Fabric and Fabric → Power BI, but never Power BI → Fabric. |
 | **Shortcut** | A OneLake virtual pointer to data in another location (internal or external) with no data movement — always reflects the source's current state. |
@@ -203,7 +203,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## T
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **T-SQL** | The full-DML query language for Fabric Warehouse and Fabric SQL database; the Lakehouse/Eventhouse/mirrored-DB SQL analytics endpoint only ever exposes a read-only subset. |
 | **Transitive shortcut** | A shortcut whose target is itself another shortcut; Fabric caps direct shortcut-to-shortcut chaining at 5 hops. |
 
@@ -212,7 +212,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## U
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **Update policy** | An Eventhouse mechanism that automatically runs a query against newly ingested data and writes the result to a derived table — transactional mode rolls back the source ingestion on failure, non-transactional mode does not. |
 
 ---
@@ -220,7 +220,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## V
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **VACUUM** | The Delta Lake command that permanently removes files no longer referenced by the table's history, subject to a default 7-day retention window. |
 | **V-Order** | A Fabric-specific Parquet write optimization (~15% slower writes) that improves compression and delivers up to 40–60% faster cold-cache Direct Lake reads; off by default in new workspaces. |
 
@@ -229,7 +229,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## W
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **Warehouse** | Fabric's full-DML, T-SQL-native data store for enterprise DW/BI workloads, distinguished from Lakehouse by its read-write SQL surface. |
 | **Watermark** | A tracked high-water mark (a column value or timestamp) used to identify only new/changed rows for an incremental load, or to bound streaming state for windowed aggregation and deduplication. |
 | **Window function** | A T-SQL/PySpark/KQL construct that computes a value across a set of related rows without collapsing them — foundational to both dimensional ranking and streaming tumbling/hopping/sliding aggregation. |
@@ -240,7 +240,7 @@ A reference of key Microsoft Fabric terms and concepts for the DP-700: Implement
 ## Z
 
 | Term | Definition |
-|------|-----------|
+| :--- | :--- |
 | **Z-Order** | A Delta `OPTIMIZE` co-location technique for higher-cardinality or multi-column selective filters, applied after bin compaction and before V-Order in a combined optimize. |
 
 ---

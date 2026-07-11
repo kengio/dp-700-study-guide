@@ -100,7 +100,7 @@ Partition on **low-cardinality** columns (dozens–thousands of values); use **Z
 | :--- | :--- | :--- |
 | ==NEE== (native execution engine) | Preview, per-env/session | Vectorized C++, auto silent JVM fallback; helps compute-heavy Parquet/Delta joins/aggs, not I/O-bound |
 | ==AQE== | ==On by default==, all runtimes | Coalesces post-shuffle partitions, sort-merge→broadcast conversion, skew-join splitting |
-| ==Autotune== | ==Off by default== (`spark.ms.autotune.enabled=false`) | Tunes `shuffle.partitions` (200), `autoBroadcastJoinThreshold` (10 MB), `files.maxPartitionBytes` (128 MB); needs ~20–25 iterations; incompatible with high concurrency/private endpoints/Runtime >1.2 |
+| ==Autotune== | ==Off by default== (`spark.ms.autotune.enabled=false`) | ==Preview==, available in all production regions; tunes `shuffle.partitions` (200), `autoBroadcastJoinThreshold` (10 MB), `files.maxPartitionBytes` (128 MB); needs ~20–25 iterations; incompatible with high concurrency/private endpoints/Runtime >1.2 |
 | High concurrency | 5 notebooks/session default | Tunable to 50 via `spark.highConcurrency.max`; up to ==36x== faster session start; only initiator billed |
 | Intelligent cache | ==On by default==, 50% of node cache | Up to 60% faster repeat reads of OneLake/ADLS shortcut files; self-managing |
 

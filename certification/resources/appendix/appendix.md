@@ -15,7 +15,7 @@ Reference materials for DP-700 exam preparation and troubleshooting — a glossa
 ## Available Resources
 
 | Resource | Description |
-|----------|-------------|
+| :--- | :--- |
 | [Glossary](./glossary.md) | ~65 Fabric/DP-700 terms A-Z, sourced from the guide's own topic files |
 | [Comparison Tables](./comparison-tables.md) | The guide's full-size decision-matrix and comparison tables, collected in one place |
 | [Error Messages](./error-messages.md) | Consolidated error reference from section 10 — one table per surface |
