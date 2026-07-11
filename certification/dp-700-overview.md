@@ -85,7 +85,7 @@ pie title Exam Domain Distribution
 
 ### Practice & Resources
 
-> The resources below are planned deliverables — each lands with its own build task. Entries become links once the corresponding file exists.
+> Most resources below are planned deliverables — each lands with its own build task. An entry becomes a link once the corresponding file exists; the rest stay plain text until then.
 
 | Resource | Description |
 | :--- | :--- |
@@ -95,14 +95,14 @@ pie title Exam Domain Distribution
 | **Exam Tips** | Strategies, common-traps table, case-study playbook (`resources/exam-tips.md`) |
 | **Official Links** | Microsoft documentation and registration (`resources/official-links.md`) |
 | **Code Examples** | Standalone PySpark / T-SQL / KQL example files (`resources/code-examples/{pyspark,tsql,kql}/`) |
-| **Cheat Sheets** | Quick-reference guides for exam topics, each with Gotchas & Traps + Before the Exam checklist (`resources/cheat-sheets/`) |
+| [Cheat Sheets](resources/cheat-sheets/cheat-sheets.md) | Quick-reference guides for exam topics, each with Gotchas & Traps + Before the Exam checklist |
 | **Anki Deck** | Spaced-repetition cards generated from the cheat sheets (`resources/anki/`) |
 | **Adaptive Practice Quiz** | Browser-based JSON-driven quiz ported from the practice quiz app (`practice/`) |
 | **Hands-on Labs** | Runnable labs across lakehouse, warehouse, orchestration, and Real-Time Intelligence scenarios (`resources/labs/`) |
 | **Final Review** | 20-minute exam-morning scan: top facts and last-minute traps for all three domains (`resources/final-review.md`) |
 | **Renewal Guide** | DP-700 annual-renewal workflow (`resources/renewal-guide.md`) |
 | **Companion Exams** | Cross-references to related Microsoft certifications (`resources/companion-exams.md`) |
-| **Appendix** | Glossary, comparison tables, error messages (`resources/appendix/`) |
+| [Appendix](resources/appendix/appendix.md) | Glossary, comparison tables, error messages |
 
 ## Study Progress Tracker
 
