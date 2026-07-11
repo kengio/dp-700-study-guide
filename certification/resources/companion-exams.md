@@ -16,7 +16,7 @@ tags:
 >
 > - **Microsoft Certified: Fabric Analytics Engineer Associate (DP-600)** — closest sibling exam; shares security/governance, lifecycle management, and star-schema data prep with DP-700, then diverges hard into DAX and semantic-model design
 > - **Microsoft Certified: Power BI Data Analyst Associate (PL-300)** — lighter overlap; shares workspace security and Import/DirectQuery/Direct Lake framing, but is otherwise a Power BI Desktop authoring exam, not a data-engineering one
-> - **Microsoft Certified: Developing AI-Enabled Database Solutions Associate (DP-800)** — meaningful overlap on security (RLS/DDM), CI/CD, and T-SQL fundamentals; DP-800 adds deep T-SQL (temporal/ledger/graph tables, JSON) and AI/vector content DP-700 never touches
+> - **Microsoft Certified: SQL AI Developer Associate (DP-800)** — meaningful overlap on security (RLS/DDM), CI/CD, and T-SQL fundamentals; DP-800 adds deep T-SQL (temporal/ledger/graph tables, JSON) and AI/vector content DP-700 never touches
 > - Every retirement/active status below was WebFetch-verified against the live Microsoft Learn pages during this page's authoring — including a correction of a stale claim inherited from an older reference guide (see the DP-600 warning)
 
 > [!tip] How to use this guide
@@ -33,7 +33,7 @@ tags:
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **[DP-600](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/dp-600)** | Fabric Analytics Engineer Associate | Jul 21, 2026 | ~100 min · scaled 700/1000 | Active | **Medium-high** (~45% of skills overlap, concentrated in security, lifecycle, and data prep) |
 | **[PL-300](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/pl-300)** | Power BI Data Analyst Associate | Apr 20, 2026 | ~100 min · scaled 700/1000 | Active | **Low** (~20% overlap, mostly workspace security and storage-mode framing) |
-| **[DP-800](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/dp-800)** | Developing AI-Enabled Database Solutions Associate | current blueprint | ~50 q · 120 min · scaled 700/1000 | Active | **Medium** (~35% overlap, concentrated in security and CI/CD) |
+| **[DP-800](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/dp-800)** | SQL AI Developer Associate | current blueprint | ~50 q · 120 min · scaled 700/1000 | Active | **Medium** (~35% overlap, concentrated in security and CI/CD) |
 
 > [!warning] Correcting a stale claim — DP-600 is NOT retired
 > An earlier community reference (the [companion guide for DP-800](https://github.com/kengio/dp-800-study-guide)) describes DP-600 as retired. **That is out of date.** WebFetch-verified against the live Microsoft Learn certification page during this page's authoring: DP-600 is **active**, its blueprint refreshed on the **same July 21, 2026 date as DP-700**, and it carries a standard 12-month renewal cycle. If you've seen "DP-600 retired" anywhere, treat it as stale and check [the live cert page](https://learn.microsoft.com/en-us/credentials/certifications/fabric-analytics-engineer-associate/) before making a study-plan decision.

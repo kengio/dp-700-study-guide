@@ -11,7 +11,7 @@ tags:
 
 > [!abstract]
 >
-> - Realistic time budget for 100 minutes, ~50–60 questions plus a 5-question case study
+> - Realistic time budget for 100 minutes — question count unpublished by Microsoft; this guide's mocks use 50 as a realistic proxy (45 standalone + a 5-question case study)
 > - Strategies by question type: scenario multi-constraint, elimination tactics for this guide's documented distractor patterns, review-flag strategy
 > - Case-study playbook: read the whole scenario first, map facts to sub-questions
 > - Exam-day logistics verified against current Microsoft policy — proctored, Pearson VUE, online or test center
@@ -32,7 +32,7 @@ tags:
 | **Passing score** | 700 / 1000 (scaled, not a raw percentage) |
 | **Duration** | 100 minutes (associate role-based exam without labs) |
 | **Seat duration** | ~120 minutes (includes agreement, instructions, and comment time) |
-| **Question count** | Most Microsoft role-based exams run 40–60 questions; DP-700's guide targets a ~45 standalone + 5-question case study shape, matching this repo's mock exams |
+| **Question count** | Question count unpublished by Microsoft — this guide's mocks use 50 as a realistic proxy (45 standalone + 5-question case study), matching this repo's mock exams |
 | **Question types** | Multiple choice, multi-select, drag-and-drop, hot area, build list, active screen, case studies |
 | **Proctoring** | This exam is proctored |
 | **Languages** | English, Japanese, Chinese (Simplified), German, French, Spanish, Portuguese (Brazil); +30 minutes if taken in a non-English language you're less fluent in |

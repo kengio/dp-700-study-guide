@@ -89,13 +89,13 @@ pie title Exam Domain Distribution
 | :--- | :--- |
 | [Practice Questions](resources/practice-questions/practice-questions.md) | Domain-specific practice questions with explanations (`resources/practice-questions/`) |
 | [Mock Exam 1](resources/mock-exam/mock-exam-1.md) / [2](resources/mock-exam-2/mock-exam-2.md) / [3](resources/mock-exam-3/mock-exam-3.md) | Three 50-question exams (45 standalone + 5-question case study each) |
-| [Mock Exam Debriefs](resources/mock-exam/mock-exam-1-debrief.md) | Per-question map to topic files + study plan by miss count, one per mock exam |
+| [Mock Exam Debriefs](resources/mock-exam/mock-exam-1-debrief.md) ([2](resources/mock-exam-2/mock-exam-2-debrief.md) / [3](resources/mock-exam-3/mock-exam-3-debrief.md)) | Per-question map to topic files + study plan by miss count, one per mock exam |
 | [Exam Tips](resources/exam-tips.md) | Time management, question-type strategies, elimination tactics, case-study playbook, exam-day logistics |
 | [Official Links](resources/official-links.md) | Microsoft documentation and registration, verified live |
 | [Code Examples](resources/code-examples/code-examples.md) | Standalone PySpark / T-SQL / KQL example files (`resources/code-examples/{pyspark,tsql,kql}/`) |
 | [Cheat Sheets](resources/cheat-sheets/cheat-sheets.md) | Quick-reference guides for exam topics, each with Gotchas & Traps + Before the Exam checklist |
 | [Anki Deck](resources/anki/anki-deck.md) | 146 spaced-repetition cards generated from the cheat sheets (`resources/anki/`) |
-| [Adaptive Practice Quiz](https://kengio.github.io/dp-700-study-guide/) | Browser-based JSON-driven quiz ported from the practice quiz app (`practice/`) |
+| Adaptive Practice Quiz | Browser-based JSON-driven quiz ported from the practice quiz app (`practice/`) — ships with the practice quiz app |
 | [Hands-on Labs](resources/labs/labs.md) | Runnable labs across lakehouse, warehouse, orchestration, and Real-Time Intelligence scenarios (`resources/labs/`) |
 | [Final Review](resources/final-review.md) | 20-minute exam-morning scan: top facts and last-minute traps for all three domains |
 | [Renewal Guide](resources/renewal-guide.md) | DP-700 annual-renewal workflow |
