@@ -33,18 +33,18 @@
     {
       "id": "dp-700-mock-3-q001",
       "domain": "implement-and-manage-an-analytics-solution",
-      "title": "How Many Notebooks Share One High-Concurrency Session",
+      "title": "Billing When a Pipeline Fans Out to Shared Notebook Activities",
       "difficulty": "easy",
-      "question": "A workspace has high concurrency mode enabled for notebooks, and `spark.highConcurrency.max` has never been changed from its default. How many notebooks can share a single Spark session by default, and which one is billed for the shared compute?",
+      "question": "A pipeline has three notebook activities that all attach to the same workspace default Lakehouse with identical Spark compute settings, so they qualify to share one high concurrency session. The first notebook activity to run initiates the session; the other two join it. Which activity is billed for the shared session's compute, and does high concurrency mode apply to pipeline-triggered notebook activities the same way it applies to interactive notebooks?",
       "choices": {
-        "A": "50 notebooks by default; each attached notebook is billed individually for its own share of the session",
-        "B": "5 notebooks by default, raisable up to 50 via `spark.highConcurrency.max`; only the notebook that initiated the session is billed",
-        "C": "Unlimited notebooks by default; billing is split evenly across every notebook attached to the session",
-        "D": "5 notebooks by default with no documented way to raise the limit; the workspace Admin's account is always billed for the shared session no matter who attaches"
+        "A": "All three activities split the session's compute cost evenly, since Fabric can't attribute Spark charges to a single pipeline activity",
+        "B": "Only the activity that initiated the shared session is billed; high concurrency mode applies identically to pipeline-triggered notebook activities and interactive notebooks",
+        "C": "High concurrency mode is notebook-only — pipeline-triggered notebook activities can never share a session, so all three run in separate, individually-billed sessions",
+        "D": "The pipeline itself, not any individual activity, is billed as a single line item, regardless of which notebook activity actually initiated the session"
       },
       "correctAnswer": "B",
-      "shortAnswer": "High concurrency mode shares one Spark session across multiple notebooks, defaulting to 5 notebooks per session and tunable up to 50 through the `spark.highConcurrency.max` property. Billing follows the session, not each attached notebook — only the notebook (or activity) that actually initiated the session incurs the compute charge.",
-      "explanation": "Option A inflates the default to the raised ceiling instead of the starting default. Option C invents both an unlimited default and a per-notebook billing split that doesn't exist. Option D correctly states the default but wrongly claims it can't be raised, and invents an Admin-always-billed rule that has nothing to do with how session billing actually works."
+      "shortAnswer": "High concurrency mode's session sharing extends to both notebooks and pipeline-triggered notebook activities, provided they match on user, default Lakehouse, and Spark compute settings — exactly the setup here. Billing follows the session, not each participating activity: only the activity that initiated the shared session incurs the compute charge, and Capacity Metrics attributes usage to that initiating activity the same way it would for an initiating notebook.",
+      "explanation": "Option A invents an even-split billing model that doesn't exist for shared sessions. Option C wrongly denies pipeline-triggered notebook activities the same session-sharing capability interactive notebooks have — the documented behavior applies to both identically. Option D invents a pipeline-level billing line item; Fabric attributes the shared session's cost to the specific initiating activity, not the containing pipeline."
     },
     {
       "id": "dp-700-mock-3-q002",
@@ -145,34 +145,34 @@
     {
       "id": "dp-700-mock-3-q008",
       "domain": "implement-and-manage-an-analytics-solution",
-      "title": "A Contributor Who Still Can't Schedule a Gateway Refresh",
+      "title": "Removing a Share That Doesn't Actually Revoke Access",
       "difficulty": "hard",
-      "question": "A user holds Contributor on a workspace and has full write access to a semantic model that needs a scheduled refresh through an on-premises data gateway. They still can't configure the schedule. What's the missing piece, and why doesn't Contributor alone cover it?",
+      "question": "A report owner shares a sensitive report directly with Priya (item-level Read), who separately also holds the Contributor role on the containing workspace. To fully block Priya from the report, the owner removes only the item-level share. Does this fully revoke her access, and if not, what else is required?",
       "choices": {
-        "A": "Contributor doesn't include write access on semantic models by default — the user needs an explicit item-level Write grant first",
-        "B": "The user needs a separate permission on the gateway itself, configured outside Fabric's own role system — a third, independent access axis alongside workspace role and item permission",
-        "C": "Only a workspace Admin, never a Contributor, can configure any scheduled refresh regardless of gateway involvement",
-        "D": "The gateway requires the semantic model owner specifically to configure the schedule; no other user, regardless of role or gateway permission, is ever allowed to do it"
+        "A": "Yes — item-level removal is always sufficient to revoke a specific user's access to a report, regardless of any workspace role they hold",
+        "B": "No — Priya's Contributor role still covers the item by default; her workspace role must also be removed or downgraded to fully revoke access",
+        "C": "No — but the correct fix is deleting Priya's user account from Microsoft Entra ID entirely, not adjusting any Fabric role",
+        "D": "Yes, but only because Priya's Contributor role was granted after the item share; whichever grant came later determines what wins"
       },
       "correctAnswer": "B",
-      "shortAnswer": "Gateway permissions sit outside Fabric's workspace-role and item-permission model entirely — they're managed on the gateway resource itself. Contributor plus full item write access covers everything inside Fabric, but scheduling a refresh through an on-premises gateway additionally requires a permission on that gateway, granted independently of any Fabric role.",
-      "explanation": "Option A is wrong on its own premise — Contributor does include write access on items like semantic models; that's not the blocker here. Option C overstates the role requirement; Contributor-and-above can configure scheduled refreshes once the gateway permission is also in place, not Admin exclusively. Option D invents an owner-only restriction that doesn't reflect how gateway permissions are actually granted to any authorized user."
+      "shortAnswer": "Item permission and workspace role are independent, additive grants. Removing Priya's item-level share only closes that one door — her Contributor role is a second, separate door that already covers every item in the workspace, this report included. Fully revoking her access requires checking both layers: remove the item share (done), then also remove or downgrade her workspace role, since Contributor+ exposes all workspace content regardless of any item-level share.",
+      "explanation": "Option A ignores that a Contributor+ workspace role independently grants access to every item, not just ones explicitly shared. Option C is a wildly disproportionate fix — deleting the account isn't necessary when simply adjusting her workspace role resolves it. Option D invents a grant-order-determines-precedence rule that doesn't exist; item permission and workspace role don't race against each other, they layer."
     },
     {
       "id": "dp-700-mock-3-q009",
       "domain": "implement-and-manage-an-analytics-solution",
-      "title": "A \"Block Predicate\" Option That Isn't Real",
+      "title": "Blocking a Whole Schema vs. Blocking One Column",
       "difficulty": "medium",
-      "question": "A team designing row-level security for a Fabric Warehouse table sees documentation describing both FILTER and BLOCK security predicates and wants to use a BLOCK predicate to reject inserts that violate a security rule outright, rather than silently filtering rows on read. Can they?",
+      "question": "A Warehouse team has two separate requirements: reporting-role SQL users should never even see a staging schema used only by the ETL pipeline, and a finance role querying the Orders table needs every column except CreditCard. Which granular mechanism fits each requirement respectively?",
       "choices": {
-        "A": "No — Fabric Warehouse doesn't support row-level security of any kind; only CLS and OLS are available",
-        "B": "Yes — Fabric Warehouse RLS supports both FILTER and BLOCK predicates, matching on-premises SQL Server's security-predicate model exactly in every respect",
-        "C": "No — Fabric Warehouse RLS supports FILTER predicates only; BLOCK predicate types are an Azure SQL/SQL Server-only feature",
-        "D": "Yes, but only if Column-Level Security is also configured on the same table alongside the BLOCK predicate"
+        "A": "Column-level security for both — `GRANT SELECT ON SCHEMA::Staging(...)` and `GRANT SELECT ON dbo.Orders(...)` use the identical column-list syntax",
+        "B": "Row-level security (`CREATE SECURITY POLICY`) for both, since RLS is the general-purpose SQL-endpoint security mechanism for any restriction",
+        "C": "Object-level security (`GRANT`/`DENY` on the Staging schema) for the first; column-level security (`GRANT SELECT` on the Orders table naming only permitted columns) for the second",
+        "D": "A OneLake data access role for the first, since schema-level restriction is Lakehouse-only and unavailable through T-SQL; column-level security for the second"
       },
       "correctAnswer": "C",
-      "shortAnswer": "Fabric Warehouse's RLS implementation supports FILTER predicates exclusively — silently filtering which rows a query returns. BLOCK predicates, which reject write operations outright, exist in SQL Server/Azure SQL but aren't part of Fabric Warehouse's RLS surface.",
-      "explanation": "Option B wrongly assumes full parity with the on-premises SQL Server security-predicate model. Option D invents a CLS-as-prerequisite condition that has nothing to do with predicate type availability. Option A understates Fabric Warehouse's actual capability — RLS (via FILTER predicates) is fully supported; it's specifically BLOCK predicates that aren't."
+      "shortAnswer": "Restricting which tables/schemas a SQL principal can even see is OLS's job — standard `GRANT`/`REVOKE`/`DENY` on the schema itself blocks the reporting role from the Staging schema entirely. Blocking a single sensitive column while leaving the rest of a table queryable is CLS's job — `GRANT SELECT ON dbo.Orders(columns)` naming only the permitted columns gives finance every column except CreditCard.",
+      "explanation": "Option A invents a shared column-list syntax between schema-level and column-level grants that doesn't exist — CLS operates on columns within one table, not whole schemas. Option B misapplies RLS, which filters *rows*, not entire schemas or specific columns — it doesn't fit either requirement. Option D wrongly claims schema-level restriction needs OneLake security; OLS handles it natively on the SQL endpoint with no Lakehouse involvement required."
     },
     {
       "id": "dp-700-mock-3-q010",
@@ -293,9 +293,9 @@
       "difficulty": "easy",
       "question": "A customer's address changes in the source system. The dimensional model needs the *old* address to remain queryable against historical fact rows, while new fact rows reference the updated address. Which SCD approach fits, and what does the alternative (Type 1) do instead?",
       "choices": {
-        "A": "SCD Type 2 — insert a new dimension row with a new surrogate key and effective-dating; SCD Type 1 would instead overwrite the existing row in place, losing the old address entirely",
-        "B": "SCD Type 1 — insert a new dimension row for every change, since Type 1 is the history-preserving approach",
-        "C": "Both SCD Type 1 and Type 2 preserve full history identically; the only difference is table naming convention",
+        "A": "SCD Type 2 — insert a new dimension row with a new surrogate key and effective-dating; Type 1 would overwrite the row in place instead, losing the old address",
+        "B": "SCD Type 1 — insert a new dimension row with a new surrogate key for every change, since Type 1 is Fabric's documented history-preserving approach",
+        "C": "Both SCD Type 1 and Type 2 preserve full history identically in a dimensional model; the only real difference between them is table naming convention",
         "D": "Neither approach preserves history — a full table snapshot per day is the only documented way to keep old attribute values queryable against historical facts"
       },
       "correctAnswer": "A",
@@ -417,18 +417,18 @@
     {
       "id": "dp-700-mock-3-q025",
       "domain": "ingest-and-transform-data",
-      "title": "An Update Policy That References Its Source With a Prefix",
+      "title": "Chaining Update Policies Across Three Tables",
       "difficulty": "hard",
-      "question": "A KQL update policy's transform query is written as `cluster('mycluster').database('mydb').RawEvents | extend ...` — explicitly qualifying the source table with `cluster()` and `database()`, reasoning that being explicit is always safer. What's wrong with this query, specifically for an update policy?",
+      "question": "A team chains update policies so that ingesting into table A triggers table B's update policy, and B's completion triggers table C's update policy. Someone later adds a fourth update policy on C that writes back into A, closing the loop. What happens?",
       "choices": {
-        "A": "Nothing is wrong — explicit qualification is always the recommended, safer pattern for any KQL query, including update policies",
-        "B": "Update policy queries must reference the source table **unqualified** — no `database()`/`cluster()` prefix — or the policy fails to bind correctly",
-        "C": "The query is fine as written, but it will run measurably slower than an unqualified reference due to the extra cluster/database lookup on every ingested batch",
-        "D": "`cluster()`/`database()` prefixes are required specifically for update policies targeting a different database than the source table"
+        "A": "Chaining more than two update policies deep isn't supported at all — B's ingest would never actually trigger C's policy",
+        "B": "Fabric detects the circular chain and cuts it at runtime, rather than looping ingestion indefinitely",
+        "C": "The circular reference is allowed and re-triggers each policy indefinitely until the source table hits its retention limit",
+        "D": "Update policies can't be chained across different tables in the first place — each policy must write back into its own source table"
       },
       "correctAnswer": "B",
-      "shortAnswer": "Update policy transform queries have a specific, narrower requirement than ad hoc KQL queries: the source table must be referenced **unqualified**, with no `database()`/`cluster()` prefix. Adding one — even with good intentions about being explicit — breaks how the update policy binds to its source, rather than just being a stylistic choice.",
-      "explanation": "Option A wrongly generalizes \"explicit is safer\" from general KQL querying to update policies specifically, where the opposite rule applies. Option C underestimates the actual failure mode — this isn't a performance tradeoff, it's a binding requirement. Option D invents a cross-database exception that isn't how update policies are documented to work; the unqualified-reference rule applies regardless of target."
+      "shortAnswer": "Update policies can cascade — table A's update policy triggers B, B's triggers C, and so on — with no depth limit stopping a three-table chain. But a circular chain (C writing back into A) is specifically detected and cut at runtime, preventing the indefinite retriggering loop that an unchecked cycle would otherwise cause.",
+      "explanation": "Option A invents a two-policy depth limit that doesn't exist — cascading chains of update policies are a documented, supported pattern with no such ceiling. Option C describes exactly the runaway loop that Fabric's circular-chain detection exists to prevent — it doesn't let the cycle run until a retention limit intervenes. Option D wrongly denies cross-table chaining altogether, when cascading across distinct tables (A→B→C) is the normal, supported use of update policies."
     },
     {
       "id": "dp-700-mock-3-q026",
@@ -438,8 +438,8 @@
       "question": "A team migrating from a Synapse dedicated pool tries to run `COPY INTO` against a Fabric Warehouse with `FILE_TYPE = 'ORC'`, since ORC worked fine in their old environment. The statement fails immediately. Why?",
       "choices": {
         "A": "`FILE_TYPE = 'ORC'` requires a separate preview feature flag that hasn't been enabled on this particular Warehouse instance yet",
-        "B": "Fabric Warehouse's `COPY INTO` supports `CSV`, `JSONL`, and `PARQUET` only — ORC isn't a supported file type, unlike Synapse dedicated pools",
-        "C": "ORC files over 1 GB aren't supported, but smaller ORC files load without issue",
+        "B": "Fabric Warehouse's `COPY INTO` supports `CSV`, `JSONL`, and `PARQUET` only — ORC isn't supported, unlike Synapse dedicated pools",
+        "C": "ORC files over 1 GB aren't supported by `COPY INTO`, but smaller ORC files under that size load without issue",
         "D": "The syntax is correct, but ORC files require `MAXERRORS` to be explicitly set to a nonzero value first"
       },
       "correctAnswer": "B",
@@ -453,10 +453,10 @@
       "difficulty": "medium",
       "question": "A single eventstream ingests device telemetry and fans out to two destinations: a Lakehouse for downstream ML feature engineering with complex joins, and an Eventhouse feeding a sub-second live dashboard. Is naming \"one best streaming engine\" for this whole pipeline the right framing?",
       "choices": {
-        "A": "Yes — Eventstream alone should be named, since it's the only component actually touching every part of the pipeline",
-        "B": "No — a single eventstream fanning out to two destinations is an unsupported configuration; two separate eventstreams are required",
+        "A": "Yes — Eventstream alone should be named as the one streaming engine, since it's the only component actually touching every part of this two-destination pipeline",
+        "B": "No — a single eventstream fanning out to two separate destinations at once is an unsupported configuration; two separate eventstreams are required instead",
         "C": "Yes — Spark Structured Streaming should be named as the one engine, since it's the most powerful and can theoretically reach both destinations on its own, making Eventstream's routing layer redundant",
-        "D": "No — this is a multi-stage topology where Eventstream (routing), Spark (ML/complex joins on the Lakehouse side), and KQL/Eventhouse (sub-second dashboard) are each the right engine for their own stage"
+        "D": "No — a multi-stage topology: Eventstream (routing), Spark (ML/complex joins on the Lakehouse side), KQL/Eventhouse (sub-second dashboard) — one right engine per stage"
       },
       "correctAnswer": "D",
       "shortAnswer": "This is the documented reference topology almost verbatim: Eventstream handles filtering/routing and fans out to multiple destinations simultaneously (a first-class, supported pattern), Spark Structured Streaming is the right engine for complex ML joins landing in the Lakehouse, and KQL/Eventhouse is purpose-built for the sub-second dashboard. A multi-stage scenario like this usually has more than one \"correct\" engine, one per stage, rather than a single best answer.",
@@ -517,9 +517,9 @@
       "difficulty": "medium",
       "question": "A live-ops team asks: \"is data actually landing in our Eventhouse tables right now, or is the pipeline just quiet?\" Which monitoring surface should they open first, and why not Monitor hub?",
       "choices": {
-        "A": "Monitor hub — it covers all 17 monitorable item types including Eventhouse ingestion, so it's always the correct first stop",
-        "B": "Eventhouse ingestion monitoring (Ingestion results logs) — Monitor hub's coverage doesn't include this level of per-table ingestion detail, and it's capped at 100 rows/30 days on the main view regardless",
-        "C": "Capacity Metrics app — ingestion volume is a capacity-level metric, so it's the right first surface for this question",
+        "A": "Monitor hub — it covers all 17 monitorable item types including Eventhouse ingestion, so it's always the correct first stop for any ingestion question",
+        "B": "Eventhouse ingestion monitoring (Ingestion results logs) — Monitor hub doesn't cover this level of per-table detail, and its main view is capped at 100 rows/30 days regardless",
+        "C": "Capacity Metrics app — ingestion volume is a capacity-level metric there, so it's the right first surface to open for this per-table question",
         "D": "The KQL queryset editor's query results pane — running a manual `count()` query by hand, repeated on a schedule, is the only documented way to confirm ingestion status without a dedicated monitoring surface"
       },
       "correctAnswer": "B",
@@ -549,10 +549,10 @@
       "difficulty": "medium",
       "question": "A capacity admin wants to configure an Activator alert that fires whenever the Capacity Metrics app shows sustained throttling, connecting the alert directly to the app itself. Can they?",
       "choices": {
-        "A": "Yes, but only for capacity admins specifically — other roles can't connect the Capacity Metrics app to Activator",
-        "B": "No — Activator can't alert on any capacity-related condition under any configuration, supported or otherwise",
+        "A": "Yes, but only for capacity admins specifically — other roles in the workspace can't connect the Capacity Metrics app as an Activator source",
+        "B": "No — Activator can't alert on any capacity-related condition whatsoever, under any configuration, supported or otherwise",
         "C": "Yes — the Capacity Metrics app is a fully supported Activator alert source, alongside Eventstreams, KQL querysets, and any surface exposing a numeric metric",
-        "D": "No — the Capacity Metrics app and the SQL analytics endpoint queried directly are both unsupported alert sources; route capacity alerting through Real-Time hub instead"
+        "D": "No — the Capacity Metrics app and a directly-queried SQL analytics endpoint are both unsupported sources; route capacity alerting through Real-Time hub instead"
       },
       "correctAnswer": "D",
       "shortAnswer": "The Capacity Metrics app and a directly-queried SQL analytics endpoint are both documented as unsupported Activator alert sources. The workaround for capacity-condition alerting specifically is routing through Fabric capacity overview events surfaced in Real-Time hub, not connecting Activator to the Capacity Metrics app itself.",
@@ -581,9 +581,9 @@
       "difficulty": "hard",
       "question": "Two concurrent ETL jobs run `MERGE` statements against the same Fabric Warehouse table, each touching a different, non-overlapping set of rows. The second job to commit fails with error 24706. The on-call engineer assumes the table's statistics are corrupted and runs `UPDATE STATISTICS` before retrying. Was that the right move?",
       "choices": {
-        "A": "Yes — 24706 is specifically a statistics-corruption signal, and `UPDATE STATISTICS` is the documented fix",
-        "B": "No — this is expected snapshot-isolation, table-level write-write conflict behavior (evaluated at the table, not the specific rows touched); the fix is retry logic with backoff, not a statistics rebuild",
-        "C": "Yes, but only because the two jobs touched non-overlapping rows — had they overlapped, retry logic would be correct instead",
+        "A": "Yes — error 24706 is specifically a documented statistics-corruption signal, and running `UPDATE STATISTICS` before retry is the correct fix",
+        "B": "No — this is expected snapshot-isolation write-write conflict behavior, evaluated at the table level, not the rows touched; the fix is retry with backoff, not a statistics rebuild",
+        "C": "Yes, but only because the two jobs happened to touch non-overlapping rows this time — had the row sets overlapped, retry logic would be the correct fix instead",
         "D": "No — the real fix is switching the session to `READ COMMITTED` isolation, which Fabric Warehouse supports specifically to resolve this exact conflict type, overriding the platform's usual snapshot-only default"
       },
       "correctAnswer": "B",
@@ -598,9 +598,9 @@
       "question": "An Eventstream connection to an Azure Event Hub fails with `AADSTS65002`, stating Fabric Eventstream isn't preauthorized to access the Event Hub through Azure AD. The end user reconfigures the connection string, credentials, and firewall rules — nothing helps. What's actually wrong, and who can fix it?",
       "choices": {
         "A": "Firewall rules on the Event Hubs namespace are always the root cause of AADSTS65002; the user simply hasn't opened the right outbound port on their own network yet",
-        "B": "The connection string has a typo — end users should keep re-entering it carefully until it's correct",
+        "B": "The connection string has a typo somewhere in the namespace or key; end users should keep carefully re-entering it until the connection succeeds",
         "C": "`AADSTS65002` is a tenant-level preauthorization gap between the Fabric Eventstream service principal and the Event Hubs namespace — it needs tenant-admin or Microsoft support escalation",
-        "D": "This error means the Event Hub itself has been deleted; the fix is recreating it with the same name"
+        "D": "This error means the target Event Hub itself has been deleted upstream; the fix is simply recreating it under the exact same name"
       },
       "correctAnswer": "C",
       "shortAnswer": "`AADSTS65002` specifically means the Fabric Eventstream service principal isn't preauthorized against that particular Event Hubs namespace at the Microsoft Entra tenant level — an end user cannot self-resolve this no matter how carefully they reconfigure the connection string, credentials, or firewall, because none of those are the actual gap. It requires tenant-level preauthorization, typically via a tenant admin or Microsoft support.",
@@ -614,8 +614,8 @@
       "question": "A SQL analytics endpoint, confirmed to be in delegated identity mode, queries a shortcut-backed table and fails outright with no useful connectivity clue. The source table has Row-Level Security defined in OneLake security. The team spends an hour checking network paths and credentials. What should they have checked first?",
       "choices": {
         "A": "Delegated mode blocks shortcut access entirely, by design, when the source table has RLS/CLS/OLS in OneLake security — check for data-level rules first, before connectivity or credentials",
-        "B": "This is a stale delegated-token issue; the fix is waiting out the standard 30–60 minute cache window before retrying",
-        "C": "This is a transitive-shortcut chain-length problem; the shortcut has exceeded the 5-hop limit",
+        "B": "This is a stale delegated-token issue specific to the shortcut's cached credential; the fix is waiting out the standard 30–60 minute cache window before retrying",
+        "C": "This is a transitive-shortcut chain-length problem; the shortcut has exceeded OneLake's documented 5-hop chaining limit for nested shortcuts",
         "D": "Delegated mode always works regardless of OneLake-level security rules defined on the source; the failure here must be an unrelated network or credential issue entirely disconnected from the source's rules"
       },
       "correctAnswer": "A",
@@ -630,9 +630,9 @@
       "question": "A Lakehouse table accumulates many small files after a series of heavy-filter writes. A developer enables auto compaction, expecting files to bin-pack *before* each write lands, the same way they assumed optimize write worked. Nothing changes about file sizes going into the table. Why?",
       "choices": {
         "A": "Auto compaction and optimize write are two names for the exact same underlying mechanism, so enabling either one should have produced identical file-size results",
-        "B": "Auto compaction only applies to Warehouse tables, not Lakehouse tables — that's why nothing changed",
+        "B": "Auto compaction only applies to Warehouse `SELECT INTO` staging tables, not Lakehouse Delta tables — that's why nothing changed here",
         "C": "Neither mechanism affects file size at all; only a manually scheduled `OPTIMIZE` command can address small files",
-        "D": "Auto compaction bin-packs **after** a write commits, not before — the developer was describing optimize write's timing, a separate mechanism, and enabled the wrong one for the goal"
+        "D": "Auto compaction bin-packs **after** a write commits, not before — that's optimize write's timing, and the developer enabled the wrong mechanism for the goal"
       },
       "correctAnswer": "D",
       "shortAnswer": "Optimize write bin-packs *before* a write lands (pre-write); auto compaction bin-packs *after* a write commits (post-write) — two distinct small-file defenses with different timing and different defaults. The developer's expectation (\"before each write lands\") describes optimize write's behavior, not auto compaction's, so enabling auto compaction alone didn't produce the pre-write effect they expected.",
@@ -645,10 +645,10 @@
       "difficulty": "hard",
       "question": "A Warehouse query team notices `result_cache_hit = 0` on a query that meets every documented disqualification-free condition — scans well over 100K rows, returns under 10K rows, no `GETDATE()`, no `VARCHAR(MAX)`, no RLS/DDM. They assume the query must be silently tripping an undocumented disqualifier. What should they check first instead?",
       "choices": {
-        "A": "Whether result-set caching is currently enabled tenant-wide at all — it's been a known, disabled-by-default issue since 2026-02-16 over stale-result risk, which would explain a 0 hit rate independent of any disqualifier",
+        "A": "Whether result-set caching is currently enabled tenant-wide — it's been a known, disabled-by-default issue since 2026-02-16 over stale-result risk, explaining a 0 hit rate independent of any disqualifier",
         "B": "Whether the query's `query_hash` in `queryinsights.exec_requests_history` has changed between runs, since hash drift is the only documented cause of any cache miss at all, regardless of anything else the checklist suggests",
-        "C": "Whether the table involved has cross-database references, since that's the one disqualifier the team's checklist omitted",
-        "D": "Whether the Warehouse's in-memory cache was manually cleared recently, resetting the result-set cache alongside it"
+        "C": "Whether the table involved has cross-database references, since that's the one disqualifier the team's otherwise-thorough checklist appears to have omitted",
+        "D": "Whether the Warehouse's in-memory cache was manually cleared recently by an admin, resetting the result-set cache alongside it in the process"
       },
       "correctAnswer": "A",
       "shortAnswer": "Result-set caching has been disabled tenant-wide since a known issue surfaced on 2026-02-16 (stale-result risk) — a `result_cache_hit = 0` result right now can simply mean the feature is off entirely, not that the query tripped a disqualifier the team missed. Checking current feature status is the right first step before assuming a documented-but-somehow-still-disqualifying condition exists.",
@@ -661,10 +661,10 @@
       "difficulty": "medium",
       "question": "A team enables Spark autotune, hoping it will immediately optimize a single ad hoc exploratory query that's run only once. After the query finishes, nothing appears to have been tuned. Why, and what condition does autotune actually need to do useful work?",
       "choices": {
-        "A": "Autotune needs a **repeated** query shape across roughly 20–25 iterations before it can tune anything — a single one-off query gives it nothing to learn from",
+        "A": "Autotune needs a **repeated** query shape across roughly 20–25 iterations to tune anything — a single one-off query gives it nothing to learn from",
         "B": "Autotune failed because it's incompatible with the workspace's default runtime version, a mismatch that applies regardless of how many times the query repeats",
-        "C": "Autotune only works on scheduled jobs, never on interactive ad hoc queries, regardless of repetition",
-        "D": "Autotune tunes on the very first run of any query, so something else must be misconfigured"
+        "C": "Autotune only works on scheduled Spark job definitions, never on interactive ad hoc notebook queries, regardless of repetition",
+        "D": "Autotune tunes on the very first run of any query via a one-time baseline snapshot, so something else in the session must be misconfigured"
       },
       "correctAnswer": "A",
       "shortAnswer": "Autotune (off by default, still Preview) needs a recurring query *shape* run repeatedly — roughly 20–25 iterations — to progressively tune settings like `shuffle.partitions`, `autoBroadcastJoinThreshold`, and `files.maxPartitionBytes`. A single ad hoc query, run once, simply doesn't give it the repetition it needs to do anything useful.",
@@ -677,8 +677,8 @@
       "difficulty": "hard",
       "question": "A KQL Eventhouse table needs the same rolling 5-minute aggregation recomputed on every dashboard refresh — dozens of times a day by different viewers. A separate table just needs incoming payloads parsed and typed once per ingested batch, with no aggregation involved. Which mechanism fits each, and how do their costs differ?",
       "choices": {
-        "A": "The dashboard aggregation → update policy (cost folded into ingest); the parse/type table → materialized view (continuous background CU)",
-        "B": "Neither mechanism differs in cost profile — the choice is purely about which one the team is more comfortable authoring",
+        "A": "The dashboard aggregation → update policy, with its cost folded into the ingest path; the parse/type table → materialized view, which carries a continuous background CU cost",
+        "B": "Neither mechanism differs in cost profile at all — the choice between them is purely about which one the authoring team happens to be more comfortable writing",
         "C": "Both should use a materialized view — it's the more powerful mechanism, so it's always the safer default to reach for regardless of whether aggregation is actually involved, since more standing compute can never make a design meaningfully worse",
         "D": "The dashboard aggregation → materialized view (continuous background CU, always GA-fresh, avoids recomputing on every refresh); the parse/type table → update policy (cost folded into each ingest, no standing aggregation state)"
       },
@@ -721,18 +721,18 @@
     {
       "id": "dp-700-mock-3-q044",
       "domain": "monitor-and-optimize-an-analytics-solution",
-      "title": "Choosing Stateful So the Team Doesn't Get Spammed",
+      "title": "Departing a Range vs. Going Silent Entirely",
       "difficulty": "easy",
-      "question": "A device sensor's reading flaps above and below a threshold repeatedly over a short window. The team wants exactly one alert when it first crosses the threshold, not a new alert on every single qualifying reading. Which Activator condition type fits, and why?",
+      "question": "A cold-chain team monitors a vaccine fridge sensor that should stay within a 2–8°C band. They want an alert the moment the temperature departs that band on either side, and a *separate* alert if the sensor stops sending readings entirely for a stretch (e.g., a network outage). Which two stateful condition types fit each need respectively?",
       "choices": {
-        "A": "Stateless — it fires on every qualifying event, which is the simplest way to guarantee at least one alert per crossing",
-        "B": "Stateful (e.g., `BECOMES`) — it fires only on a state transition, avoiding repeated alerts for a value that's already past the threshold",
-        "C": "Either type produces identical alert volume; the distinction is purely about UI configuration, not actual firing behavior on a flapping sensor",
-        "D": "Neither type can distinguish a flapping sensor from a stable one — external deduplication logic is required regardless"
+        "A": "`BECOMES` fits both scenarios cleanly — it's Activator's general-purpose stateful operator for any kind of transition, range-based or missing-data driven",
+        "B": "`EXIT RANGE` for the first; absence-of-data/heartbeat for the second — `BECOMES` doesn't fit either need as cleanly",
+        "C": "A stateless comparison (`< 2 OR > 8`) is functionally identical to `EXIT RANGE` and simpler to configure, so use it for the first; heartbeat for the second",
+        "D": "Neither requirement is achievable with an Activator condition — missing data and range departures both require an external monitoring tool outside Fabric"
       },
       "correctAnswer": "B",
-      "shortAnswer": "Stateful conditions (`BECOMES`/`DECREASES`/`INCREASES`/`EXIT RANGE`/heartbeat) fire only on a state *transition*, not on every qualifying event — exactly the \"alert only once\" behavior the team wants for a flapping sensor. Stateless conditions fire on every qualifying event, which is the noisy behavior they're explicitly trying to avoid.",
-      "explanation": "Option A picks the noisier of the two condition types for a scenario that explicitly asks for the opposite. Option C dismisses a real, documented firing-behavior difference between the two condition types as cosmetic. Option D overlooks that this exact problem is what stateful conditions are purpose-built to solve, without needing any external deduplication logic."
+      "shortAnswer": "Activator's stateful vocabulary includes `EXIT RANGE` specifically for departure from a bounded range — exactly the 2–8°C band requirement — and a separate absence-of-data/heartbeat condition for detecting the *lack* of events rather than a value crossing anything. `BECOMES` is built for a single-threshold transition (crossing one value), which fits neither of these two requirements as cleanly as the purpose-built operators do.",
+      "explanation": "Option A overgeneralizes `BECOMES` as a catch-all, ignoring that `EXIT RANGE` and heartbeat exist as distinct, purpose-built operators for exactly these two shapes. Option C's stateless comparison would re-fire on every reading still outside the band (the flapping-alert problem stateful conditions exist to avoid), unlike `EXIT RANGE`'s transition-only firing. Option D denies Activator's documented stateful vocabulary entirely, which handles both requirements natively with no external tool needed."
     },
     {
       "id": "dp-700-mock-3-q045",
@@ -806,8 +806,8 @@
       "question": "A player's console reconnects and resends buffered match events several minutes after their 5-minute tumbling window closed. The streaming job's `.withWatermark()` tolerance has already elapsed for that window by the time the events arrive. What actually happens to those late events, and what's the precise role the watermark played?",
       "choices": {
         "A": "The watermark automatically reopens the closed window and recomputes its aggregate to include the late events, since Delta tables support append-after-close by design and intent, the same way any append-only table recomputes a previously finalized aggregate",
-        "B": "`.withWatermark()` has no effect on late data at all — its only purpose is deduplication, unrelated to windowed aggregation timing",
-        "C": "The watermark rejected the events at ingestion — they never entered the stream and were dropped by Eventstream before reaching Spark",
+        "B": "`.withWatermark()` has no effect on late data of any kind — its only documented purpose is exactly-once deduplication, entirely unrelated to windowed aggregation timing",
+        "C": "The watermark rejected the events at the ingestion boundary — they never actually entered the stream and were silently dropped by Eventstream before ever reaching the Spark job",
         "D": "The events are still processed and land in the underlying data; they're just excluded from that specific tumbling window's already-finalized aggregation result, since the watermark had already bounded and released that window's state"
       },
       "correctAnswer": "D",

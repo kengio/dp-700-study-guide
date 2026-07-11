@@ -34,15 +34,15 @@ tags:
 
 | # | Topic | Blueprint skill | Re-read | Cheat sheet |
 | :---: | :--- | :--- | :--- | :--- |
-| 1 | How Many Notebooks Share One High-Concurrency Session | Configure Spark workspace settings | [01-spark-settings.md](../../01-fabric-workspace-settings/01-spark-settings.md) | [optimization-levers](../cheat-sheets/optimization-levers-quick-ref.md) |
+| 1 | Billing When a Pipeline Fans Out to Shared Notebook Activities | Configure Spark workspace settings | [01-spark-settings.md](../../01-fabric-workspace-settings/01-spark-settings.md) | [optimization-levers](../cheat-sheets/optimization-levers-quick-ref.md) |
 | 2 | Reassigning a Workspace Already Claimed by Another Domain | Configure domain workspace settings | [02-domain-settings.md](../../01-fabric-workspace-settings/02-domain-settings.md) | — |
 | 3 | Two OneLake Settings That Look Like the Same Lever | Configure OneLake workspace settings | [03-onelake-settings.md](../../01-fabric-workspace-settings/03-onelake-settings.md) | [lifecycle-cicd](../cheat-sheets/lifecycle-cicd-quick-ref.md) |
 | 4 | Installing a Private Wheel With No Git Repository Connected | Configure Apache Airflow workspace settings | [04-airflow-settings.md](../../01-fabric-workspace-settings/04-airflow-settings.md) | — |
 | 5 | A Switch Branch Blocked by Local Edits | Implement version control | [01-version-control.md](../../02-lifecycle-management/01-version-control.md) | [lifecycle-cicd](../cheat-sheets/lifecycle-cicd-quick-ref.md) |
 | 6 | Hand-Editing the Auto-Generated .sqlproj File | Create and configure database projects | [02-database-projects.md](../../02-lifecycle-management/02-database-projects.md) | [lifecycle-cicd](../cheat-sheets/lifecycle-cicd-quick-ref.md) |
 | 7 | Two Lakehouses, Same Name, Different Folder | Configure deployment pipelines | [03-deployment-pipelines.md](../../02-lifecycle-management/03-deployment-pipelines.md) | [lifecycle-cicd](../cheat-sheets/lifecycle-cicd-quick-ref.md) |
-| 8 | A Contributor Who Still Can't Schedule a Gateway Refresh | Implement workspace and item-level access controls | [01-workspace-item-access.md](../../03-security-governance/01-workspace-item-access.md) | [security-governance](../cheat-sheets/security-governance-quick-ref.md) |
-| 9 | A "Block Predicate" Option That Isn't Real | Implement RLS, CLS, and OLS | [02-granular-access-controls.md](../../03-security-governance/02-granular-access-controls.md) | [security-governance](../cheat-sheets/security-governance-quick-ref.md) |
+| 8 | Removing a Share That Doesn't Actually Revoke Access | Implement workspace and item-level access controls | [01-workspace-item-access.md](../../03-security-governance/01-workspace-item-access.md) | [security-governance](../cheat-sheets/security-governance-quick-ref.md) |
+| 9 | Blocking a Whole Schema vs. Blocking One Column | Implement RLS, CLS, and OLS | [02-granular-access-controls.md](../../03-security-governance/02-granular-access-controls.md) | [security-governance](../cheat-sheets/security-governance-quick-ref.md) |
 | 10 | A New Restrictive Role That Changes Nothing | Implement OneLake security | [03-onelake-security.md](../../03-security-governance/03-onelake-security.md) | [security-governance](../cheat-sheets/security-governance-quick-ref.md) |
 | 11 | Masking a Date-of-Birth Column With datetime() | Implement dynamic data masking | [04-dynamic-data-masking.md](../../03-security-governance/04-dynamic-data-masking.md) | [security-governance](../cheat-sheets/security-governance-quick-ref.md) |
 | 12 | Write Permission Isn't Enough to Certify | Implement governance (sensitivity labels, endorsement) | [05-governance.md](../../03-security-governance/05-governance.md) | [security-governance](../cheat-sheets/security-governance-quick-ref.md) |
@@ -63,7 +63,7 @@ tags:
 | 22 | Binary Copy vs. Parsed Copy for a Straight File Move | Implement pipeline ingestion | [04-pipeline-ingestion.md](../../06-batch-ingestion/04-pipeline-ingestion.md) | — |
 | 23 | Matching the Verb to the Tool | Choose a transform tool | [01-choosing-transform-tool.md](../../07-batch-transformation/01-choosing-transform-tool.md) | [decision-matrices](../cheat-sheets/decision-matrices-quick-ref.md) |
 | 24 | Broadcasting the Wrong Side of a Join | Transform data with PySpark | [02-pyspark-transformations.md](../../07-batch-transformation/02-pyspark-transformations.md) | [language-syntax-map](../cheat-sheets/language-syntax-map.md) |
-| 25 | An Update Policy That References Its Source With a Prefix | Transform data with KQL | [04-kql-transformations.md](../../07-batch-transformation/04-kql-transformations.md) | [language-syntax-map](../cheat-sheets/language-syntax-map.md) |
+| 25 | Chaining Update Policies Across Three Tables | Transform data with KQL | [04-kql-transformations.md](../../07-batch-transformation/04-kql-transformations.md) | [language-syntax-map](../cheat-sheets/language-syntax-map.md) |
 | 26 | A COPY INTO Load That Rejects a Perfectly Valid File Type | Transform data with T-SQL | [03-tsql-transformations.md](../../07-batch-transformation/03-tsql-transformations.md) | [language-syntax-map](../cheat-sheets/language-syntax-map.md) |
 | 27 | One Eventstream, Two Very Different Query Destinations | Choose a streaming engine | [01-choosing-streaming-engine.md](../../08-streaming-data/01-choosing-streaming-engine.md) | [decision-matrices](../cheat-sheets/decision-matrices-quick-ref.md) |
 | 28 | Trying to MERGE Straight Into a Streaming Write | Implement Spark structured streaming | [03-spark-structured-streaming.md](../../08-streaming-data/03-spark-structured-streaming.md) | [streaming-windowing](../cheat-sheets/streaming-windowing-quick-ref.md) |
@@ -87,7 +87,7 @@ tags:
 | 41 | Materialized View or Update Policy, By Cost Profile | Optimize real-time performance | [04-realtime-optimization.md](../../11-performance-optimization/04-realtime-optimization.md) | [optimization-levers](../cheat-sheets/optimization-levers-quick-ref.md) |
 | 42 | A Long-Running Copy Job That Intermittently Times Out | Optimize pipeline and query performance | [05-pipeline-query-optimization.md](../../11-performance-optimization/05-pipeline-query-optimization.md) | [optimization-levers](../cheat-sheets/optimization-levers-quick-ref.md) |
 | 43 | A "Successful" Pipeline Run That Hides a Stale Dashboard | Monitor Fabric items and activities | [01-monitoring-surfaces.md](../../09-monitoring-alerting/01-monitoring-surfaces.md) | [monitoring-surfaces](../cheat-sheets/monitoring-surfaces-quick-ref.md) |
-| 44 | Choosing Stateful So the Team Doesn't Get Spammed | Configure Activator alerts | [03-activator-alerts.md](../../09-monitoring-alerting/03-activator-alerts.md) | [monitoring-surfaces](../cheat-sheets/monitoring-surfaces-quick-ref.md) |
+| 44 | Departing a Range vs. Going Silent Entirely | Configure Activator alerts | [03-activator-alerts.md](../../09-monitoring-alerting/03-activator-alerts.md) | [monitoring-surfaces](../cheat-sheets/monitoring-surfaces-quick-ref.md) |
 | 45 | Why a Refresh Schedule Quietly Stopped Running | Monitor semantic model refresh | [02-semantic-model-refresh.md](../../09-monitoring-alerting/02-semantic-model-refresh.md) | [monitoring-surfaces](../cheat-sheets/monitoring-surfaces-quick-ref.md) |
 
 ### Case Study: Nordscape Games (Qs 46–50)
