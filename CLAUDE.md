@@ -24,6 +24,7 @@ dp-700-study-guide/
 │   └── resources/                      # Practice questions, mock exams, exam tips, code examples, appendix, cheat sheets
 ├── i18n/                                # Community translations — parallel tree per locale, see TRANSLATING.md
 ├── practice/                            # Static adaptive practice quiz — HTML/JS/CSS + Python build.py + JSON banks
+├── scripts/                             # Repo tooling — validate-mermaid.mjs (CI-enforced diagram parser)
 ```
 
 Each topic folder contains a named index file (e.g., `orchestration.md`, `streaming-data.md`) and numbered `.md` topic files.
@@ -112,6 +113,14 @@ Use callouts to break up dense text in topic files and cheat sheets. Standard ty
 
 - **Architecture diagrams:** Mermaid (`flowchart`, `sequenceDiagram`, `graph`)
 - **Directory trees:** ASCII text, not Mermaid
+- **`mindmap` node text must not contain `(` `)` `[` `]` `{` `}` or `"`** — Mermaid parses those as
+  node-shape delimiters, so one stray pair breaks the entire diagram ("Error parsing Mermaid
+  diagram!"). Quoting the string does not help; rewrite with `-` or `,`
+  (`Runtime logs - 3 severities`, not `Runtime logs (3 severities)`). This applies to every
+  `## Quick Recall` mindmap in the topic index files
+- **Validate after touching any diagram:** `cd scripts && npm ci && npm run validate:mermaid` —
+  parses every ```` ```mermaid ```` block in the repo with the real Mermaid parser. The `Lint`
+  workflow runs the same check on every PR
 - **Screenshots:** `images/<feature>/`; standard markdown `![Alt](path)` with caption; ≤800 px wide
 
 ### Links

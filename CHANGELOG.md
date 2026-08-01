@@ -4,6 +4,21 @@ Notable changes to the DP-700 study guide.
 
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/). Dates use ISO 8601. Each section is grouped under the Microsoft blueprint date it tracks, so future readers can match guide versions to the version of the exam they were preparing for.
 
+## [Unreleased]
+
+Still aligned to the **July 21, 2026** blueprint — no content or answer changes.
+
+### Fixed
+
+- Three `## Quick Recall` mindmaps failed to render as *"Error parsing Mermaid diagram!"* in Obsidian, on GitHub, and on the practice site. Mermaid reads `(` `)` as node-shape delimiters, so parentheses in node text break the whole diagram — and the double quotes added to work around it made it worse. Affected `certification/01-fabric-workspace-settings/fabric-workspace-settings.md`, `certification/03-security-governance/security-governance.md`, and `certification/09-monitoring-alerting/monitoring-alerting.md`; rewritten with `-` / `,` separators, same facts
+- `.markdownlint-cli2.jsonc` and `lychee.toml` only ignored a root-level `node_modules/`, so local lint runs walked dependency READMEs once `scripts/` had its dependencies installed
+
+### Added
+
+- `scripts/validate-mermaid.mjs` — parses every ```` ```mermaid ```` block in the repo with the real Mermaid parser and reports `file:line` for any failure. Skips diagrams nested inside ```` ```markdown ```` examples
+- `Mermaid diagram syntax` job in `.github/workflows/lint.yml` — a broken diagram now fails the PR instead of shipping to readers
+- Mindmap punctuation rule documented in `CLAUDE.md` and `CONTRIBUTING.md`, with the local validation command
+
 ## [1.0.0] - 2026-07-11
 
 The complete DP-700 study guide, aligned to the **July 21, 2026** blueprint.

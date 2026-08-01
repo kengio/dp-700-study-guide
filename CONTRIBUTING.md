@@ -24,7 +24,7 @@ Thanks for being here. This guide exists because someone open-sourced their exam
 
 1. **Fork** the repo and clone your fork
 2. **Create a branch** off `main` — name it descriptively (e.g., `fix/q42-shortcut-path`, `feat/case-study-mock-1`)
-3. **Make the change.** Run `markdownlint` on any file you touch (see [conventions](#conventions))
+3. **Make the change.** Run `markdownlint` on any file you touch (see [conventions](#conventions)); if you touched a Mermaid diagram, also run `cd scripts && npm ci && npm run validate:mermaid`
 4. **Commit** with a clear message. We use loose conventional-commit prefixes: `docs:`, `fix:`, `feat:`, `chore:`, `review(roundN):` for review passes
 5. **Open a PR** against `main`. The PR template will prompt you for the relevant details
 6. **Respond to review feedback** — most PRs land within a few days
@@ -100,6 +100,14 @@ Use Obsidian-flavoured callouts (also render on GitHub). Standard types:
 - Architecture and flow → Mermaid (`sequenceDiagram`, `flowchart`, `graph`)
 - Directory trees → ASCII text (not Mermaid)
 - Both GitHub and Obsidian render Mermaid natively
+- **Never put `(` `)` `[` `]` `{` `}` or `"` in `mindmap` node text** — Mermaid reads them as
+  node-shape delimiters and the whole diagram fails with *"Error parsing Mermaid diagram!"*.
+  Use `-` or `,` instead: `Runtime logs - 3 severities`, not `Runtime logs (3 severities)`
+- Validate before pushing — CI runs the same check on every PR:
+
+  ```bash
+  cd scripts && npm ci && npm run validate:mermaid
+  ```
 
 ### Links
 

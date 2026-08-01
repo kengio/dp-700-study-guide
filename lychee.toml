@@ -27,6 +27,7 @@ max_cache_age = "1d"
 exclude_path = [
   ".obsidian/",
   "node_modules/",
+  "scripts/node_modules/",
   ".git/",
   ".reference/",
 ]
