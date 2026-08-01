@@ -24,3 +24,6 @@ RELEASE_NOTES.md
 
 # DP-800 reference clone (used for porting infrastructure/format, not part of this guide)
 .reference/
+
+# Node dependencies (scripts/ tooling)
+node_modules/

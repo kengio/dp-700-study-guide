@@ -8,6 +8,7 @@ on:
       - '.markdownlint.json'
       - '.markdownlint-cli2.jsonc'
       - 'lychee.toml'
+      - 'scripts/**'
       - '.github/workflows/lint.yml'
   push:
     branches: [main]
@@ -16,6 +17,7 @@ on:
       - '.markdownlint.json'
       - '.markdownlint-cli2.jsonc'
       - 'lychee.toml'
+      - 'scripts/**'
       - '.github/workflows/lint.yml'
 
 permissions:
@@ -32,6 +34,26 @@ jobs:
         uses: DavidAnson/markdownlint-cli2-action@v19
         with:
           config: '.markdownlint-cli2.jsonc'
+
+  mermaid:
+    name: Mermaid diagram syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: scripts/package-lock.json
+
+      - name: Install validator dependencies
+        run: npm ci
+        working-directory: scripts
+
+      - name: Parse every mermaid block
+        run: npm run validate:mermaid
+        working-directory: scripts
 
   link-check:
     name: Internal link integrity (lychee)
