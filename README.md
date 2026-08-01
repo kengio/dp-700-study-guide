@@ -371,7 +371,8 @@ dp-700-study-guide/
 ├── practice/                            # adaptive practice quiz — HTML/JS/CSS + build.py + JSON banks
 │                                        # auto-deployed to GitHub Pages
 ├── i18n/                                # community translations — parallel tree per locale
-├── .github/workflows/                   # CI: markdownlint + lychee (lint.yml), Pages deploy (deploy-practice.yml)
+├── scripts/                             # repo tooling — Mermaid diagram validation
+├── .github/workflows/                   # CI: markdownlint + lychee + Mermaid (lint.yml), Pages deploy (deploy-practice.yml)
 ├── CHANGELOG.md                         # versioned change log
 ├── CONTRIBUTING.md / CONTRIBUTORS.md    # contribution guide and roster
 ├── TRANSLATING.md                       # translation conventions
@@ -442,7 +443,7 @@ dp-700-study-guide/
 
 Status as of **v1.0.0** (2026-07-11) — the guide is complete and out of scaffold phase:
 
-- ✅ Repository scaffold, CI (markdownlint + lychee), issue/PR templates
+- ✅ Repository scaffold, CI (markdownlint + lychee + Mermaid diagram validation), issue/PR templates
 - ✅ 11 topic sections — all three domains, mapped 1:1 to the July 21, 2026 blueprint
 - ✅ 7 cheat sheets + appendix (glossary, comparison tables, error-message reference)
 - ✅ 82 practice questions across all three domains, with full explanations
