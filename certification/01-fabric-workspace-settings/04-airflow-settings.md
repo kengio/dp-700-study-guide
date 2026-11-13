@@ -130,7 +130,7 @@ Two supported paths, depending on whether the job is Git-connected:
    /opt/airflow/git/<repoName>/<pathToPrivatePackage>
    ```
 
-   For example, a package at `/dags/test/private.whl` in the repo becomes `/opt/airflow/git/<repoName>/dags/test/private.whl`.
+   For example, a package at `/plugins/test/private.whl` in the repo becomes `/opt/airflow/git/<repoName>/plugins/test/private.whl`.
 
 **Without a connected Git repository:**
 
